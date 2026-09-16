@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "users": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Tu espacio",
+      "email": null,
+      "role": "owner",
+      "createdAt": "2026-09-16T08:00:00.000Z"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Avena nocturna con frutos rojos",
+      "description": "Un desayuno cremoso que puedes dejar listo la noche anterior.",
+      "instructions": "1. Mezcla la avena, la leche y las semillas en un tarro.\n2. Guarda tapado en la nevera durante toda la noche.\n3. Sirve con yogur y frutos rojos justo antes de comer.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "10000000-0000-4000-8000-000000000001", "name": "Copos de avena", "quantity": "50 g" },
+        { "id": "10000000-0000-4000-8000-000000000002", "name": "Leche o bebida vegetal", "quantity": "180 ml" },
+        { "id": "10000000-0000-4000-8000-000000000003", "name": "Yogur natural", "quantity": "2 cucharadas" },
+        { "id": "10000000-0000-4000-8000-000000000004", "name": "Semillas de chía", "quantity": "1 cucharadita" },
+        { "id": "10000000-0000-4000-8000-000000000005", "name": "Frutos rojos", "quantity": "1 puñado" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Tostada de hummus y tomate",
+      "description": "Tostada rápida, fresca y saciante para desayunos o meriendas.",
+      "instructions": "1. Tuesta el pan hasta que quede dorado.\n2. Unta el hummus de forma uniforme.\n3. Añade el tomate cortado, un chorrito de aceite y las semillas.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "20000000-0000-4000-8000-000000000001", "name": "Pan integral", "quantity": "2 rebanadas" },
+        { "id": "20000000-0000-4000-8000-000000000002", "name": "Hummus", "quantity": "60 g" },
+        { "id": "20000000-0000-4000-8000-000000000003", "name": "Tomate", "quantity": "1 unidad" },
+        { "id": "20000000-0000-4000-8000-000000000004", "name": "Aceite de oliva", "quantity": "1 cucharadita" },
+        { "id": "20000000-0000-4000-8000-000000000005", "name": "Semillas de sésamo", "quantity": "Al gusto" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Ensalada mediterránea de garbanzos",
+      "description": "Una comida vegetal completa, fresca y fácil de preparar con antelación.",
+      "instructions": "1. Lava y escurre los garbanzos.\n2. Corta el pepino, el tomate y la cebolla en dados pequeños.\n3. Mezcla todos los ingredientes y aliña con aceite, limón, sal y pimienta.\n4. Termina con el queso feta desmenuzado.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "30000000-0000-4000-8000-000000000001", "name": "Garbanzos cocidos", "quantity": "200 g" },
+        { "id": "30000000-0000-4000-8000-000000000002", "name": "Pepino", "quantity": "1/2 unidad" },
+        { "id": "30000000-0000-4000-8000-000000000003", "name": "Tomates cherry", "quantity": "10 unidades" },
+        { "id": "30000000-0000-4000-8000-000000000004", "name": "Queso feta", "quantity": "40 g" },
+        { "id": "30000000-0000-4000-8000-000000000005", "name": "Aceite de oliva y limón", "quantity": "Al gusto" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Salmón al horno con verduras",
+      "description": "Cena de horno con pocos pasos y verduras de temporada.",
+      "instructions": "1. Calienta el horno a 200 °C.\n2. Coloca las verduras cortadas en una bandeja y aliña con aceite y especias.\n3. Hornea 15 minutos.\n4. Añade el salmón, el limón y hornea 10-12 minutos más, hasta que esté hecho.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "40000000-0000-4000-8000-000000000001", "name": "Lomo de salmón", "quantity": "150 g" },
+        { "id": "40000000-0000-4000-8000-000000000002", "name": "Calabacín", "quantity": "1/2 unidad" },
+        { "id": "40000000-0000-4000-8000-000000000003", "name": "Pimiento rojo", "quantity": "1/2 unidad" },
+        { "id": "40000000-0000-4000-8000-000000000004", "name": "Limón", "quantity": "1/2 unidad" },
+        { "id": "40000000-0000-4000-8000-000000000005", "name": "Aceite de oliva", "quantity": "1 cucharadita" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    },
+    {
+      "id": "55555555-5555-4555-8555-555555555555",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Yogur con nueces y canela",
+      "description": "Tentempié de tres minutos con una combinación sencilla y cremosa.",
+      "instructions": "1. Sirve el yogur en un bol.\n2. Añade las nueces troceadas.\n3. Espolvorea canela y mezcla antes de tomar.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "50000000-0000-4000-8000-000000000001", "name": "Yogur griego natural", "quantity": "170 g" },
+        { "id": "50000000-0000-4000-8000-000000000002", "name": "Nueces", "quantity": "20 g" },
+        { "id": "50000000-0000-4000-8000-000000000003", "name": "Canela", "quantity": "1 pizca" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    },
+    {
+      "id": "66666666-6666-4666-8666-666666666666",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Pasta integral con verduras",
+      "description": "Plato reconfortante de diario con verduras salteadas y sabor mediterráneo.",
+      "instructions": "1. Cuece la pasta siguiendo las indicaciones del envase.\n2. Saltea la cebolla, el calabacín y los champiñones con aceite.\n3. Incorpora la pasta escurrida, los tomates y las especias.\n4. Sirve con parmesano al gusto.",
+      "imageUrl": null,
+      "ingredients": [
+        { "id": "60000000-0000-4000-8000-000000000001", "name": "Pasta integral", "quantity": "80 g" },
+        { "id": "60000000-0000-4000-8000-000000000002", "name": "Calabacín", "quantity": "1/2 unidad" },
+        { "id": "60000000-0000-4000-8000-000000000003", "name": "Champiñones", "quantity": "100 g" },
+        { "id": "60000000-0000-4000-8000-000000000004", "name": "Tomates cherry", "quantity": "8 unidades" },
+        { "id": "60000000-0000-4000-8000-000000000005", "name": "Parmesano", "quantity": "15 g" }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    }
+  ],
+  "weeklyPlans": [
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "name": "Menú semanal",
+      "kind": "repeating",
+      "startsOn": null,
+      "endsOn": null,
+      "slots": [
+        { "id": "monday-breakfast", "day": "monday", "meal": "breakfast", "time": "07:30", "recipeIds": ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"] },
+        { "id": "monday-midMorning", "day": "monday", "meal": "midMorning", "time": "10:30", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "monday-lunch", "day": "monday", "meal": "lunch", "time": "14:00", "recipeIds": ["33333333-3333-4333-8333-333333333333"] },
+        { "id": "monday-snack", "day": "monday", "meal": "snack", "time": "17:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "monday-dinner", "day": "monday", "meal": "dinner", "time": "21:00", "recipeIds": ["44444444-4444-4444-8444-444444444444"] },
+        { "id": "tuesday-breakfast", "day": "tuesday", "meal": "breakfast", "time": "07:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "tuesday-midMorning", "day": "tuesday", "meal": "midMorning", "time": "10:30", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "tuesday-lunch", "day": "tuesday", "meal": "lunch", "time": "14:00", "recipeIds": ["66666666-6666-4666-8666-666666666666"] },
+        { "id": "tuesday-snack", "day": "tuesday", "meal": "snack", "time": "17:30", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "tuesday-dinner", "day": "tuesday", "meal": "dinner", "time": "21:00", "recipeIds": ["33333333-3333-4333-8333-333333333333"] },
+        { "id": "wednesday-breakfast", "day": "wednesday", "meal": "breakfast", "time": "07:30", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "wednesday-midMorning", "day": "wednesday", "meal": "midMorning", "time": "10:30", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "wednesday-lunch", "day": "wednesday", "meal": "lunch", "time": "14:00", "recipeIds": ["33333333-3333-4333-8333-333333333333"] },
+        { "id": "wednesday-snack", "day": "wednesday", "meal": "snack", "time": "17:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "wednesday-dinner", "day": "wednesday", "meal": "dinner", "time": "21:00", "recipeIds": ["44444444-4444-4444-8444-444444444444"] },
+        { "id": "thursday-breakfast", "day": "thursday", "meal": "breakfast", "time": "07:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "thursday-midMorning", "day": "thursday", "meal": "midMorning", "time": "10:30", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "thursday-lunch", "day": "thursday", "meal": "lunch", "time": "14:00", "recipeIds": ["66666666-6666-4666-8666-666666666666"] },
+        { "id": "thursday-snack", "day": "thursday", "meal": "snack", "time": "17:30", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "thursday-dinner", "day": "thursday", "meal": "dinner", "time": "21:00", "recipeIds": ["33333333-3333-4333-8333-333333333333"] },
+        { "id": "friday-breakfast", "day": "friday", "meal": "breakfast", "time": "07:30", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "friday-midMorning", "day": "friday", "meal": "midMorning", "time": "10:30", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "friday-lunch", "day": "friday", "meal": "lunch", "time": "14:00", "recipeIds": ["66666666-6666-4666-8666-666666666666"] },
+        { "id": "friday-snack", "day": "friday", "meal": "snack", "time": "17:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "friday-dinner", "day": "friday", "meal": "dinner", "time": "21:00", "recipeIds": ["44444444-4444-4444-8444-444444444444"] },
+        { "id": "saturday-breakfast", "day": "saturday", "meal": "breakfast", "time": "08:30", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "saturday-midMorning", "day": "saturday", "meal": "midMorning", "time": "11:00", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "saturday-lunch", "day": "saturday", "meal": "lunch", "time": "14:30", "recipeIds": ["33333333-3333-4333-8333-333333333333"] },
+        { "id": "saturday-snack", "day": "saturday", "meal": "snack", "time": "18:00", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "saturday-dinner", "day": "saturday", "meal": "dinner", "time": "21:30", "recipeIds": ["44444444-4444-4444-8444-444444444444"] },
+        { "id": "sunday-breakfast", "day": "sunday", "meal": "breakfast", "time": "08:30", "recipeIds": ["22222222-2222-4222-8222-222222222222"] },
+        { "id": "sunday-midMorning", "day": "sunday", "meal": "midMorning", "time": "11:00", "recipeIds": ["55555555-5555-4555-8555-555555555555"] },
+        { "id": "sunday-lunch", "day": "sunday", "meal": "lunch", "time": "14:30", "recipeIds": ["66666666-6666-4666-8666-666666666666"] },
+        { "id": "sunday-snack", "day": "sunday", "meal": "snack", "time": "18:00", "recipeIds": ["11111111-1111-4111-8111-111111111111"] },
+        { "id": "sunday-dinner", "day": "sunday", "meal": "dinner", "time": "21:00", "recipeIds": ["33333333-3333-4333-8333-333333333333"] }
+      ],
+      "createdAt": "2026-09-16T08:00:00.000Z",
+      "updatedAt": "2026-09-16T08:00:00.000Z"
+    }
+  ]
+}

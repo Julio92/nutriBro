@@ -1,0 +1,8 @@
+services:
+  nutribro:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Define DATABASE_URL en tu entorno}
+      AUTH_SECRET: ${AUTH_SECRET:?Define AUTH_SECRET en tu entorno}
