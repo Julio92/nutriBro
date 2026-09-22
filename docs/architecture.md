@@ -1,17 +1,17 @@
-# Arquitectura de Nutribro
+# Nutribro Architecture
 
-## Objetivo y límites
+## Goal and scope
 
-Nutribro permite a cada persona usuaria organizar recetas reutilizables y un único menú semanal recurrente de siete días por cinco comidas. Cada comida puede agrupar una o más recetas ordenadas. Una biblioteca inicial de recetas se copia para cada cuenta local al registrarse. Los datos de producto se almacenan de forma aislada por cuenta en PostgreSQL.
+Nutribro allows each user to organize reusable recipes and a single recurring weekly menu of seven days by five meals. Each meal can group one or more ordered recipes. An initial recipe library is copied for each local account when the user signs up. Product data is stored in an isolated per-account structure in PostgreSQL.
 
-Quedan fuera del alcance cálculos nutricionales, recomendaciones, generación con IA y lista de la compra.
+The following are out of scope: nutritional calculations, recommendations, AI generation, and shopping lists.
 
-## Vista de contenedores
+## Container view
 
 ```mermaid
 flowchart LR
-  U[Persona usuaria] --> F[Formulario de acceso]
-  U --> B[Cliente React]
+  U[End user] --> F[Sign-in form]
+  U --> B[React client]
   B --> P[Next.js App Router]
   B --> A[Route Handlers /api]
   F --> AU[Auth.js Credentials]
@@ -26,125 +26,125 @@ flowchart LR
   D --> N[(Neon PostgreSQL)]
 ```
 
-- Las páginas de servidor recuperan la sesión y los datos iniciales.
-- Los componentes cliente manejan navegación, tema, formularios y mutaciones contra las API del mismo origen.
-- Auth.js valida la sesión JWT firmada; el servicio mantiene la autorización por propietario.
-- `NutritionRepository` recibe siempre un `userId`, por lo que nunca hidrata datos de otros usuarios.
+- Server pages fetch the session and initial data.
+- Client components handle navigation, theming, forms, and mutations against same-origin APIs.
+- Auth.js validates the signed JWT session; the service enforces ownership authorization.
+- `NutritionRepository` always receives a `userId`, so it never hydrates data for other users.
 
-## Capas y responsabilidades
+## Layers and responsibilities
 
-| Capa | Ubicación | Responsabilidad |
+| Layer | Location | Responsibility |
 | --- | --- | --- |
-| Presentación | `src/app`, `src/components`, `src/lib` | UI, interacción y consumo de DTOs. No accede a sesiones ni base de datos directamente. |
-| Dominio | `src/domain/nutrition` | Tipos, calendario, fábricas históricas y validación Zod. No depende de Next.js. |
-| Aplicación | `src/server/services` | Casos de uso, reglas de propiedad, DTOs y validación de entrada. |
-| Persistencia | `src/server/infrastructure/database`, `postgres-nutrition-repository.ts` | Esquema Drizzle, cliente Neon e hidratación/sincronización del agregado por usuario. |
-| Entrega HTTP | `src/app/api`, `src/server/http` | Control de origen, límites de cuerpo y mapeo de errores a respuestas JSON. |
-| Identidad | `src/auth.ts`, `src/server/auth`, `src/server/services/local-account-service.ts` | Credenciales locales, hash Argon2id, sesión JWT y datos de identidad seguros para la UI. |
+| Presentation | `src/app`, `src/components`, `src/lib` | UI, interaction, and DTO consumption. It does not access sessions or the database directly. |
+| Domain | `src/domain/nutrition` | Types, calendar logic, historical factories, and Zod validation. It has no dependency on Next.js. |
+| Application | `src/server/services` | Use cases, ownership rules, DTOs, and input validation. |
+| Persistence | `src/server/infrastructure/database`, `postgres-nutrition-repository.ts` | Drizzle schema, Neon client, and aggregation hydration/synchronization per user. |
+| HTTP delivery | `src/app/api`, `src/server/http` | Origin checks, body limits, and error-to-JSON response mapping. |
+| Identity | `src/auth.ts`, `src/server/auth`, `src/server/services/local-account-service.ts` | Local credentials, Argon2id hashing, JWT session, and secure identity data for the UI. |
 
-## Flujo de una mutación
+## Mutation flow
 
-1. La UI envía JSON a un Route Handler del mismo origen.
-2. El endpoint comprueba origen, tipo y tamaño del cuerpo, y exige una sesión válida.
-3. `NutritionService` valida la entrada con Zod y comprueba que receta, plan y hueco pertenecen al `userId` de la sesión.
-4. `PostgresNutritionRepository` asegura que el usuario tenga su plan de 35 huecos, hidrata solo su agregado y aplica el mutador del servicio sobre una copia.
-5. Se validan invariantes de dominio y Drizzle sincroniza recetas, ingredientes, plan, huecos y asignaciones ordenadas mediante un lote transaccional HTTP de Neon.
-6. El endpoint devuelve un DTO mínimo o un error estructurado; nunca hashes de contraseña ni datos de otra cuenta.
+1. The UI sends JSON to a same-origin Route Handler.
+2. The endpoint checks origin, type, and body size, and requires a valid session.
+3. `NutritionService` validates the input with Zod and verifies that the recipe, plan, and slot belong to the session `userId`.
+4. `PostgresNutritionRepository` ensures the user has a 35-slot plan, hydrates only their aggregate, and applies the service mutator on a copy.
+5. Domain invariants are validated and Drizzle synchronizes recipes, ingredients, plan, slots, and ordered assignments through a Neon transactional HTTP batch.
+6. The endpoint returns a minimal DTO or a structured error; it never leaks password hashes or data from another account.
 
-## Decisiones arquitectónicas (ADRs)
+## Architectural decisions (ADRs)
 
-### ADR-001 — Next.js App Router como BFF ligero
+### ADR-001 — Next.js App Router as a lightweight BFF
 
-**Decisión:** una única aplicación Next.js con páginas de servidor, componentes cliente y Route Handlers.
+**Decision:** a single Next.js application with server pages, client components, and Route Handlers.
 
-**Por qué:** protege secretos y acceso a datos en el servidor, reduce despliegues y conserva un borde HTTP claro para futuras integraciones.
+**Why:** it keeps secrets and data access on the server, reduces deployment complexity, and preserves a clear HTTP boundary for future integrations.
 
-### ADR-002 — Neon PostgreSQL y Drizzle ORM
+### ADR-002 — Neon PostgreSQL and Drizzle ORM
 
-**Decisión:** usar Neon como PostgreSQL gestionado y Drizzle para el esquema, las consultas y las migraciones SQL versionadas en [drizzle](../drizzle).
+**Decision:** use Neon as the managed PostgreSQL service and Drizzle for the schema, queries, and versioned SQL migrations in [drizzle](../drizzle).
 
-**Por qué:** Vercel no ofrece almacenamiento local persistente a funciones serverless. Neon permite una conexión HTTP adecuada para ese entorno y Drizzle mantiene el modelo tipado sin acoplar la UI a SQL.
+**Why:** Vercel does not offer persistent local storage for serverless functions. Neon provides a suitable HTTP connection for that environment, and Drizzle keeps the model typed without coupling the UI to SQL.
 
-`JsonNutritionRepository` queda como adaptador heredado para leer el origen de migración; la composición de producción usa `PostgresNutritionRepository`.
+`JsonNutritionRepository` remains as a legacy adapter for reading the migration source; production composition uses `PostgresNutritionRepository`.
 
-### ADR-003 — Credenciales locales con Argon2id y sesiones JWT
+### ADR-003 — Local credentials with Argon2id and JWT sessions
 
-**Decisión:** Auth.js v5 usa el proveedor `Credentials` para email y contraseña. Los hashes se calculan con Argon2id y la sesión es `jwt`.
+**Decision:** Auth.js v5 uses the `Credentials` provider for email and password. Hashes are generated with Argon2id and the session is `jwt`.
 
-**Por qué:** permite validar toda la gestión de cuentas en localhost sin configurar un proveedor OAuth. Auth.js requiere JWT cuando Credentials es el único proveedor; la cookie firmada contiene la identidad de sesión, no la contraseña ni su hash. Los datos de cuenta y el hash viven en PostgreSQL, separados en `users` y `user_credentials`.
+**Why:** it allows local account management to be validated without configuring an OAuth provider. Auth.js requires JWT when Credentials is the only provider; the signed cookie contains the session identity, not the password or its hash. Account data and the hash live in PostgreSQL, separated into `users` and `user_credentials`.
 
-`LocalAccountService` valida entrada con Zod, normaliza el email, crea hashes Argon2id y compara el coste también para correos inexistentes. Las rutas de autenticación viven en `/api/auth/[...nextauth]`; si faltan `DATABASE_URL` o `AUTH_SECRET`, la pantalla de acceso explica la configuración requerida y las APIs no recurren al almacén heredado compartido.
+`LocalAccountService` validates input with Zod, normalizes the email, creates Argon2id hashes, and compares cost parameters even for nonexistent addresses. Authentication routes live under `/api/auth/[...nextauth]`; if `DATABASE_URL` or `AUTH_SECRET` are missing, the sign-in screen explains the required configuration and the APIs do not fall back to the shared legacy store.
 
-Las tablas `auth_accounts`, `auth_sessions` y `auth_verification_tokens` se conservan para una futura incorporación de OAuth o enlaces mágicos, pero las sesiones de esta fase no se almacenan en `auth_sessions`.
+The `auth_accounts`, `auth_sessions`, and `auth_verification_tokens` tables are preserved for a future addition of OAuth or magic links, but sessions in this phase are not stored in `auth_sessions`.
 
-### ADR-004 — Agregado de menú con ámbito de usuario
+### ADR-004 — User-scoped menu aggregate
 
-**Decisión:** conservar el servicio basado en el agregado `StoreData`, pero cambiar el puerto a `ensureWorkspace(userId)`, `read(userId)` y `update(userId, mutator)`.
+**Decision:** keep the service based on the `StoreData` aggregate, but change the port to `ensureWorkspace(userId)`, `read(userId)`, and `update(userId, mutator)`.
 
-**Por qué:** reduce la migración de los casos de uso existentes y evita cargar todos los tenants. Cada primera sesión crea un plan `repeating` vacío con los 35 `MealSlot` estables. PostgreSQL aporta claves foráneas, cascadas, índices y unicidad además de la validación Zod.
+**Why:** it reduces migration effort for existing use cases and avoids loading all tenants. Each first session creates an empty `repeating` plan with the 35 stable `MealSlot` records. PostgreSQL provides foreign keys, cascades, indexes, and uniqueness in addition to Zod validation.
 
-### ADR-005 — Plan repetitivo con huecos y recetas ordenadas
+### ADR-005 — Repeating plan with slots and ordered recipes
 
-**Decisión:** un `WeeklyPlan` `repeating` por usuario, 35 `MealSlot` identificados por día y comida, y una tabla `meal_slot_recipe_assignments` para las recetas de cada hueco.
+**Decision:** a `WeeklyPlan` per user with `repeating` mode, 35 `MealSlot` entries identified by day and meal, and a `meal_slot_recipe_assignments` table for the recipes in each slot.
 
-**Por qué:** representa la regla actual sin fechas artificiales y permite combinar, por ejemplo, un plato principal y un acompañamiento en la misma comida. Una restricción única por `(weekly_plan_id, day, meal)` y una clave primaria por `(weekly_plan_id, id)` impiden huecos duplicados; la clave de asignación impide repetir una receta dentro de un hueco y su posición conserva un orden estable de presentación.
+**Why:** it represents the current rule without artificial dates and allows combining, for example, a main dish and a side dish in the same meal. A unique constraint on `(weekly_plan_id, day, meal)` and a primary key on `(weekly_plan_id, id)` prevent duplicate slots; the assignment key prevents repeating the same recipe within a slot and its position preserves a stable display order.
 
-### ADR-006 — DTOs explícitos y validación en frontera
+### ADR-006 — Explicit DTOs and boundary validation
 
-**Decisión:** los endpoints devuelven resúmenes, detalles o tablero; todo cuerpo JSON se valida en el servidor.
+**Decision:** endpoints return summaries, details, or board data; every JSON body is validated on the server.
 
-**Por qué:** evita exposición accidental de campos de Auth.js y hace los contratos estables frente a cambios de esquema.
+**Why:** it prevents accidental exposure of Auth.js fields and keeps contracts stable even if the schema changes.
 
-### ADR-007 — Biblioteca inicial versionada y privada
+### ADR-007 — Versioned private starter library
 
-**Decisión:** las 21 recetas extraídas del plan se mantienen como plantillas versionadas de dominio y se copian en la transacción de alta de cada cuenta. `user_default_recipe_libraries` registra la versión recibida por usuario.
+**Decision:** the 21 recipes extracted from the plan remain as versioned domain templates and are copied into the account creation transaction for each account. `user_default_recipe_libraries` records the version received by each user.
 
-**Por qué:** las recetas siguen teniendo `ownerId`, por lo que una persona puede editarlas o borrarlas sin afectar a nadie más. La marca impide duplicados al añadir la biblioteca de forma explícita a una cuenta existente. Las porciones sin elaboración del documento no se modelan como recetas porque el dominio exige ingredientes e instrucciones.
+**Why:** recipes still carry `ownerId`, so a user can edit or delete them without affecting anyone else. The flag prevents duplicates when the library is explicitly added to an existing account. Unfinished document portions are not modeled as recipes because the domain requires ingredients and instructions.
 
-## Seguridad aplicada
+## Applied security
 
-- `AUTH_SECRET` y `DATABASE_URL` permanecen solo en variables de servidor; no hay secretos `NEXT_PUBLIC_`.
-- Todas las rutas de producto requieren identidad autenticada. Un acceso sin sesión devuelve `401`; una instalación incompleta devuelve `503` sin recurrir al usuario fijo del MVP.
-- La comprobación de propiedad reside en `NutritionService`, no solo en la navegación o en la UI.
-- Las contraseñas se guardan exclusivamente como hashes Argon2id con parámetros de coste definidos en servidor; nunca se registran, devuelven o serializan al cliente.
-- La tabla `user_credentials` tiene una relación uno a uno y borrado en cascada con `users`.
-- La biblioteca inicial se inserta junto con la cuenta y sus credenciales. `user_default_recipe_libraries` conserva una marca de versión por usuario para impedir una segunda copia accidental.
-- Zod valida JSON, UUID, longitudes, ingredientes y URL HTTPS; los Route Handlers limitan el tamaño de carga y comprueban el mismo origen para mutaciones.
-- CSP, anti-frame, `nosniff`, política de referentes y de permisos se mantienen en la configuración de Next.js.
-- Los módulos de base de datos e identidad son solo de servidor mediante `server-only`.
+- `AUTH_SECRET` and `DATABASE_URL` remain server-only variables; there are no `NEXT_PUBLIC_` secrets.
+- All product routes require an authenticated identity. Requests without a session return `401`; incomplete installations return `503` without falling back to the fixed MVP user.
+- Ownership checks live in `NutritionService`, not only in navigation or UI code.
+- Passwords are stored exclusively as Argon2id hashes using server-defined cost parameters; they are never logged, returned, or serialized to the client.
+- The `user_credentials` table has a one-to-one relationship and cascade delete with `users`.
+- The starter library is inserted alongside the account and credentials. `user_default_recipe_libraries` keeps a per-user version marker to prevent accidental second copies.
+- Zod validates JSON, UUIDs, lengths, ingredients, and HTTPS URLs; Route Handlers limit payload size and check same-origin requests for mutations.
+- CSP, anti-frame settings, `nosniff`, referrer policy, and permission policy are maintained in the Next.js configuration.
+- Database and identity modules are server-only via `server-only`.
 
-## Datos heredados y migración
+## Legacy data and migration
 
-Los JSON locales se preservan como origen hasta completar una importación explícita. `scripts/import-json.ts` exige:
+Local JSON files are preserved as the source until an explicit import is completed. `scripts/import-json.ts` requires:
 
-1. Una cuenta destino ya creada mediante el formulario de registro.
-2. `NUTRITION_IMPORT_USER_ID` con su UUID.
-3. `NUTRITION_IMPORT_CONFIRM=replace` para reconocer que reemplazará el menú y las recetas de esa cuenta.
+1. A destination account already created through the sign-up form.
+2. `NUTRITION_IMPORT_USER_ID` with that account's UUID.
+3. `NUTRITION_IMPORT_CONFIRM=replace` to acknowledge that it will replace that account's menu and recipes.
 
-El script remapea UUID de recetas e ingredientes antes de insertarlos, por lo que no puede sobrescribir datos de otros usuarios por colisión de claves. El JSON demo usa `recipeIds` ordenados; el lector conserva compatibilidad con el campo histórico `recipeId` y lo normaliza durante la importación. Los nuevos registros normales no reciben las recetas demo.
+The script remaps recipe and ingredient UUIDs before inserting them, so it cannot overwrite other users' data via key collisions. The demo JSON uses ordered `recipeIds`; the reader keeps compatibility with the historical `recipeId` field and normalizes it during import. New standard records do not receive the demo recipes.
 
-La migración `0004_gigantic_joystick` crea las asignaciones por hueco, copia cada `meal_slots.recipe_id` existente como una asignación de posición cero y elimina la columna heredada después de conservar sus datos.
+The migration `0004_gigantic_joystick` creates per-slot assignments, copies each existing `meal_slots.recipe_id` as a position-zero assignment, and removes the legacy column after preserving its data.
 
-## Extensión prevista
+## Planned extension
 
-### Roles y gestión de cuenta
+### Roles and account management
 
-Añadir roles persistentes o una tabla de membresías solo cuando exista una necesidad de compartir espacios. Las comprobaciones de propietario actuales deben mantenerse como defensa de datos por recurso.
+Add persistent roles or a membership table only when there is a concrete need to share spaces. The current owner checks should remain as the resource-level data defense.
 
-### Nutrición y objetivos
+### Nutrition and goals
 
-Crear `IngredientCatalogItem`, `NutritionProfile`, `NutritionGoal` y cantidades normalizadas sin alterar la representación textual original de ingredientes.
+Create `IngredientCatalogItem`, `NutritionProfile`, `NutritionGoal`, and normalized amounts without altering the original textual representation of ingredients.
 
-### Planes por fecha
+### Date-based plans
 
-Añadir planes de semana ISO u overrides fechados. La resolución debe preferir el plan específico y después el plan recurrente base.
+Add ISO week plans or dated overrides. Resolution should prefer the specific plan and then the base repeating plan.
 
-## Estrategia de despliegue
+## Deployment strategy
 
-La entrega pública usa GitHub como origen, Vercel para Next.js y Neon como almacenamiento persistente. Producción, Preview y desarrollo deben usar conexiones de Neon y `AUTH_SECRET` independientes. Vercel recibe únicamente `DATABASE_URL` y `AUTH_SECRET` como secretos de servidor; el código no requiere `AUTH_URL`, `NEXTAUTH_URL` ni variables públicas para Auth.js.
+Public delivery uses GitHub as the source, Vercel for Next.js, and Neon as the persistent storage. Production, Preview, and development should use separate Neon connections and `AUTH_SECRET` values. Vercel receives only `DATABASE_URL` and `AUTH_SECRET` as server secrets; the app does not require `AUTH_URL`, `NEXTAUTH_URL`, or public variables for Auth.js.
 
-Las migraciones Drizzle se ejecutan explícitamente contra Neon antes de que una versión que depende de ellas reciba tráfico. No forman parte del build de Vercel: así un fallo de migración no deja una versión de aplicación a medio desplegar. El primer entorno de producción comienza vacío; el registro aprovisiona las recetas iniciales y el plan sin importar los JSON de desarrollo.
+Drizzle migrations run explicitly against Neon before a release depending on them receives traffic. They are not part of the Vercel build: this prevents a migration failure from leaving the application partially deployed. The first production environment starts empty; sign-up provisions the starter recipes and plan without importing the development JSON files.
 
-Antes de publicar el formulario de credenciales se configura una regla de Firewall de Vercel que limita por IP los `POST` de registro e inicio de sesión. La regla se valida en Preview mediante registros y después se publica con respuesta `429` al superar el umbral. Este control protege el borde HTTP; una futura fase puede añadir límites por cuenta y pruebas automatizadas.
+Before publishing the credentials form, a Vercel Firewall rule limits `POST` requests for sign-in and sign-up by IP. The rule is validated in Preview via logs and then published with a `429` response when the threshold is exceeded. This protects the HTTP edge; a future phase can add per-account limits and automated tests.
 
-El `Dockerfile` sigue disponible para desarrollo o alojamiento alternativo, pero no monta ni contiene datos de producto: también depende de PostgreSQL externo. El procedimiento operativo completo está en [docs/deployment.md](deployment.md).
+The `Dockerfile` remains available for development or alternative hosting, but it does not bundle or contain product data: it also depends on external PostgreSQL. The full operational procedure is in [docs/deployment.md](deployment.md).

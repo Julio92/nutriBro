@@ -49,7 +49,7 @@ function createAuthConfig(): NextAuthConfig {
             password: credentials?.password,
           });
 
-          if (!account) {
+          if (!account || account.emailVerified === null || account.emailVerified === undefined) {
             return null;
           }
 

@@ -1,76 +1,76 @@
-# Despliegue público en Vercel
+# Public deployment on Vercel
 
-## Alcance del primer lanzamiento
+## Scope of the first release
 
-Nutribro se entrega desde el repositorio privado [Julio92/nutriBro](https://github.com/Julio92/nutriBro) a Vercel. La producción empieza con una base Neon vacía: no se trasladan recetas ni menús del entorno local. Cada persona que se registra recibe su propia biblioteca predeterminada y su plan recurrente vacío.
+Nutribro is delivered from the private repository [Julio92/nutriBro](https://github.com/Julio92/nutriBro) to Vercel. Production starts with an empty Neon database: no recipes or menus are migrated from the local environment. Every person who signs up receives their own starter library and an empty recurring plan.
 
-No forman parte de este corte una limpieza amplia, CI, endpoint de readiness, pruebas E2E, observabilidad o límites de autenticación por cuenta. El límite de acceso por IP del Firewall de Vercel sí es obligatorio antes de anunciar el sitio.
+This slice does not include broad cleanup, CI, readiness endpoints, E2E tests, observability, or per-account authentication limits. The Vercel Firewall IP limit is still required before announcing the site.
 
-## Separación de entornos
+## Environment separation
 
-| Entorno | Base de datos | Secreto de Auth.js | Uso |
+| Environment | Database | Auth.js secret | Use |
 | --- | --- | --- | --- |
-| Development | Proyecto Neon local de desarrollo | Valor local en `.env.local` | Desarrollo en localhost. |
-| Preview | Base o branch Neon independiente | Valor distinto de Preview | Pull requests y pruebas de Vercel. |
-| Production | Proyecto Neon exclusivo de producción | Valor nuevo y estable de Production | Usuarios reales. |
+| Development | Local Neon development project | Local value in `.env.local` | Local development. |
+| Preview | Independent Neon base or branch | Different value from Preview | Pull requests and Vercel testing. |
+| Production | Exclusive Neon production project | New, stable Production value | Real users. |
 
-`DATABASE_URL` y `AUTH_SECRET` son secretos de servidor. No se copian a Git, no se añaden como variables `NEXT_PUBLIC_*` y no se reutilizan entre entornos. Cambiar `AUTH_SECRET` invalida las sesiones JWT existentes.
+`DATABASE_URL` and `AUTH_SECRET` are server secrets. They are not copied to Git, they are not added as `NEXT_PUBLIC_*` variables, and they are not reused across environments. Changing `AUTH_SECRET` invalidates existing JWT sessions.
 
-## Preparar GitHub
+## Prepare GitHub
 
-1. Ejecutar `npm run check` y confirmar que lint, pruebas y build finalizan correctamente.
-2. Inicializar Git con `main` como rama de producción y añadir `https://github.com/Julio92/nutriBro.git` como remoto `origin`.
-3. Revisar el área de preparación antes del primer commit. Deben entrar el código, [package-lock.json](../package-lock.json), [drizzle](../drizzle), configuraciones y documentación.
-4. Confirmar que [.gitignore](../.gitignore) deja fuera `.env.local`, `.next`, `.vercel`, `node_modules` y [data/nutrition-data.json](../data/nutrition-data.json). No forzar la inclusión de archivos ignorados.
-5. Crear el commit inicial y enviar `main` al repositorio privado.
+1. Run `npm run check` and confirm that lint, tests, and the final build all complete successfully.
+2. Initialize Git with `main` as the production branch and add `https://github.com/Julio92/nutriBro.git` as the `origin` remote.
+3. Review the staging area before the first commit. The code, [package-lock.json](../package-lock.json), [drizzle](../drizzle), configuration files, and documentation should all be included.
+4. Confirm that [.gitignore](../.gitignore) excludes `.env.local`, `.next`, `.vercel`, `node_modules`, and [data/nutrition-data.json](../data/nutrition-data.json). Do not force the inclusion of ignored files.
+5. Create the initial commit and push `main` to the private repository.
 
-## Preparar Neon
+## Prepare Neon
 
-1. Crear el proyecto Neon de producción en una región apropiada para los usuarios previstos.
-2. Copiar su URL de conexión TLS estándar con `sslmode=require` a un entorno temporal del proceso de migración. No modificar ni publicar el archivo local de entorno para este fin.
-3. Ejecutar `npm run db:migrate` antes del primer tráfico de Production y confirmar que se aplica el historial completo de [drizzle](../drizzle).
-4. No ejecutar `npm run db:seed`, `npm run db:import-json` ni `npm run db:seed-default-recipes` en la base vacía de producción. Esos comandos están reservados a importaciones explícitas hacia una cuenta existente.
-5. Repetir el patrón con otra base o branch Neon para Preview antes de habilitar pull requests.
+1. Create the Neon production project in a region appropriate for the expected users.
+2. Copy its standard TLS connection URL with `sslmode=require` to a temporary environment for the migration process. Do not modify or publish the local environment file for this purpose.
+3. Run `npm run db:migrate` before the first production traffic and confirm that the full history in [drizzle](../drizzle) is applied.
+4. Do not run `npm run db:seed`, `npm run db:import-json`, or `npm run db:seed-default-recipes` against the empty production database. Those commands are reserved for explicit imports into an existing account.
+5. Repeat the pattern with another Neon project or branch for Preview before enabling pull requests.
 
-## Configurar Vercel
+## Configure Vercel
 
-1. En Vercel, importar el repositorio GitHub privado y seleccionar el preset Next.js.
-2. Usar la raíz del repositorio, Node.js 22, `npm ci` como instalación y `npm run build` como comando de build.
-3. Crear secretos de proyecto antes de desplegar:
-   - **Production:** `DATABASE_URL` de Neon producción y `AUTH_SECRET` de producción.
-   - **Preview:** `DATABASE_URL` de Neon Preview y un `AUTH_SECRET` distinto.
-4. Mantener la región de funciones predeterminada inicialmente. Si se detecta latencia, seleccionar después una región Vercel cercana a Neon.
-5. No usar Docker, Docker Compose ni `npm run start` como flujo de Vercel. Esos recursos siguen disponibles para ejecuciones locales o alojamiento alternativo.
+1. In Vercel, import the private GitHub repository and select the Next.js preset.
+2. Use the repository root, Node.js 22, `npm ci` for installation, and `npm run build` as the build command.
+3. Create project secrets before deployment:
+   - **Production:** Neon production `DATABASE_URL` and production `AUTH_SECRET`.
+   - **Preview:** Neon Preview `DATABASE_URL` and a different `AUTH_SECRET`.
+4. Keep the default function region initially. If latency is detected, choose a Vercel region closer to Neon afterward.
+5. Do not use Docker, Docker Compose, or `npm run start` as the Vercel flow. Those resources remain available for local execution or alternative hosting.
 
-El proyecto usa Auth.js con `trustHost`, por lo que no necesita `AUTH_URL` ni `NEXTAUTH_URL` para este despliegue. La falta de cualquiera de los dos secretos obligatorios produce un estado de configuración incompleta en lugar de activar el acceso.
+The project uses Auth.js with `trustHost`, so it does not require `AUTH_URL` or `NEXTAUTH_URL` for this deployment. The absence of either required secret produces an incomplete configuration state instead of enabling access.
 
-## Límite de acceso en Firewall
+## Firewall access limits
 
-Antes de anunciar Production, crear una sola regla de rate limiting en el Firewall de Vercel:
+Before announcing Production, create a single rate-limiting rule in the Vercel Firewall:
 
-- **Condiciones:** método `POST` y ruta igual a `/sign-in`, `/sign-up` o `/api/auth/callback/credentials`; combinar las tres rutas con `OR`.
-- **Clave:** dirección IP.
-- **Algoritmo:** ventana fija.
-- **Umbral:** 10 solicitudes en 10 minutos.
-- **Respuesta al excederlo:** `429`.
+- **Conditions:** method `POST` and the route is equal to `/sign-in`, `/sign-up`, or `/api/auth/callback/credentials`; combine the three routes with `OR`.
+- **Key:** IP address.
+- **Algorithm:** fixed window.
+- **Threshold:** 10 requests in 10 minutes.
+- **Response when exceeded:** `429`.
 
-Primero guardar la misma condición con acción de registro sobre un Preview y comprobar en los eventos del Firewall que alcanza las rutas esperadas. Cuando la condición sea correcta, cambiar la acción a rate limit, revisar los cambios y publicarlos. En Vercel Hobby esta regla compartida ocupa el único límite de rate limiting disponible por proyecto.
+First, save the same condition with logging enabled in a Preview environment and check the Firewall events to confirm it reaches the expected routes. When the condition is correct, change the action to rate limit, review the changes, and publish them. On Vercel Hobby, this shared rule occupies the only rate-limiting limit available per project.
 
-## Verificación de lanzamiento
+## Launch verification
 
-Después del primer despliegue de `main`:
+After the first deployment of `main`:
 
-1. Abrir la URL de Production y confirmar que no se muestra el aviso de variables de entorno ausentes.
-2. Crear una cuenta nueva, iniciar sesión y cerrar sesión.
-3. Crear, editar y eliminar una receta.
-4. Asignar varias recetas a la misma comida, recargar y confirmar que permanecen guardadas.
-5. Confirmar que una cuenta nueva recibe la biblioteca inicial y los 35 slots del menú.
-6. Realizar intentos controlados de acceso para confirmar la respuesta `429` una vez superado el umbral y revisar los eventos del Firewall.
-7. Revisar los logs de Vercel y el consumo de Neon tras la primera sesión real.
+1. Open the Production URL and confirm that the missing environment variable warning is not shown.
+2. Create a new account, sign in, and sign out.
+3. Create, edit, and delete a recipe.
+4. Assign several recipes to the same meal, reload, and confirm they remain saved.
+5. Confirm that a new account receives the starter library and the 35 plan slots.
+6. Run controlled access attempts to confirm the `429` response after the threshold and review the Firewall events.
+7. Review Vercel logs and Neon usage after the first real session.
 
-## Operación posterior
+## Post-launch operation
 
-- Configurar alertas de cuota y una estrategia de copias de seguridad/exportación en Neon.
-- Añadir GitHub Actions para ejecutar `npm ci` y `npm run check` en cada pull request.
-- Añadir una comprobación de readiness y pruebas de navegador para alta, acceso y asignación múltiple.
-- Al crecer el uso, separar los límites de registro y acceso y añadir un límite persistente por cuenta o correo.
+- Configure quota alerts and a backup/export strategy in Neon.
+- Add GitHub Actions to run `npm ci` and `npm run check` on every pull request.
+- Add a readiness check and browser tests for sign-up, sign-in, and multiple assignments.
+- As usage grows, separate sign-up and access limits and add a persistent per-account or per-email limit.

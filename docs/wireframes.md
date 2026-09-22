@@ -1,200 +1,200 @@
-# Wireframes textuales y UX
+# Textual wireframes and UX
 
-## Principios de interfaz
+## Interface principles
 
-- **Priorizar lo inmediato:** la vista del día actual aparece antes del tablero completo.
-- **Acción cerca del contexto:** pulsar una receta de hoy abre su detalle; la reasignación múltiple se realiza desde el tablero semanal.
-- **Reutilización visible:** la biblioteca indica en cuántas comidas se utiliza cada receta.
-- **Edición sin fricción:** ingredientes dinámicos, formularios cortos y placeholders orientativos.
-- **Espacio privado:** la aplicación pide acceso antes de mostrar recetas o menú, y permite cerrar sesión desde la cabecera.
-- **Sin falsas promesas:** las funciones futuras se identifican como “Próximamente”; no se simulan cálculos nutricionales.
+- **Prioritize what is immediate:** the current day view appears before the full board.
+- **Action close to context:** pressing a recipe for today opens its detail; multi-reassignment happens from the weekly board.
+- **Visible reuse:** the library shows how many meals each recipe is used in.
+- **Low-friction editing:** dynamic ingredients, short forms, and helpful placeholders.
+- **Private space:** the app requests access before showing recipes or the menu and allows sign-out from the header.
+- **No false promises:** future features are labeled as “Coming soon”; nutrition calculations are never simulated.
 
-## 1. Dashboard — escritorio
+## 1. Dashboard — desktop
 
 ```text
 ┌──────────────────────┬───────────────────────────────────────────────────────────┐
-│  [hoja] nutribro     │ Planificador personal       [+ Nueva] [◐] [AM] [Salir] │
+│  [leaf] nutribro     │ Personal planner       [+ New] [◐] [AM] [Sign out] │
 │                      ├───────────────────────────────────────────────────────────┤
-│  ▣ Plan semanal      │ HOY · MARTES                                                │
-│  ▤ Recetas           │ martes, 16 de septiembre                                   │
-│  🛒 Lista ... (soon) │ [Desayuno · Avena… · Tostada… ↗]                           │
-│                      │ [Media mañana · Yogur… ↗]                                  │
-│                      │ [Comida · Pasta… ↗]                                        │
-│                      │ [Merienda · Avena… ↗]                                      │
-│                      │ [Cena · Ensalada… ↗]                                       │
+│  ▣ Weekly plan      │ TODAY · TUESDAY                                            │
+│  ▤ Recipes          │ tuesday, 16 September                                     │
+│  🛒 List ... (soon) │ [Breakfast · Oatmeal… · Toast… ↗]                          │
+│                      │ [Midday · Yogurt… ↗]                                     │
+│                      │ [Lunch · Pasta… ↗]                                       │
+│                      │ [Snack · Oatmeal… ↗]                                     │
+│                      │ [Dinner · Salad… ↗]                                      │
 │                      │                                                           │
-│                      │ PLAN RECURRENTE                         [7 días · 5 comidas]│
-│                      │ ┌Lun─┐┌Mar─┐┌Mié─┐┌Jue─┐┌Vie─┐┌Sáb─┐┌Dom─┐                 │
+│                      │ REPEATING PLAN                         [7 days · 5 meals] │
+│                      │ ┌Mon─┐┌Tue─┐┌Wed─┐┌Thu─┐┌Fri─┐┌Sat─┐┌Sun─┐                 │
 │                      │ │Des ││Des ││Des ││Des ││Des ││Des ││Des │                 │
-│                      │ │Aven││Tost││Aven││Tost││Aven││Aven││Tost│                 │
+│                      │ │Oat ││Toas││Oat ││Toas││Oat ││Oat ││Toas│                 │
 │                      │ │ ...││ ...││ ...││ ...││ ...││ ...││ ...│                 │
 │                      │ └────┘└────┘└────┘└────┘└────┘└────┘└────┘                 │
 └──────────────────────┴───────────────────────────────────────────────────────────┘
 ```
 
-- El tablero tiene desplazamiento horizontal suave cuando no cabe por completo.
-- Una tarjeta no asignada se diferencia mediante borde discontinuo y el texto “Añadir recetas”.
-- Las horas permanecen en el tablero semanal; las tarjetas del día priorizan el tipo de comida y sus recetas en orden.
-- Las tarjetas del día no incluyen miniatura: los nombres de las recetas ganan presencia y cada uno abre su detalle.
+- The board supports smooth horizontal scrolling when it does not fully fit.
+- An unassigned card is differentiated by a dashed border and the text “Add recipes”.
+- The time slots remain on the weekly board; the day cards prioritize meal type and recipe order.
+- Day cards do not include thumbnails: recipe names are more prominent and each one opens the detail view.
 
-## 2. Dashboard — móvil
+## 2. Dashboard — mobile
 
 ```text
 ┌──────────────────────────────────┐
-│ [hoja] nutribro         [+] [◐] [↪] │
+│ [leaf] nutribro        [+] [◐] [↩] │
 ├──────────────────────────────────┤
-│ HOY · MARTES                      │
-│ martes, 16 de septiembre          │
-│ [Desayuno · Avena… · Tostada…]    │
-│ [Media mañana · Yogur…]           │
-│ [Comida · Pasta…]                 │
-│ [Merienda · Avena…]               │
-│ [Cena · Ensalada…]                │
+│ TODAY · TUESDAY                   │
+│ tuesday, 16 September            │
+│ [Breakfast · Oatmeal… · Toast…]   │
+│ [Midday · Yogurt…]                │
+│ [Lunch · Pasta…]                  │
+│ [Snack · Oatmeal…]                │
+│ [Dinner · Salad…]                 │
 │                                  │
-│ PLAN RECURRENTE    [7 días · 5]   │
-│  ← desliza horizontalmente →      │
-│ ┌ Lunes ────────────────┐         │
-│ │ Desayuno   Avena + Tostada │    │
-│ │ Media      Yogur ...  │         │
-│ │ Comida     Ensalada…  │         │
-│ │ Merienda   Tostada…   │         │
-│ │ Cena       Salmón…    │         │
+│ REPEATING PLAN   [7 days · 5]    │
+│  ← swipe horizontally →          │
+│ ┌ Monday ────────────────┐       │
+│ │ Breakfast   Oat + Toast │      │
+│ │ Midday     Yogurt ...  │       │
+│ │ Lunch      Salad…      │       │
+│ │ Snack      Toast…      │       │
+│ │ Dinner     Salmon…     │       │
 │ └───────────────────────┘         │
 ├──────────────────────────────────┤
-│       [▣ Plan]  [+] [▤ Recetas]   │
+│       [▣ Plan]  [+] [▤ Recipes]  │
 └──────────────────────────────────┘
 ```
 
-La barra inferior mantiene disponibles las dos vistas principales y el alta de recetas con el pulgar. El contenido deja espacio para la barra segura del dispositivo.
+The bottom bar keeps the two main views and recipe creation available with the thumb. The content leaves room for the device safe area.
 
-## 3. Acceso
+## 3. Sign-in
 
 ```text
 ┌──────────────────────────────────────┐
-│            [hoja] nutribro           │
+│            [leaf] nutribro           │
 │                                      │
-│ TU ESPACIO PERSONAL                   │
-│ Organiza tu semana a tu ritmo.        │
+│ YOUR PERSONAL SPACE                  │
+│ Organize your week at your own pace. │
 │                                      │
-│ Guarda tus recetas y tu menú          │
-│ recurrente en un espacio privado.     │
+│ Save your recipes and your recurring │
+│ menu in a private space.             │
 │                                      │
-│ Correo electrónico                    │
+│ Email address                        │
 │ [_______________________________]    │
-│ Contraseña                            │
+│ Password                             │
 │ [_______________________________]    │
-│ Al menos 12 caracteres.               │
+│ At least 12 characters.              │
 │                                      │
-│ [            Acceder             ]   │
-│ ¿Aún no tienes cuenta? Crear cuenta   │
+│ [            Sign in            ]    │
+│ Don’t have an account? Create one    │
 └──────────────────────────────────────┘
 ```
 
-El registro solicita nombre, correo, contraseña y repetición de contraseña. Ambos formularios validan en servidor; solo se persiste un hash Argon2id. Si faltan las variables de Neon o Auth.js, la pantalla comunica la configuración requerida sin dejar entrar a datos de demostración compartidos.
+The sign-up form requests name, email, password, and password confirmation. Both forms validate on the server; only an Argon2id hash is persisted. If the Neon or Auth.js variables are missing, the screen communicates the required setup without allowing access to shared demo data.
 
-## 4. Biblioteca de recetas
+## 4. Recipe library
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│ BIBLIOTECA                                    [+ Nueva] │
-│ Tus recetas                                            │
-│ Guarda tus básicos y reutilízalos en el menú.          │
+│ LIBRARY                                       [+ New] │
+│ Your recipes                                            │
+│ Save your basics and reuse them in the menu.            │
 │                                                         │
-│ [⌕ Buscar por nombre o descripción________________]    │
-│ [Todas] [Planificadas] [Sin asignar]                   │
-│ 6 recetas                                              │
+│ [⌕ Search by name or description________________]    │
+│ [All] [Planned] [Unassigned]                           │
+│ 6 recipes                                               │
 │                                                         │
 │ ┌───────────┐ ┌───────────┐ ┌───────────┐             │
-│ │ ilustrac. │ │ ilustrac. │ │ ilustrac. │             │
+│ │ artwork   │ │ artwork   │ │ artwork   │             │
 │ │ 5 ingred. │ │ 5 ingred. │ │ 3 ingred. │             │
-│ │ Avena...  │ │ Tostada…  │ │ Yogur…    │             │
-│ │ 5 comidas │ │ 4 comidas │ │ 7 comidas │             │
+│ │ Oatmeal...│ │ Toast…    │ │ Yogurt…   │             │
+│ │ 5 meals   │ │ 4 meals   │ │ 7 meals   │             │
 │ └───────────┘ └───────────┘ └───────────┘             │
 └─────────────────────────────────────────────────────────┘
 ```
 
-Las tarjetas se convierten en una lista de dos columnas visuales en pantallas estrechas. La búsqueda filtra al escribir y el contador anuncia el número de resultados.
+The cards become a two-column visual list on narrow screens. Search filters as the user types and the counter announces the number of results.
 
-## 5. Selector de asignación
+## 5. Assignment selector
 
 ```text
 ┌─────────────────────────────────────┐
-│ ASIGNAR RECETAS                  [×]│
-│ Lunes · Desayuno                    │
-│ Horario habitual: 07:30             │
+│ ASSIGN RECIPES                 [×]    │
+│ Monday · Breakfast                   │
+│ Typical time: 07:30                 │
 │                                     │
-│ [⌕ Busca recetas_________________]  │
+│ [⌕ Search recipes_________________]  │
 │                                     │
-│ [×] Quitar todas las recetas        │
-│ ┌────┐ Avena nocturna...         [✓]│
-│ │ AN │ 5 ingredientes               │
+│ [×] Remove all recipes              │
+│ ┌────┐ Overnight oats...      [✓] │
+│ │ OO │ 5 ingredients               │
 │ └────┘                              │
-│ ┌────┐ Tostada de hummus...      [✓]│
-│ │ TH │ 5 ingredientes               │
+│ ┌────┐ Hummus toast...        [✓] │
+│ │ HT │ 5 ingredients               │
 │ └────┘                              │
-│                  [Guardar 2 recetas]│
+│                  [Save 2 recipes]    │
 └─────────────────────────────────────┘
 ```
 
-Abrir desde una comida no modifica datos. Las filas se pueden marcar o desmarcar y el cambio solo se persiste al guardar. Las recetas asignadas muestran una marca de selección; “Quitar todas las recetas” permite vaciar el hueco explícitamente.
+Opening this from a meal does not change data. Rows can be selected or deselected, and the change is only persisted when saved. Assigned recipes show a selection marker; “Remove all recipes” lets the user clear the slot explicitly.
 
-## 6. Detalle de receta
+## 6. Recipe detail
 
 ```text
 ┌───────────────────────────────┐
-│ Detalle de receta          [×]│
+│ Recipe detail            [×]  │
 ├───────────────────────────────┤
-│       [ imagen / iniciales ]  │
-│ RECETA GUARDADA               │
-│ Salmón al horno con verduras  │
-│ Descripción…                  │
-│ [Editar] [Eliminar]           │
+│       [ image / initials ]    │
+│ RECIPE SAVED                  │
+│ Baked salmon with vegetables   │
+│ Description…                  │
+│ [Edit] [Delete]               │
 │                               │
-│ ♨ Ingredientes             5  │
-│ Lomo de salmón          150 g │
-│ Calabacín            1/2 ud.  │
+│ ♨ Ingredients             5   │
+│ Salmon fillet          150 g  │
+│ Courgette              1/2 pc │
 │ ...                           │
 │                               │
-│ ◷ Elaboración                 │
-│ 1. Calienta el horno…         │
+│ ◷ Preparation                 │
+│ 1. Preheat the oven…          │
 │                               │
-│ ↻ En el menú                4 │
-│ [Lunes · Cena] [Viernes · Cena]│
+│ ↻ In the menu                4 │
+│ [Monday · Dinner] [Friday · Dinner] │
 └───────────────────────────────┘
 ```
 
-Se usa un cajón lateral en escritorio y pantalla completa en móvil. La eliminación pide confirmación nativa y avisa que las asignaciones se limpiarán.
+A side drawer is used on desktop and a full-screen view on mobile. Deletion asks for native confirmation and warns that assignments will be cleaned up.
 
-## 7. Editor de receta
+## 7. Recipe editor
 
 ```text
 ┌────────────────────────────────────────────────────┐
-│ NUEVA RECETA                                     [×]│
-│ Añade una receta                                   │
+│ NEW RECIPE                                      [×]│
+│ Add a recipe                                      │
 │                                                    │
-│ Nombre * [_______________________________________] │
-│ Descripción [__________________________________]   │
-│ Imagen HTTPS (opcional) [______________________]   │
+│ Name * [_______________________________________] │
+│ Description [__________________________________]   │
+│ HTTPS image (optional) [______________________]   │
 │                                                    │
-│ Ingredientes *                                     │
-│ [Ingrediente_______________] [Cantidad____] [-]   │
-│ [+ Añadir ingrediente]                             │
+│ Ingredients *                                      │
+│ [Ingredient_______________] [Quantity____] [-]   │
+│ [+ Add ingredient]                                  │
 │                                                    │
-│ Elaboración *                                      │
-│ [1. Prepara los ingredientes...                ]  │
+│ Preparation *                                      │
+│ [1. Prepare the ingredients...                ]  │
 │                                                    │
-│                              [Cancelar] [Guardar] │
+│                              [Cancel] [Save]     │
 └────────────────────────────────────────────────────┘
 ```
 
-La validación cliente evita envíos incompletos y el servidor vuelve a validar toda la carga. Los mensajes de error se comunican mediante una región de alerta.
+Client-side validation prevents incomplete submissions and the server validates the full payload again. Error messages are communicated through an alert region.
 
-## Tema y accesibilidad
+## Theme and accessibility
 
-- El modo claro usa fondo blanco, una barra lateral `#f9f8f7` y acciones principales azules `#2783de`.
-- Los tokens de color cubren modo claro y oscuro desde una única estructura de componentes.
-- Todos los controles tienen texto o `aria-label`.
-- Los focos son visibles y no dependen solo del color.
-- La animación se reduce si el sistema solicita menos movimiento.
-- Los controles, tarjetas y filas son objetivos táctiles de al menos 38–46 px cuando corresponde.
-- La cabecera muestra iniciales de la cuenta y un control explícito de cierre de sesión; en móvil este último conserva una etiqueta accesible aunque solo muestre el icono.
+- The light theme uses a white background, a sidebar `#f9f8f7`, and primary blue actions `#2783de`.
+- Color tokens cover both light and dark mode from a single component structure.
+- All controls have visible text or `aria-label`.
+- Focus states are visible and do not rely only on color.
+- Motion is reduced if the system requests less movement.
+- Controls, cards, and rows are touch targets of at least 38–46 px when appropriate.
+- The header shows account initials and an explicit sign-out control; on mobile, that control keeps an accessible label even if it only displays the icon.

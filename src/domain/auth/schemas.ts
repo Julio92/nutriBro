@@ -27,6 +27,29 @@ export const localAccountRegistrationSchema = localAccountSignInSchema.extend({
     .max(120, "El nombre no puede superar los 120 caracteres."),
 });
 
+export const localAccountPasswordChangeSchema = z
+  .object({
+    userId: z.string().trim().min(1, "Falta el identificador del usuario."),
+    currentPassword: passwordSchema,
+    newPassword: passwordSchema,
+  })
+  .passthrough();
+
+export const localAccountPasswordRecoverySchema = z
+  .object({
+    email: emailSchema,
+    token: z.string().trim().min(1, "Falta el token de recuperación."),
+    password: passwordSchema,
+  })
+  .passthrough();
+
+export const localAccountEmailVerificationSchema = z
+  .object({
+    email: emailSchema,
+    token: z.string().trim().min(1, "Falta el token de verificación."),
+  })
+  .passthrough();
+
 export function fieldErrorsFromAuthSchema(error: z.ZodError) {
   const fields: Record<string, string[]> = {};
 

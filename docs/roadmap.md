@@ -1,61 +1,58 @@
-# Roadmap de evolución
+# Evolution roadmap
 
-## Versión 1.0 — Menú recurrente (implementada)
+## Version 1.0 — Recurring menu (implemented)
 
-- Menú de 7 días × 5 comidas y vista prioritaria del día actual.
-- Recetas reutilizables con CRUD, ingredientes dinámicos, búsqueda y asignación a huecos.
-- Tema claro/oscuro, responsive, accesibilidad básica y pruebas de dominio.
+- 7-day × 5-meal menu and priority view of the current day.
+- Reusable recipes with CRUD, dynamic ingredients, search, and assignment to slots.
+- Light/dark theme, responsive layout, basic accessibility, and domain tests.
 
-## Versión 1.1 — Datos y cuentas personales (implementada; pendiente de conexión Neon)
+## Version 1.1 — Personal data and accounts (implemented)
 
-- Neon PostgreSQL, esquema Drizzle y migraciones SQL versionadas.
-- Registro e inicio local con email/contraseña, hashes Argon2id y sesiones JWT de Auth.js.
-- Aislamiento de recetas y menú por usuario, con aprovisionamiento automático de 35 huecos.
-- Biblioteca inicial versionada de 21 recetas del plan, copiada y editable de forma privada por cuenta.
-- Importación explícita del JSON heredado y datos demo, sin exposición compartida al registro.
-- Preparación para despliegue Vercel sin dependencia de un disco local.
+- Neon PostgreSQL, Drizzle schema, and versioned SQL migrations.
+- Local sign-up and sign-in with email/password, Argon2id hashes, and Auth.js JWT sessions.
+- Isolation of recipes and menus by user, with automatic provisioning of 35 slots.
+- Versioned starter library of 21 plan recipes, copied and edited privately per account.
+- Explicit import of legacy JSON and demo data without exposing shared data during sign-up.
+- Preparation for Vercel deployment without depending on a local disk.
 
-La verificación final de migraciones, registro y persistencia queda condicionada a configurar una base Neon de desarrollo y las variables locales `DATABASE_URL` y `AUTH_SECRET`.
+Final verification of migrations, sign-up, and persistence remains conditional on configuring a Neon development database and the local `DATABASE_URL` and `AUTH_SECRET` variables.
 
-## Versión 1.2 — Calidad operativa
+## Version 1.2 — Operational quality
 
-- Edición de horarios y nombres de comidas.
-- Reordenación de comidas y personalización de la estructura semanal.
-- Exportación JSON para portabilidad y copia de seguridad verificable.
-- Pantalla de perfil con nombre, imagen, borrado de cuenta y control de sesiones.
-- Cambio y recuperación de contraseña, verificación de email, rate limiting y pruebas E2E.
-- Añadir OAuth o enlaces mágicos solo cuando aporte valor y con una estrategia explícita de vinculación de cuentas.
+- Profile screen with name, image, account deletion, and session control.
+- Password change and recovery, email verification, rate limiting, and E2E tests.
+- Add OAuth or magic links only when they provide value and with an explicit account-linking strategy.
 
-## Versión 2.0 — Espacios y planificación por fechas
+## Version 2.0 — Spaces and date-based planning
 
-- Calendario con semanas ISO y navegación temporal.
-- Plan recurrente base más sobrescrituras fechadas, plantillas y excepciones puntuales.
-- Espacios compartidos, membresías, roles explícitos y auditoría de cambios.
-- Histórico de planes y recetas utilizadas.
+- ISO week calendar and temporal navigation.
+- Base recurring plan plus dated overrides, templates, and one-off exceptions.
+- Shared spaces, memberships, explicit roles, and change auditing.
+- History of plans and used recipes.
 
-## Versión 3.0 — Nutrición y objetivos
+## Version 3.0 — Nutrition and goals
 
-- Catálogo de alimentos con unidades normalizadas.
-- Nutrientes por ingrediente, receta, comida y día.
-- Objetivos personales, preferencias, alergias y avisos de información incompleta.
-- Trazabilidad de fuentes, fechas y redondeos transparentes.
+- Food catalog with normalized units.
+- Nutrients per ingredient, recipe, meal, and day.
+- Personal goals, preferences, allergies, and warnings for incomplete information.
+- Source, date, and rounding traceability.
 
-## Versión 3.1 — Lista de la compra
+## Version 3.1 — Shopping list
 
-- Agregación de ingredientes según los huecos seleccionados.
-- Consolidación de unidades equivalentes con revisión manual.
-- Exclusiones de despensa, categorías y estado de compra.
-- Compartir o imprimir la lista.
+- Ingredient aggregation based on selected slots.
+- Consolidation of equivalent units with manual review.
+- Pantry exclusions, categories, and purchase status.
+- Share or print the list.
 
-## Versión 4.0 — Automatización responsable
+## Version 4.0 — Responsible automation
 
-- Sugerencias opcionales basadas en preferencias explícitas.
-- Explicación de cada sugerencia y control humano antes de aplicarla.
-- Ningún cálculo o recomendación de salud sin datos, fuente y límites claros.
+- Optional suggestions based on explicit preferences.
+- Explanation of each suggestion and human approval before applying it.
+- No health calculation or recommendation without clear data, source, and limits.
 
-## Criterios de prioridad
+## Priority criteria
 
-1. Mantener la autorización por recurso incluso al añadir roles o espacios compartidos.
-2. No introducir nutrición antes de normalizar ingredientes y unidades.
-3. Aplicar migraciones y copias de seguridad antes de activar cambios de esquema en producción.
-4. Mantener siempre la edición manual como camino principal, incluso con automatizaciones.
+1. Maintain resource-level authorization even when adding roles or shared spaces.
+2. Do not introduce nutrition before normalizing ingredients and units.
+3. Apply migrations and backups before enabling schema changes in production.
+4. Keep manual editing as the primary path even with automation.

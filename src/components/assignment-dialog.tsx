@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Search, X } from "lucide-react";
+import { Check, Save, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { getMealLabel, getWeekdayLabel } from "@/domain/nutrition/constants";
@@ -93,9 +93,20 @@ export function AssignmentDialog({
               Elige una o más recetas para esta comida.
             </p>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Cerrar" disabled={isSaving}>
-            <X size={19} aria-hidden="true" />
-          </button>
+          <div className="dialog-header__actions">
+            <button
+              className="icon-button icon-button--primary"
+              type="button"
+              onClick={saveSelection}
+              aria-label="Guardar recetas"
+              disabled={isSaving}
+            >
+              <Save size={18} aria-hidden="true" />
+            </button>
+            <button className="icon-button" type="button" onClick={onClose} aria-label="Cerrar" disabled={isSaving}>
+              <X size={19} aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         <label className="search-field search-field--dialog">

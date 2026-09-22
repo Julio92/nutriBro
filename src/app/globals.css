@@ -414,6 +414,19 @@ textarea:focus-visible {
   color: var(--text);
 }
 
+.icon-button--primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.icon-button--primary:hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+  color: var(--primary-foreground);
+}
+
 .icon-button--small {
   width: 33px;
   height: 33px;
@@ -1642,6 +1655,12 @@ html[data-theme="dark"] .recipe-art--tone-4 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 15px;
+}
+
+.dialog-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dialog-header .eyebrow {

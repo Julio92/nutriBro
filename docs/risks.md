@@ -1,29 +1,29 @@
-# Riesgos técnicos y mitigaciones
+# Technical risks and mitigations
 
-| Riesgo | Impacto | Probabilidad actual | Mitigación actual | Acción antes de escalar |
+| Risk | Impact | Current probability | Current mitigation | Action before escalating |
 | --- | --- | --- | --- | --- |
-| Variables Neon/Auth.js sin configurar | El acceso y los datos no están disponibles | Alta antes de la primera configuración | Pantalla de acceso y APIs fallan de forma explícita sin usar datos compartidos | Configurar secretos por entorno, comprobar conexión y añadir verificaciones de despliegue. |
-| Ataques de fuerza bruta o credential stuffing | Acceso no autorizado a cuentas locales | Media en una app pública | Contraseñas de 12+ caracteres, hash Argon2id y error genérico de inicio de sesión | Rate limiting por IP/cuenta, CAPTCHA adaptativo, MFA y monitorización. |
-| Recuperación de contraseña ausente | Una cuenta puede quedar inaccesible | Media | Alcance explícitamente limitado a desarrollo local | Implementar enlace de un solo uso, expiración, verificación de email y revocación de sesiones. |
-| Secretos expuestos o rotados sin control | Secuestro de sesiones o acceso a base de datos | Baja con buenas prácticas | `.env*` se ignora, no hay secretos públicos y Vercel gestiona variables | Rotación, acceso mínimo, alertas de secretos y revisión de logs. |
-| Límites o cold starts del plan gratuito de Neon | Latencia inicial o indisponibilidad al superar cuota | Media | Conexión HTTP serverless y esquema compacto | Alertas de cuota, exportaciones, plan de pago y prueba de restauración. |
-| Escrituras concurrentes sobre el mismo menú | Una actualización puede sobrescribir una edición reciente | Baja en uso personal; media al crecer | El lote de Neon mantiene cada sincronización atómica y el agregado se limita a un usuario | Añadir revisión/versionado optimista o mutaciones SQL granulares antes de colaboración o alta concurrencia. |
-| Importación JSON destructiva | Pérdida de datos de la cuenta destino | Media durante la migración | Exige `NUTRITION_IMPORT_CONFIRM=replace`, UUID destino y remapea IDs | Copia de seguridad previa, modo de previsualización y registro de importaciones. |
-| Transcripción incompleta del plan fuente | Ingredientes o pasos ambiguos en la biblioteca inicial | Media al actualizar el plan | Las recetas se versionan, se validan con Zod y las porciones sin elaboración no se convierten en recetas | Revisar cada nueva versión con la persona usuaria y registrar las correcciones de origen. |
-| Borrado de receta limpia asignaciones | Una acción afecta múltiples comidas | Media | Confirmación, contador de huecos limpiados y FK `ON DELETE SET NULL` | Historial, papelera y confirmación con detalle de huecos afectados. |
-| Ingredientes como texto libre | No se pueden sumar unidades de forma fiable | Alta | Deliberado: no hay cálculos ni datos nutricionales | Catálogo de alimentos, cantidades decimales y unidades canónicas. |
-| URLs de imagen externas | Privacidad, contenido cambiante o imagen rota | Media | Solo HTTPS, sin carga de archivos ni proxy | Media propia, lista de dominios o proxy seguro con análisis de archivos. |
-| Cobertura solo unitaria | Fallos de registro, sesión, UI o navegador no detectados | Media | Pruebas de dominio, servicio y respuestas HTTP | Añadir Playwright para registro, acceso, aislamiento de cuentas, CRUD y accesibilidad. |
-| Dependencias npm | Vulnerabilidades aguas arriba | Media | Lockfile y auditoría de npm; hay vulnerabilidades moderadas pendientes de revisión | Renovación automática, SCA, evaluación de advisories y parches en CI. |
-| CSP con `unsafe-inline` | Protección de scripts menos estricta | Baja | CSP, origen único y ausencia de HTML no confiable; `unsafe-eval` solo en desarrollo | Usar nonce por solicitud para script y estilos al añadir terceros. |
+| Neon/Auth.js variables not configured | Access and data are unavailable | High before first configuration | Sign-in screen and APIs fail explicitly without using shared demo data | Configure secrets per environment, verify connectivity, and add deployment checks. |
+| Brute-force attacks or credential stuffing | Unauthorized access to local accounts | Medium in a public app | Passwords of 12+ characters, Argon2id hashes, and a generic sign-in error | Rate limiting by IP/account, adaptive CAPTCHA, MFA, and monitoring. |
+| Missing password recovery | An account may become inaccessible | Medium | Scope is explicitly limited to local development | Implement a single-use link, expiration, email verification, and session revocation. |
+| Exposed or unrotated secrets | Session hijacking or database access | Low with good practices | `.env*` is ignored, there are no public secrets, and Vercel manages the variables | Rotation, minimum access, secret alerts, and log review. |
+| Neon free plan limits or cold starts | Initial latency or unavailability after quota exhaustion | Medium | Serverless HTTP connection and a compact schema | Quota alerts, exports, a paid plan, and recovery testing. |
+| Concurrent writes to the same menu | One update may overwrite a recent edit | Low in personal use; medium as usage grows | Neon batching keeps each synchronization atomic and the aggregate is limited to a user | Add optimistic revision/versioning or more granular SQL mutations before collaboration or high concurrency. |
+| Destructive JSON import | Data loss in the target account | Medium during migration | Requires `NUTRITION_IMPORT_CONFIRM=replace`, destination UUID, and ID remapping | Pre-import backup, preview mode, and import logging. |
+| Incomplete transcription of the source plan | Ambiguous ingredients or steps in the starter library | Medium when updating the plan | Recipes are versioned, validated with Zod, and portions without instructions are not converted into recipes | Review each new version with the end user and record source corrections. |
+| Recipe deletion cleaning assignments | One action affects multiple meals | Medium | Confirmation, count of cleaned slots, and `ON DELETE SET NULL` FK | History, trash bin, and confirmation with affected slot details. |
+| Free-text ingredients | Units cannot be reliably summed | High | Deliberate choice: there are no nutritional calculations or data | Food catalog, decimal quantities, and canonical units. |
+| External image URLs | Privacy issues, changing content, or broken images | Medium | Only HTTPS, no uploads or proxying | Self-hosted media, allowlist of domains, or a safe proxy with file analysis. |
+| Unit-only coverage | Sign-up, session, UI, or browser issues go undetected | Medium | Domain, service, and HTTP response tests | Add Playwright coverage for sign-up, sign-in, account isolation, CRUD, and accessibility. |
+| npm dependencies | Upstream vulnerabilities | Medium | Lockfile and npm audit; moderate vulnerabilities remain to be reviewed | Automatic renewal, SCA, advisory review, and CI patches. |
+| CSP with `unsafe-inline` | Script protection is weaker | Low | CSP, single origin, and no untrusted HTML; `unsafe-eval` only in development | Use per-request nonce values for scripts and styles when adding third parties. |
 
-## Operación de base de datos
+## Database operations
 
-- Aplica la migración antes de desplegar una versión que dependa de tablas o columnas nuevas.
-- Conserva el JSON heredado hasta comprobar la importación y hacer una copia de seguridad de Neon.
-- Usa una base y credenciales diferentes para desarrollo, preview y producción.
-- Rota `AUTH_SECRET` de forma planificada: cambiarlo invalida todas las sesiones JWT existentes.
+- Apply the migration before deploying a version that depends on new tables or columns.
+- Keep the legacy JSON until import has been verified and a Neon backup has been taken.
+- Use different databases and credentials for development, preview, and production.
+- Rotate `AUTH_SECRET` on a planned schedule: changing it invalidates all JWT sessions.
 
-## Límites de producto que deben mantenerse explícitos
+## Product boundaries that must remain explicit
 
-La aplicación no debe presentar las recetas como consejo médico ni simular datos nutricionales. Si se añaden metas o cálculos, deben indicar fuente de datos, fechas, incertidumbre y una advertencia para necesidades clínicas.
+The application must not present recipes as medical advice or simulate nutritional data. If goals or calculations are added later, they must show the data source, date range, uncertainty, and a warning for clinical needs.

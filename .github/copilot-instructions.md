@@ -1,19 +1,27 @@
-# Instrucciones del proyecto Nutribro
+# Nutribro project instructions
 
-- [x] Requisitos definidos: MVP web de nutrición semanal, TypeScript, UI responsive, persistencia local y pruebas.
-- [x] Proyecto inicializado con Next.js App Router, TypeScript, Tailwind CSS y ESLint.
-- [x] Aplicación personalizada con un dominio desacoplado, Route Handlers, repositorio JSON, biblioteca de recetas y tablero semanal.
-- [x] No requiere extensiones adicionales de VS Code.
-- [x] Validar los cambios con `npm run check` antes de integrar.
-- [x] Usar `npm run dev` para desarrollo local. No iniciar servidores persistentes durante una tarea salvo que sea necesario para una comprobación puntual.
-- [x] Mantener README y documentación en `docs/` cuando cambie arquitectura, modelo, endpoints o alcance.
+- [x] Defined requirements: weekly nutrition MVP, TypeScript, responsive UI, local persistence, and tests.
+- [x] Project initialized with Next.js App Router, TypeScript, Tailwind CSS, and ESLint.
+- [x] Application customized with a decoupled domain, Route Handlers, JSON repository, recipe library, and weekly dashboard.
+- [x] No additional VS Code extensions are required.
+- [x] Validate changes with `npm run check` before integrating.
+- [x] Use `npm run dev` for local development. Do not start persistent servers during a task unless needed for a focused verification.
+- [x] Keep the README and docs in `docs/` updated when architecture, model, endpoints, or scope change.
+- [x] Use the active task defined in `tasks/backlog.md` as the source of work for agents. Each task must include status, scope, and acceptance criteria.
+- [x] Before editing code, the agent must explain the implementation plan and the validation it will run.
 
-## Convenciones
+## Conventions
 
-- Mantener TypeScript estricto y validar toda entrada HTTP con Zod.
-- No acceder a la persistencia directamente desde componentes ni Route Handlers; usar `NutritionService` y `NutritionRepository`.
-- Respetar la separación: UI en `src/components`, dominio en `src/domain`, aplicación en `src/server/services` e infraestructura en `src/server/infrastructure`.
-- El menú recurrente es la fuente de verdad del MVP. No añadir cálculos nutricionales, IA, autenticación o lista de compra sin actualizar el alcance y la documentación.
-- El archivo activo `data/nutrition-data.json` es local y no debe versionarse. Los datos reproducibles están en `data/demo-nutrition-data.json`.
-- Antes de reemplazar JSON por una base de datos, conservar el contrato `NutritionRepository` y añadir migraciones y pruebas de integración.
-- Preservar accesibilidad: etiquetas, foco visible, contraste y preferencia de reducción de movimiento.
+- Keep TypeScript strict and validate all HTTP input with Zod.
+- Do not access persistence directly from components or Route Handlers; use `NutritionService` and `NutritionRepository`.
+- Respect the separation of concerns: UI in `src/components`, domain in `src/domain`, application logic in `src/server/services`, and infrastructure in `src/server/infrastructure`.
+- The recurring menu is the source of truth for the MVP. Do not add nutritional calculations, AI, authentication, or shopping lists without updating scope and documentation.
+- The active file `data/nutrition-data.json` is local and must not be versioned. Reproducible data is in `data/demo-nutrition-data.json`.
+- Before replacing JSON with a database, preserve the `NutritionRepository` contract and add migrations and integration tests.
+- Preserve accessibility: labels, visible focus, contrast, and reduced-motion preferences.
+- Every development task must be recorded in `tasks/backlog.md` with status `New | In Progress | Blocked | Review | Done` and clear acceptance criteria.
+- If several tasks are open, the agent must work on the one marked as `In Progress` first or on the highest-priority available task.
+- The agent must not begin a new task if the current task is not closed or if the scope is not explicitly defined.
+- If a task requires scope expansion or architecture changes, it must be documented before implementation.
+- The required validation is `npm run check` for integration merges, and UI/feature tasks should include a smoke test or additional documentation check when applicable.
+- If a task requires user validation, ask for explicit confirmation before marking it as Done.
