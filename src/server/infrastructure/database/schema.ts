@@ -144,6 +144,37 @@ export const recipeIngredients = pgTable(
   (table) => [index("recipe_ingredients_recipe_position_idx").on(table.recipeId, table.position)],
 );
 
+export const userRecipeTags = pgTable(
+  "user_recipe_tags",
+  {
+    id: uuid("id").primaryKey(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    value: text("value").notNull(),
+    createdAt: createdAtColumn(),
+  },
+  (table) => [uniqueIndex("user_recipe_tags_owner_value_idx").on(table.ownerId, table.value)],
+);
+
+export const recipeTags = pgTable(
+  "recipe_tags",
+  {
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => userRecipeTags.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.recipeId, table.tagId] }),
+    uniqueIndex("recipe_tags_recipe_position_idx").on(table.recipeId, table.position),
+    index("recipe_tags_tag_id_idx").on(table.tagId),
+  ],
+);
+
 export const weeklyPlans = pgTable(
   "weekly_plans",
   {
@@ -217,6 +248,8 @@ export const databaseSchema = {
   userDefaultRecipeLibraries,
   recipes,
   recipeIngredients,
+  userRecipeTags,
+  recipeTags,
   weeklyPlans,
   mealSlots,
   mealSlotRecipeAssignments,

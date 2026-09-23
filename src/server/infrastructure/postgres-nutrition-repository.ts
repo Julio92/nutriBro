@@ -1,6 +1,8 @@
 import "server-only";
 
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import {
@@ -23,7 +25,9 @@ import {
   mealSlots,
   mealSlotRecipeAssignments,
   recipeIngredients,
+  recipeTags,
   recipes,
+  userRecipeTags,
   users,
   weeklyPlans,
 } from "@/server/infrastructure/database/schema";
@@ -33,6 +37,8 @@ import { NotFoundError } from "@/server/services/errors";
 type DatabaseUser = typeof users.$inferSelect;
 type DatabaseRecipe = typeof recipes.$inferSelect;
 type DatabaseIngredient = typeof recipeIngredients.$inferSelect;
+type DatabaseUserTag = typeof userRecipeTags.$inferSelect;
+type DatabaseRecipeTag = typeof recipeTags.$inferSelect;
 type DatabasePlan = typeof weeklyPlans.$inferSelect;
 type DatabaseSlot = typeof mealSlots.$inferSelect;
 type DatabaseSlotRecipeAssignment = typeof mealSlotRecipeAssignments.$inferSelect;
@@ -59,6 +65,7 @@ function toDomainUser(row: DatabaseUser): User {
 function toDomainRecipe(
   row: DatabaseRecipe,
   ingredientsByRecipeId: Map<string, Ingredient[]>,
+  tagsByRecipeId: Map<string, string[]>,
 ): Recipe {
   return {
     id: row.id,
@@ -67,6 +74,7 @@ function toDomainRecipe(
     description: row.description,
     instructions: row.instructions,
     imageUrl: row.imageUrl,
+    tags: tagsByRecipeId.get(row.id) ?? [],
     ingredients: ingredientsByRecipeId.get(row.id) ?? [],
     createdAt: toIsoString(row.createdAt),
     updatedAt: toIsoString(row.updatedAt),
@@ -197,8 +205,62 @@ export class PostgresNutritionRepository implements NutritionRepository {
     return result;
   }
 
+  private async ensureRecipeTagTables(database: NutritionDatabase): Promise<void> {
+    const rows = await database.execute(sql`
+      SELECT
+        to_regclass('public.user_recipe_tags') AS user_recipe_tags,
+        to_regclass('public.recipe_tags') AS recipe_tags;
+    `);
+
+    const firstRow = Array.isArray(rows) ? rows[0] : null;
+    const hasUserRecipeTags = Boolean((firstRow as { user_recipe_tags?: string } | null)?.user_recipe_tags);
+    const hasRecipeTags = Boolean((firstRow as { recipe_tags?: string } | null)?.recipe_tags);
+
+    if (!hasUserRecipeTags) {
+      await database.execute(sql`
+        CREATE TABLE IF NOT EXISTS "user_recipe_tags" (
+          "id" uuid PRIMARY KEY NOT NULL,
+          "owner_id" uuid NOT NULL,
+          "value" text NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          CONSTRAINT "user_recipe_tags_owner_id_users_id_fk"
+            FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action
+        );
+      `);
+      await database.execute(sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS "user_recipe_tags_owner_value_idx"
+          ON "user_recipe_tags" USING btree ("owner_id","value");
+      `);
+    }
+
+    if (!hasRecipeTags) {
+      await database.execute(sql`
+        CREATE TABLE IF NOT EXISTS "recipe_tags" (
+          "recipe_id" uuid NOT NULL,
+          "tag_id" uuid NOT NULL,
+          "position" integer NOT NULL,
+          PRIMARY KEY ("recipe_id", "tag_id"),
+          CONSTRAINT "recipe_tags_recipe_id_recipes_id_fk"
+            FOREIGN KEY ("recipe_id") REFERENCES "public"."recipes"("id") ON DELETE cascade ON UPDATE no action,
+          CONSTRAINT "recipe_tags_tag_id_user_recipe_tags_id_fk"
+            FOREIGN KEY ("tag_id") REFERENCES "public"."user_recipe_tags"("id") ON DELETE cascade ON UPDATE no action
+        );
+      `);
+      await database.execute(sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS "recipe_tags_recipe_position_idx"
+          ON "recipe_tags" USING btree ("recipe_id","position");
+      `);
+      await database.execute(sql`
+        CREATE INDEX IF NOT EXISTS "recipe_tags_tag_id_idx"
+          ON "recipe_tags" USING btree ("tag_id");
+      `);
+    }
+  }
+
   private async readStore(userId: string): Promise<StoreData> {
     const database = this.databaseFactory();
+    await this.ensureRecipeTagTables(database);
+
     const [[user], [plan], recipeRows] = await Promise.all([
       database.select().from(users).where(eq(users.id, userId)).limit(1),
       database
@@ -217,16 +279,18 @@ export class PostgresNutritionRepository implements NutritionRepository {
       throw new NotFoundError("No se ha encontrado el menú semanal.");
     }
 
-    const [slotRows, ingredientRows, assignmentRows] = await Promise.all([
+    const recipeIds = recipeRows.map((recipe) => recipe.id);
+
+    const [slotRows, ingredientRows, assignmentRows, tagRows, recipeTagRows] = await Promise.all([
       database
         .select()
         .from(mealSlots)
         .where(eq(mealSlots.weeklyPlanId, plan.id)),
-      recipeRows.length > 0
+      recipeIds.length > 0
         ? database
             .select()
             .from(recipeIngredients)
-            .where(inArray(recipeIngredients.recipeId, recipeRows.map((recipe) => recipe.id)))
+            .where(inArray(recipeIngredients.recipeId, recipeIds))
             .orderBy(asc(recipeIngredients.position))
         : Promise.resolve([] as DatabaseIngredient[]),
       database
@@ -234,6 +298,17 @@ export class PostgresNutritionRepository implements NutritionRepository {
         .from(mealSlotRecipeAssignments)
         .where(eq(mealSlotRecipeAssignments.weeklyPlanId, plan.id))
         .orderBy(asc(mealSlotRecipeAssignments.position)),
+      database
+        .select()
+        .from(userRecipeTags)
+        .where(eq(userRecipeTags.ownerId, userId)),
+      recipeIds.length > 0
+        ? database
+            .select()
+            .from(recipeTags)
+            .where(inArray(recipeTags.recipeId, recipeIds))
+            .orderBy(asc(recipeTags.position))
+        : Promise.resolve([] as DatabaseRecipeTag[]),
     ]);
 
     const ingredientsByRecipeId = new Map<string, Ingredient[]>();
@@ -247,6 +322,23 @@ export class PostgresNutritionRepository implements NutritionRepository {
       ingredientsByRecipeId.set(ingredient.recipeId, ingredients);
     }
 
+    const tagValuesById = new Map<string, string>();
+    for (const tag of tagRows as DatabaseUserTag[]) {
+      tagValuesById.set(tag.id, tag.value);
+    }
+
+    const tagsByRecipeId = new Map<string, string[]>();
+    for (const relation of recipeTagRows as DatabaseRecipeTag[]) {
+      const tagValue = tagValuesById.get(relation.tagId);
+      if (!tagValue) {
+        continue;
+      }
+
+      const tags = tagsByRecipeId.get(relation.recipeId) ?? [];
+      tags.push(tagValue);
+      tagsByRecipeId.set(relation.recipeId, tags);
+    }
+
     const recipeIdsBySlotId = new Map<string, string[]>();
     for (const assignment of assignmentRows as DatabaseSlotRecipeAssignment[]) {
       const recipeIds = recipeIdsBySlotId.get(assignment.slotId) ?? [];
@@ -257,7 +349,9 @@ export class PostgresNutritionRepository implements NutritionRepository {
     return validateStoreData({
       schemaVersion: 1,
       users: [toDomainUser(user)],
-      recipes: recipeRows.map((recipe) => toDomainRecipe(recipe, ingredientsByRecipeId)),
+      recipes: recipeRows.map((recipe) =>
+        toDomainRecipe(recipe, ingredientsByRecipeId, tagsByRecipeId),
+      ),
       weeklyPlans: [
         toDomainPlan(
           plan,
@@ -293,6 +387,9 @@ export class PostgresNutritionRepository implements NutritionRepository {
 
     if (deletedRecipeIds.length > 0) {
       statements.push(
+        database.delete(recipeTags).where(inArray(recipeTags.recipeId, deletedRecipeIds)),
+      );
+      statements.push(
         database.delete(recipes).where(
           and(eq(recipes.ownerId, userId), inArray(recipes.id, deletedRecipeIds)),
         ),
@@ -301,6 +398,14 @@ export class PostgresNutritionRepository implements NutritionRepository {
 
     if (draft.recipes.length > 0) {
       statements.push(
+        database.delete(recipeTags).where(
+          inArray(
+            recipeTags.recipeId,
+            draft.recipes.map((recipe) => recipe.id),
+          ),
+        ),
+      );
+      statements.push(
         database.delete(recipeIngredients).where(
           inArray(
             recipeIngredients.recipeId,
@@ -308,6 +413,62 @@ export class PostgresNutritionRepository implements NutritionRepository {
           ),
         ),
       );
+
+      const tagRowsToInsert: Array<{
+        id: string;
+        ownerId: string;
+        value: string;
+        createdAt: Date;
+      }> = [];
+      const recipeTagRows: Array<{ recipeId: string; tagId: string; position: number }> = [];
+      const tagValuesByKey = new Map(
+        (await database.select().from(userRecipeTags).where(eq(userRecipeTags.ownerId, userId))).map((tag) => [
+          tag.value.toLocaleLowerCase("en-US"), tag,
+        ]),
+      );
+
+      for (const recipe of draft.recipes) {
+        const seenTagValues = new Set<string>();
+
+        for (const [position, tagValue] of recipe.tags.entries()) {
+          const normalizedTag = tagValue.trim();
+          if (!normalizedTag) {
+            continue;
+          }
+
+          const key = normalizedTag.toLocaleLowerCase("en-US");
+          if (seenTagValues.has(key)) {
+            continue;
+          }
+          seenTagValues.add(key);
+
+          let persistedTag = tagValuesByKey.get(key) as DatabaseUserTag | undefined;
+          if (!persistedTag) {
+            persistedTag = {
+              id: randomUUID(),
+              ownerId: userId,
+              value: normalizedTag,
+              createdAt: new Date(),
+            };
+            tagValuesByKey.set(key, persistedTag);
+            tagRowsToInsert.push(persistedTag);
+          }
+
+          recipeTagRows.push({
+            recipeId: recipe.id,
+            tagId: persistedTag.id,
+            position,
+          });
+        }
+      }
+
+      if (tagRowsToInsert.length > 0) {
+        statements.push(
+          database.insert(userRecipeTags).values(tagRowsToInsert).onConflictDoNothing({
+            target: [userRecipeTags.ownerId, userRecipeTags.value],
+          }),
+        );
+      }
 
       for (const recipe of draft.recipes) {
         statements.push(
@@ -353,6 +514,10 @@ export class PostgresNutritionRepository implements NutritionRepository {
             })),
           ),
         );
+      }
+
+      if (recipeTagRows.length > 0) {
+        statements.push(database.insert(recipeTags).values(recipeTagRows));
       }
     }
 

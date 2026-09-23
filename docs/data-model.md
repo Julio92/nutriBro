@@ -11,8 +11,11 @@ erDiagram
   USERS ||--|| USER_CREDENTIALS : has
   USERS ||--|| USER_DEFAULT_RECIPE_LIBRARIES : receives
   USERS ||--o{ RECIPES : owns
+  USERS ||--o{ USER_RECIPE_TAGS : defines
   USERS ||--|| WEEKLY_PLANS : owns
   RECIPES ||--|{ RECIPE_INGREDIENTS : contains
+  RECIPES ||--o{ RECIPE_TAGS : labeled_with
+  RECIPE_TAGS }o--|| USER_RECIPE_TAGS : references
   WEEKLY_PLANS ||--|{ MEAL_SLOTS : contains
   MEAL_SLOTS ||--o{ MEAL_SLOT_RECIPE_ASSIGNMENTS : groups
   RECIPES ||--o{ MEAL_SLOT_RECIPE_ASSIGNMENTS : assigned_in
@@ -55,6 +58,17 @@ erDiagram
     text image_url
     timestamp created_at
     timestamp updated_at
+  }
+  USER_RECIPE_TAGS {
+    uuid id PK
+    uuid owner_id FK
+    text value
+    timestamp created_at
+  }
+  RECIPE_TAGS {
+    uuid recipe_id PK, FK
+    uuid tag_id PK, FK
+    integer position
   }
   RECIPE_INGREDIENTS {
     uuid id PK
@@ -118,6 +132,23 @@ Hashes, passwords, and tokens are not included in DTOs, client components, or pr
 | `created_at`, `updated_at` | Audit and ordering. |
 
 The `(owner_id, updated_at)` index resolves the recipe library for an account.
+
+### `user_recipe_tags` and `recipe_tags`
+
+| Field | Rule |
+| --- | --- |
+| `id` | Tag UUID created once per unique user value. |
+| `owner_id` | FK to `users.id`; a tag namespace is user-specific. |
+| `value` | User-managed tag text, trimmed and deduplicated case-insensitively. |
+| `created_at` | Audit field. |
+
+Each tag value is stored exactly once per user and then reused across recipes by the `recipe_tags` join table. This keeps tags searchable and editable without creating a global default taxonomy.
+
+| Field | Rule |
+| --- | --- |
+| `recipe_id` | FK to `recipes`; recipe deletion cascades the assignments. |
+| `tag_id` | FK to `user_recipe_tags`. |
+| `position` | Stable ordering of tags inside a recipe. |
 
 ### `recipe_ingredients`
 

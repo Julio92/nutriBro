@@ -113,6 +113,16 @@ export function RecipeLibrary({
                 </span>
                 <strong>{recipe.name}</strong>
                 <span className="recipe-card__description">{recipe.description || "Sin descripción"}</span>
+                {recipe.tags.length > 0 ? (
+                  <span className="recipe-card__tags" aria-label={`Etiquetas de ${recipe.name}`}>
+                    {recipe.tags.slice(0, 3).map((tag) => (
+                      <span className="recipe-card__tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                    {recipe.tags.length > 3 ? <span className="recipe-card__tag">+{recipe.tags.length - 3}</span> : null}
+                  </span>
+                ) : null}
                 <span className="recipe-card__footer">Actualizada {formatUpdateDate(recipe.updatedAt)}</span>
               </span>
             </button>

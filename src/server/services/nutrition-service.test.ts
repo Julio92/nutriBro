@@ -33,6 +33,7 @@ const input: RecipeInput = {
   description: "Una receta de prueba.",
   instructions: "Sofríe las verduras. Añade el arroz y cocina.",
   imageUrl: "",
+  tags: ["Almuerzo", "Vegetariano"],
   ingredients: [
     { name: "Arroz", quantity: "80 g" },
     { name: "Verduras", quantity: "200 g" },
@@ -49,8 +50,10 @@ describe("NutritionService", () => {
     const secondRecipe = await service.createRecipe(DEFAULT_OWNER_ID, {
       ...input,
       name: "Ensalada de acompañamiento",
+      tags: ["Cena"],
     });
     expect(recipe.ingredients).toHaveLength(2);
+    expect(recipe.tags).toEqual(["Almuerzo", "Vegetariano"]);
 
     const assignedDashboard = await service.setSlotRecipes(
       DEFAULT_OWNER_ID,

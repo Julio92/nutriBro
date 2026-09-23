@@ -28,9 +28,26 @@ This slice does not include broad cleanup, CI, readiness endpoints, E2E tests, o
 
 1. Create the Neon production project in a region appropriate for the expected users.
 2. Copy its standard TLS connection URL with `sslmode=require` to a temporary environment for the migration process. Do not modify or publish the local environment file for this purpose.
-3. Run `npm run db:migrate` before the first production traffic and confirm that the full history in [drizzle](../drizzle) is applied.
-4. Do not run `npm run db:seed`, `npm run db:import-json`, or `npm run db:seed-default-recipes` against the empty production database. Those commands are reserved for explicit imports into an existing account.
-5. Repeat the pattern with another Neon project or branch for Preview before enabling pull requests.
+3. Run the migration sequence against the remote Neon database before the first production traffic and confirm that the full history in [drizzle](../drizzle) is applied:
+   - `npx drizzle-kit generate`
+   - `npx drizzle-kit migrate`
+   - `npm run db:migrate`
+4. Validate the remote schema immediately after migration by querying `information_schema.tables` or a SQL client to confirm the new tables exist before starting the app.
+5. Do not run `npm run db:seed`, `npm run db:import-json`, or `npm run db:seed-default-recipes` against the empty production database. Those commands are reserved for explicit imports into an existing account.
+6. Repeat the pattern with another Neon project or branch for Preview before enabling pull requests.
+
+### Lesson learned: verify the remote schema, not just the local repo
+
+The app can build and even run locally while the remote Neon database remains behind the latest migration. In this project, the missing `recipe_tags` and `user_recipe_tags` tables caused a runtime 500 on the dashboard because the repository queried those tables during page hydration.
+
+The correct workflow is therefore:
+
+- update the schema in [src/server/infrastructure/database/schema.ts](../src/server/infrastructure/database/schema.ts)
+- generate a Drizzle migration in [drizzle](../drizzle)
+- apply it with `npx drizzle-kit migrate` or `npm run db:migrate`
+- confirm the target Neon database contains the expected tables before restarting the app
+
+Never assume that a local migration file or a local `npm run check` result means the remote database is already updated. When the database is stale, the app's code and the remote schema can diverge even though the repository itself looks correct.
 
 ## Configure Vercel
 

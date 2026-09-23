@@ -19,6 +19,19 @@ describe("recipe input validation", () => {
     expect(recipe.ingredients).toHaveLength(1);
   });
 
+  it("accepts recipe tags and normalizes them to unique values", () => {
+    const recipe = parseRecipeInput({
+      name: "Sopa de verduras",
+      description: "",
+      instructions: "Cocer todos los ingredientes y triturar.",
+      imageUrl: "",
+      tags: ["Desayuno", " desayuno ", "Cena", "Cena"],
+      ingredients: [{ name: "Calabacín", quantity: "1 unidad" }],
+    });
+
+    expect(recipe.tags).toEqual(["Desayuno", "Cena"]);
+  });
+
   it("rejects image URLs that are not HTTPS", () => {
     expect(() =>
       parseRecipeInput({
@@ -68,6 +81,7 @@ describe("stored nutrition data", () => {
           quantity: "1 unidad",
         },
       ],
+      tags: [],
       createdAt: data.users[0].createdAt,
       updatedAt: data.users[0].createdAt,
     });

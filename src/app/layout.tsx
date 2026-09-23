@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -15,7 +16,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body className="min-h-full">
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script
+          id="nutribro-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

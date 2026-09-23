@@ -125,6 +125,20 @@ The script remaps recipe and ingredient UUIDs before inserting them, so it canno
 
 The migration `0004_gigantic_joystick` creates per-slot assignments, copies each existing `meal_slots.recipe_id` as a position-zero assignment, and removes the legacy column after preserving its data.
 
+### Remote migration discipline
+
+A migration is only valid once it has been applied to the actual database behind the app. The project includes a history under [drizzle](../drizzle), but that folder alone does not change the remote Neon schema. When a new table such as `user_recipe_tags` or `recipe_tags` is introduced, the code will fail at runtime until the target database is migrated.
+
+The safe sequence is:
+
+1. Update the schema in [src/server/infrastructure/database/schema.ts](../src/server/infrastructure/database/schema.ts)
+2. Run `npx drizzle-kit generate`
+3. Run `npx drizzle-kit migrate` against the active `DATABASE_URL`
+4. Run `npm run db:migrate` as the project-level wrapper
+5. Validate with a SQL query or schema inspection before restarting the application
+
+This protects production and preview environments from stale schema drift, and it keeps local development aligned with the live database state when a migration is required.
+
 ## Planned extension
 
 ### Roles and account management

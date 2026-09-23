@@ -34,6 +34,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Pan integral de trigo", quantity: "70 g" },
       { name: "Tomate crudo", quantity: "55 g (3 rodajas)" },
     ],
+    tags: [],
   },
   {
     key: "arroz-con-verduras",
@@ -60,6 +61,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Zanahoria", quantity: "20 g (5 rodajas)" },
       { name: "Azafrán", quantity: "Cantidad no indicada" },
     ],
+    tags: [],
   },
   {
     key: "pollo-al-curry-con-zanahorias",
@@ -78,6 +80,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Zanahoria", quantity: "100 g (1 unidad grande)" },
       { name: "Aceite de oliva", quantity: "8 g (1 cucharada de postre)" },
     ],
+    tags: [],
   },
   {
     key: "ensalada-de-maiz-guisantes-y-zanahoria",
@@ -95,6 +98,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Zanahoria", quantity: "120 g" },
       { name: "Aceite de oliva", quantity: "10 g (1 cucharada sopera)" },
     ],
+    tags: [],
   },
   {
     key: "pasta-de-lentejas-con-mozzarella",
@@ -115,6 +119,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Aceite de oliva", quantity: "8 g (1 cucharada de postre)" },
       { name: "Mozzarella fresca light", quantity: "60 g (1/2 bola)" },
     ],
+    tags: [],
   },
   {
     key: "chips-de-patata-al-horno",
@@ -132,6 +137,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Aceite de oliva", quantity: "5 g (1 cucharada de postre)" },
       { name: "Pimienta negra", quantity: "1 g (al gusto)" },
     ],
+    tags: [],
   },
   {
     key: "salmon-al-horno-con-tomillo-y-cherry",
@@ -152,6 +158,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Salmón", quantity: "120 g" },
       { name: "Tomillo", quantity: "2 g (al gusto)" },
     ],
+    tags: [],
   },
   {
     key: "quinoa-con-setas",
@@ -168,6 +175,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Champiñón o seta", quantity: "50 g" },
       { name: "Aceite de oliva", quantity: "5 g (1 cucharada de postre)" },
     ],
+    tags: [],
   },
   {
     key: "salteado-de-pavo-con-verduras-al-limon",
@@ -190,6 +198,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Miel", quantity: "25 g (1 cucharada sopera)" },
       { name: "Zumo de limón", quantity: "100 g (1 vaso pequeño)" },
     ],
+    tags: [],
   },
   {
     key: "tortilla-francesa-con-pavo",
@@ -209,6 +218,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Huevo de gallina", quantity: "60 g (1 unidad talla M)" },
       { name: "Aceite de oliva", quantity: "8 g (1 cucharada de postre)" },
     ],
+    tags: [],
   },
   {
     key: "ensalada-de-lentejas-mixta-con-maiz",
@@ -230,6 +240,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Maíz dulce enlatado", quantity: "30 g (3 cucharadas soperas)" },
       { name: "Lentejas cocidas", quantity: "120 g" },
     ],
+    tags: [],
   },
   {
     key: "lomo-adobado-con-champinones",
@@ -246,6 +257,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Champiñón o seta", quantity: "175 g (7 unidades medianas)" },
       { name: "Lomo adobado", quantity: "240 g (5 filetes)" },
     ],
+    tags: [],
   },
   {
     key: "merluza-al-horno-con-espinacas",
@@ -265,6 +277,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Aceite de oliva", quantity: "5 g (1 cucharada de postre)" },
       { name: "Leche evaporada", quantity: "75 g" },
     ],
+    tags: [],
   },
   {
     key: "pasta-integral-de-espelta-con-tomate-y-albahaca",
@@ -284,6 +297,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Albahaca", quantity: "5 g (al gusto)" },
       { name: "Pasta integral de espelta", quantity: "80 g (2 vasos pequeños de 100 ml)" },
     ],
+    tags: [],
   },
   {
     key: "bocadillo-de-hummus-y-rucula",
@@ -299,6 +313,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Hummus", quantity: "15 g (1 cucharada sopera)" },
       { name: "Rúcula", quantity: "10 g" },
     ],
+    tags: [],
   },
   {
     key: "chips-de-boniato-al-horno",
@@ -316,6 +331,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Aceite de oliva", quantity: "3 g (1 cucharada de café)" },
       { name: "Pimienta negra", quantity: "1 g (al gusto)" },
     ],
+    tags: [],
   },
   {
     key: "pechuga-de-pavo-con-esparragos",
@@ -332,6 +348,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Espárrago", quantity: "150 g (10 espárragos)" },
       { name: "Pavo, pechuga fresca", quantity: "275 g" },
     ],
+    tags: [],
   },
   {
     key: "pizza-fit-de-atun-cebolla-y-pimiento",
@@ -351,6 +368,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Cebolla o cebolleta", quantity: "30 g (1 trozo pequeño)" },
       { name: "Pimiento rojo", quantity: "50 g" },
     ],
+    tags: [],
   },
   {
     key: "ensalada-de-tomate-con-ajo",
@@ -367,6 +385,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Ajo", quantity: "5 g (1 diente)" },
       { name: "Aceite de oliva", quantity: "5 g (1 cucharada de postre)" },
     ],
+    tags: [],
   },
   {
     key: "paella-valenciana",
@@ -393,6 +412,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Pimentón", quantity: "2 g (al gusto)" },
       { name: "Azafrán", quantity: "Cantidad no indicada" },
     ],
+    tags: [],
   },
   {
     key: "hamburguesa-de-pollo-con-lechuga-y-tomate",
@@ -410,6 +430,7 @@ export const DEFAULT_RECIPE_TEMPLATES: ReadonlyArray<DefaultRecipeTemplate> = [
       { name: "Hamburguesa de pollo", quantity: "130 g (1 unidad)" },
       { name: "Tomate crudo", quantity: "45 g (3 rodajas)" },
     ],
+    tags: [],
   },
 ];
 
@@ -435,6 +456,7 @@ export function createDefaultRecipeLibrary(
         name: ingredient.name,
         quantity: ingredient.quantity,
       })),
+      tags: [...(template.tags ?? [])],
       createdAt: timestamp,
       updatedAt: timestamp,
     },

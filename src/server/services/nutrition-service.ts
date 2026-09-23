@@ -32,6 +32,7 @@ function toRecipeSummary(recipe: Recipe): RecipeSummary {
     name: recipe.name,
     description: recipe.description,
     imageUrl: recipe.imageUrl,
+    tags: recipe.tags,
     ingredientCount: recipe.ingredients.length,
   };
 }
@@ -249,6 +250,7 @@ export class NutritionService {
         description: input.description,
         instructions: input.instructions,
         imageUrl: input.imageUrl || null,
+        tags: input.tags ?? [],
         ingredients: input.ingredients.map((ingredient) => ({
           id: randomUUID(),
           name: ingredient.name,
@@ -278,6 +280,7 @@ export class NutritionService {
       recipe.description = input.description;
       recipe.instructions = input.instructions;
       recipe.imageUrl = input.imageUrl || null;
+      recipe.tags = input.tags ?? [];
       recipe.ingredients = input.ingredients.map((ingredient) => ({
         id: randomUUID(),
         name: ingredient.name,

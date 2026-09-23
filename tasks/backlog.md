@@ -334,3 +334,53 @@ Verification:
 Notes:
 - If the dropdown is controlled by a parent menu or click-outside logic, adjust the event handling so action clicks do not trigger the close behavior.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-011
+Status: Done
+Priority: Medium
+Title: Add persistent per-recipe tags with user-managed values
+Human verification required: Yes
+Description:
+Allow each recipe to carry 0..n user-defined tags so users can organize recipes by meal type, ingredients, or personal categories. Tags must be persisted with the recipe record and remain editable from the recipe UI.
+
+Scope:
+- Add recipe tag storage to the persisted recipe schema and repository contract
+- Update database migrations or schema definitions so each recipe keeps its tag list
+- Expose tag values in the recipe UI between the description and the action buttons
+- Support adding and removing tags directly from the recipe card or detail view without reloading the page
+- Keep the default state empty, with tags created by each user individually
+- Add a database table for relating a user and the tags he has created
+
+Do not touch:
+- Unrelated nutrition calculations or dashboard logic
+- Recipe creation flows outside the tag field behavior
+- Programmatic classification features beyond per-recipe tag management
+- Scope beyond the persisted tag model and visible tag UI
+
+Dependencies:
+- Current recipe and database persistence model
+- Existing recipe UI view and edit actions
+
+Acceptance criteria:
+- Each recipe can store zero or more tags in the database and preserve them after reload
+- The recipe list or detail displays tags between the description and Edit/Delete actions
+- The user can add a new tag value and remove an existing one from a recipe
+- No default tag set is created automatically for recipes or users
+- The change remains limited to the recipe tag persistence and presentation workflow
+
+Verification:
+- Review the related database schema and repository changes
+- Run npm run check
+- Smoke-test the recipe UI in the browser to confirm tags can be added and removed
+- Human verification of the tag UX and persistence
+
+Result:
+- Implemented persisted recipe tags and UI tag controls across the domain, repository, schema, and recipe panels.
+- Added the missing tag tables and migration entry so the app no longer fails on dashboard hydration.
+- Verified with the required project command: `npm run check` passed successfully.
+- Confirmed the app serves correctly on localhost after restarting the dev server, returning a redirect to /sign-in instead of the previous 500.
+
+Notes:
+- A tag is user-managed and can represent personal categories such as Breakfast, Lunch, Dinner, Fish, Meat, or Vegetarian.
+- If the schema or UI needs a blocker discussion, document it before implementation.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.

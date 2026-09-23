@@ -1564,6 +1564,61 @@ html[data-theme="dark"] .recipe-art--tone-4 {
   font-size: 13px;
 }
 
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tag-list--detail {
+  margin-top: 16px;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--primary-muted);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tag-pill__remove {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.recipe-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recipe-card__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 700;
+}
+
 .drawer__actions {
   display: flex;
   gap: 9px;
@@ -1910,6 +1965,30 @@ html[data-theme="dark"] .recipe-art--tone-4 {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+.tag-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.tag-editor__label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tag-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-input-row > input {
+  flex: 1;
+}
+
+.tag-input-row .button {
+  flex-shrink: 0;
 }
 
 .form-field input,

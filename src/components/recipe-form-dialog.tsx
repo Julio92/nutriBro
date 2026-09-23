@@ -28,6 +28,7 @@ function recipeToDraft(recipe: RecipeDetail | null) {
     description: recipe?.description ?? "",
     instructions: recipe?.instructions ?? "",
     imageUrl: recipe?.imageUrl ?? "",
+    tags: recipe?.tags ?? [],
     ingredients:
       recipe?.ingredients.map((ingredient) => ({
         key: ingredient.id,
@@ -39,6 +40,7 @@ function recipeToDraft(recipe: RecipeDetail | null) {
 
 export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogProps) {
   const [draft, setDraft] = useState(() => recipeToDraft(recipe));
+  const [tagInput, setTagInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -60,6 +62,35 @@ export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogPr
         ...currentDraft.ingredients,
         createBlankIngredient(`ingredient-${Date.now()}-${currentDraft.ingredients.length}`),
       ],
+    }));
+  }
+
+  function addTag() {
+    const normalizedTag = tagInput.trim();
+    if (!normalizedTag) {
+      return;
+    }
+
+    setDraft((currentDraft) => {
+      const existingValues = currentDraft.tags ?? [];
+      const key = normalizedTag.toLocaleLowerCase("en-US");
+
+      if (existingValues.some((value) => value.toLocaleLowerCase("en-US") === key)) {
+        return currentDraft;
+      }
+
+      return {
+        ...currentDraft,
+        tags: [...existingValues, normalizedTag],
+      };
+    });
+    setTagInput("");
+  }
+
+  function removeTag(tagToRemove: string) {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      tags: (currentDraft.tags ?? []).filter((tag) => tag !== tagToRemove),
     }));
   }
 
@@ -85,6 +116,7 @@ export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogPr
       description: draft.description.trim(),
       instructions: draft.instructions.trim(),
       imageUrl: draft.imageUrl.trim(),
+      tags: draft.tags.map((tag) => tag.trim()).filter(Boolean),
       ingredients: draft.ingredients.map((ingredient) => ({
         name: ingredient.name.trim(),
         quantity: ingredient.quantity.trim(),
@@ -163,6 +195,39 @@ export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogPr
               disabled={isSaving}
             />
           </label>
+
+          <div className="tag-editor form-field form-field--wide">
+            <label className="tag-editor__label" htmlFor="recipe-tag-input">
+              Etiquetas
+            </label>
+            <div className="tag-input-row">
+              <input
+                id="recipe-tag-input"
+                value={tagInput}
+                onChange={(event) => setTagInput(event.target.value)}
+                placeholder="Ej. Desayuno"
+                maxLength={32}
+                disabled={isSaving}
+              />
+              <button type="button" className="button button--secondary" onClick={addTag} disabled={isSaving || !tagInput.trim()}>
+                Añadir
+              </button>
+            </div>
+            {draft.tags.length > 0 ? (
+              <div className="tag-list" aria-label="Etiquetas de la receta">
+                {draft.tags.map((tag) => (
+                  <span className="tag-pill" key={tag}>
+                    <span>{tag}</span>
+                    <button type="button" className="tag-pill__remove" onClick={() => removeTag(tag)} aria-label={`Quitar etiqueta ${tag}`}>
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="muted-copy">Añade categorías para organizar la receta.</p>
+            )}
+          </div>
 
           <label className="form-field form-field--wide">
             <span className="form-field__label-with-icon"><ImageIcon size={15} aria-hidden="true" /> Imagen (URL HTTPS, opcional)</span>

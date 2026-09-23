@@ -63,6 +63,16 @@ export function RecipeDetailDrawer({
               {recipe.description ? <p>{recipe.description}</p> : null}
             </div>
 
+            {recipe.tags.length > 0 ? (
+              <div className="tag-list tag-list--detail" aria-label="Etiquetas de la receta">
+                {recipe.tags.map((tag) => (
+                  <span className="tag-pill" key={tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
             <div className="drawer__actions">
               <button className="button button--secondary" type="button" onClick={() => onEdit(recipe)}>
                 <Pencil size={16} aria-hidden="true" /> Editar

@@ -23,6 +23,28 @@ const ingredientInputSchema = z
   })
   .strict();
 
+const recipeTagValueSchema = z.string().trim().min(1).max(32);
+
+export const recipeTagsSchema = z
+  .array(recipeTagValueSchema)
+  .max(12)
+  .transform((values) => {
+    const normalized: string[] = [];
+    const seen = new Set<string>();
+
+    for (const value of values) {
+      const key = value.toLocaleLowerCase("en-US");
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      normalized.push(value);
+    }
+
+    return normalized;
+  });
+
 function isHttpsImageUrlOrEmpty(value: string) {
   if (value.length === 0) {
     return true;
@@ -47,6 +69,7 @@ export const recipeInputSchema = z
       .refine(isHttpsImageUrlOrEmpty, {
         message: "La imagen debe usar una URL HTTPS válida.",
       }),
+    tags: recipeTagsSchema.default([]),
     ingredients: z.array(ingredientInputSchema).min(1).max(50),
   })
   .strict();
@@ -69,6 +92,7 @@ const storedRecipeSchema = z
     description: z.string().max(600),
     instructions: z.string().min(1).max(8_000),
     imageUrl: z.string().url().nullable(),
+    tags: recipeTagsSchema.default([]),
     ingredients: z.array(storedIngredientSchema).min(1).max(50),
     createdAt: z.string().min(1),
     updatedAt: z.string().min(1),

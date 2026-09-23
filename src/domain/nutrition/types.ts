@@ -41,6 +41,7 @@ export interface RecipeInput {
   description: string;
   instructions: string;
   imageUrl: string;
+  tags?: string[];
   ingredients: IngredientInput[];
 }
 
@@ -51,6 +52,7 @@ export interface Recipe {
   description: string;
   instructions: string;
   imageUrl: string | null;
+  tags: string[];
   ingredients: Ingredient[];
   createdAt: string;
   updatedAt: string;
@@ -88,6 +90,7 @@ export interface RecipeSummary {
   name: string;
   description: string;
   imageUrl: string | null;
+  tags: string[];
   ingredientCount: number;
 }
 
