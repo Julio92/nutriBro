@@ -12,6 +12,7 @@ This agent is the repository’s implementation worker for Nutribro. It reads th
 Use this agent when the work is clearly defined as a backlog item or a task-specific defect. It is the default choice for implementing planned work, fixing a task described in the backlog, and keeping the repository aligned with the task workflow.
 
 # Operating rules
+- Always read [copilot-instructions.md](../copilot-instructions.md) before starting any development. 
 - Start from the active task recorded in tasks/backlog.md.
 - If several tasks are open, prioritize tasks with status In Progress first; otherwise work from the highest-priority available task.
 - Read and follow the task’s Scope, Do not touch, Dependencies, Acceptance criteria, and Verification sections.

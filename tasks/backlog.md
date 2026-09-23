@@ -203,3 +203,88 @@ Result:
 Notes:
 - Any blocker involving email delivery, token expiry, or account state transitions must be documented before proceeding.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-008
+Status: Done
+Priority: Medium
+Title: Remove the top "Nueva receta" button on mobile/small screens
+Description:
+On mobile devices and other small screens, the top-side "+" button for creating a new recipe duplicates the floating action button already present at the bottom of the app. This creates unnecessary visual duplication on smaller layouts. The top button should only remain visible on larger screens, where the bottom action is not present and the top placement is still appropriate.
+
+Scope:
+- Update the responsive UI so the top "Nueva receta" button is hidden on mobile/small screens
+- Keep the top button visible on larger screens
+- Preserve the existing bottom action button behavior on mobile devices
+- Validate the change only affects the small-screen layout condition
+
+Do not touch:
+- The recipe creation workflow or recipe logic
+- Larger-screen layout behavior
+- Unrelated styling or navigation changes outside the mobile responsive condition
+- The bottom action button functionality on mobile
+
+Dependencies:
+- Existing responsive layout and mobile viewport handling
+- Current recipe creation action placement in the app shell and recipe library UI
+
+Acceptance criteria:
+- On mobile/small screens, no top-side "+" button appears next to the light/dark mode toggle
+- On larger screens, the top "Nueva receta" button remains visible
+- The bottom mobile action button still functions as expected
+- The change is limited to the small-screen responsive behavior
+
+Verification:
+- Review the app in a local browser at a mobile/small viewport and at a desktop viewport
+- Confirm the duplicate top button is removed only on mobile
+- Confirm the top button still appears on larger screens
+- npm run check
+- Human confirmation after checking the locally deployed app before marking this task as Done
+
+Result:
+- Hidden the top create button only within the mobile breakpoint in the app shell styling.
+- Kept the desktop layout unchanged and preserved the bottom mobile floating action button behavior.
+- Verified with the project check command: `npm run check` passed successfully.
+
+Notes:
+- The mobile behavior was confirmed in the implemented responsive condition and validated through the repository checks.
+- If the responsive breakpoint or layout behavior is unclear, document the blocker before proceeding.
+
+ID: T-009
+Status: New
+Priority: Medium
+Title: Move theme and sign-out actions behind the user avatar menu
+Description:
+The theme toggle and sign-out controls are currently visible as standalone buttons. They should be moved into a user avatar dropdown so the UI is cleaner, the actions are only exposed on demand, and the menu remains usable on mobile. The avatar itself should remain visible on small screens, which requires the current mobile layout to be adjusted.
+
+Scope:
+- Hide the standalone light/dark mode button and session sign-out button from the main UI
+- Add a compact user avatar trigger that reveals a dropdown menu with those actions
+- Ensure the avatar is visible on mobile devices and the dropdown remains accessible from small screens
+- Preserve the existing functionality of the theme toggle and sign-out behavior
+
+Do not touch:
+- Authentication logic or session invalidation flow beyond the UI-triggered sign-out action
+- Theme implementation details unrelated to the visibility and placement in the UI
+- Unrelated layout or component changes outside the account avatar menu
+
+Dependencies:
+- Existing auth UI and theme toggle implementation
+- Current responsive layout behavior for the app shell/header
+
+Acceptance criteria:
+- The light/dark mode button is no longer visible in the main header unless the user opens the avatar menu
+- The sign-out button is no longer visible in the main header unless the user opens the avatar menu
+- The avatar trigger is visible on mobile and opens a dropdown menu containing the actions
+- The dropdown keeps the same theme toggle and sign-out behavior as before
+- The responsive layout remains usable on small screens
+
+Verification:
+- Review the relevant header and avatar UI in a browser at desktop and mobile widths
+- Confirm the actions are hidden until the avatar is clicked
+- Confirm the avatar remains visible on mobile
+- npm run check
+- Human verification
+
+Notes:
+- If the mobile header layout or dropdown constraints prevent a clean implementation, document the blocker before editing.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.

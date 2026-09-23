@@ -2047,15 +2047,8 @@ html[data-theme="dark"] .recipe-art--tone-4 {
     display: none;
   }
 
-  .new-recipe-top-action span {
-    display: none;
-  }
-
   .new-recipe-top-action {
-    width: 38px;
-    min-height: 38px;
-    padding: 0;
-    border-radius: 10px;
+    display: none;
   }
 
   .mobile-nav {
