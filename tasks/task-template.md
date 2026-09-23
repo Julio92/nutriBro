@@ -2,6 +2,7 @@ ID: T-XXX
 Status: New
 Priority: High | Medium | Low
 Title: [short title]
+Human verification required: Yes | No
 Description:
 [what needs to be achieved]
 

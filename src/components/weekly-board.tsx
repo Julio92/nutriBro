@@ -19,7 +19,6 @@ export function WeeklyBoard({ plan, onSelectSlot }: WeeklyBoardProps) {
           <h2 id="weekly-plan-heading">{plan.name}</h2>
           <p>Tu estructura se repite cada semana.</p>
         </div>
-        <span className="week-badge">7 días · 5 comidas</span>
       </div>
 
       <div className="week-scroll" role="region" aria-label="Plan semanal completo" tabIndex={0}>

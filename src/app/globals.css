@@ -319,9 +319,69 @@ textarea:focus-visible {
 }
 
 .topbar__account {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 7px;
+}
+
+.avatar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  min-width: 182px;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 16px 32px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.account-menu__item {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.account-menu__item:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.theme-toggle--menu,
+.sign-out-action--menu {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 9px 10px;
 }
 
 .new-recipe-top-action,
@@ -405,6 +465,15 @@ textarea:focus-visible {
   background: var(--surface);
   color: var(--text-soft);
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.theme-toggle--menu {
+  display: inline-flex;
+  width: 100%;
+  height: auto;
+  min-height: 38px;
+  padding: 9px 10px;
+  border-radius: 9px;
 }
 
 .theme-toggle:hover:not(:disabled),
@@ -2217,14 +2286,15 @@ html[data-theme="dark"] .recipe-art--tone-4 {
     gap: 7px;
   }
 
-  .sign-out-action span,
-  .avatar {
-    display: none;
+  .avatar-button .avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 11px;
   }
 
-  .sign-out-action {
-    width: 38px;
-    padding: 8px;
+  .account-menu {
+    right: -4px;
+    min-width: 170px;
   }
 
   .section-heading--board {

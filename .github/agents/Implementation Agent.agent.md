@@ -22,6 +22,8 @@ Use this agent when the work is clearly defined as a backlog item or a task-spec
 - If a dependency or blocker appears, document it before continuing.
 - Keep the repository aligned with the project conventions: TypeScript strictness, Zod validation, service/repository separation, accessibility, and English-only task communication.
 - Do not broaden scope beyond the active task or change user-facing UI content that is unrelated to the task.
+- If a task includes “Human verification”, “User confirmation”, or similar approval language in Acceptance criteria or Verification, the agent MUST NOT set Status to Done until the user explicitly confirms it. The allowed status before approval is Review or Awaiting Human Verification.
+- "Done" is only valid after all required manual checks and user confirmation are complete.
 
 # Execution workflow
 1. Identify the active backlog item and confirm its current status and priority.

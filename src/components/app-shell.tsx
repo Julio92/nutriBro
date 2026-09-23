@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import type {
   DashboardData,
@@ -57,8 +57,21 @@ export function AppShell({ initialData, identity }: AppShellProps) {
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [isRecipeFormOpen, setIsRecipeFormOpen] = useState(false);
   const [recipeBeingEdited, setRecipeBeingEdited] = useState<RecipeDetail | null>(null);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const detailRequestId = useRef(0);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
 
   function showToast(message: string, tone: ToastTone = "success") {
     setToast({ message, tone });
@@ -232,29 +245,55 @@ export function AppShell({ initialData, identity }: AppShellProps) {
               <Plus size={17} aria-hidden="true" />
               <span>Nueva receta</span>
             </button>
-            <button
-              className="theme-toggle"
-              type="button"
-              onClick={toggleTheme}
-              aria-label={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
-              title={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
-            >
-              {theme === "light" ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
-            </button>
-            <div className="topbar__account">
-              <span className="avatar" title={identity.displayName}>
-                {getInitials(identity.displayName)}
-              </span>
+            <div className="topbar__account" ref={accountMenuRef}>
               <button
-                className="sign-out-action"
+                className="avatar-button"
                 type="button"
-                onClick={closeSession}
-                aria-label="Cerrar sesión"
-                title={`Cerrar sesión${identity.email ? ` (${identity.email})` : ""}`}
+                onClick={() => setIsAccountMenuOpen((current) => !current)}
+                aria-label="Abrir menú de cuenta"
+                aria-expanded={isAccountMenuOpen}
+                aria-controls="account-menu"
+                title={identity.displayName}
               >
-                <LogOut size={17} aria-hidden="true" />
-                <span>Cerrar sesión</span>
+                <span className="avatar" aria-hidden="true">
+                  {getInitials(identity.displayName)}
+                </span>
               </button>
+
+              {isAccountMenuOpen ? (
+                <div
+                  id="account-menu"
+                  className="account-menu"
+                  role="menu"
+                  aria-label="Menú de cuenta"
+                  onMouseDown={(event) => event.stopPropagation()}
+                >
+                  <button
+                    className="account-menu__item theme-toggle theme-toggle--menu"
+                    type="button"
+                    onClick={() => {
+                      toggleTheme();
+                    }}
+                    aria-label={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
+                    title={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
+                  >
+                    {theme === "light" ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+                    <span>{theme === "light" ? "Modo oscuro" : "Modo claro"}</span>
+                  </button>
+                  <button
+                    className="account-menu__item sign-out-action sign-out-action--menu"
+                    type="button"
+                    onClick={() => {
+                      closeSession();
+                    }}
+                    aria-label="Cerrar sesión"
+                    title={`Cerrar sesión${identity.email ? ` (${identity.email})` : ""}`}
+                  >
+                    <LogOut size={16} aria-hidden="true" />
+                    <span>Cerrar sesión</span>
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </header>

@@ -250,7 +250,7 @@ Notes:
 - If the responsive breakpoint or layout behavior is unclear, document the blocker before proceeding.
 
 ID: T-009
-Status: New
+Status: Done
 Priority: Medium
 Title: Move theme and sign-out actions behind the user avatar menu
 Description:
@@ -285,6 +285,52 @@ Verification:
 - npm run check
 - Human verification
 
+Result:
+- Reworked the header so the theme toggle and sign-out action live inside the account avatar menu.
+- Kept the avatar visible on small screens and added a compact dropdown that closes on outside click.
+- Confirmed the implementation with the required repository validation: `npm run check` passed successfully.
+
 Notes:
 - If the mobile header layout or dropdown constraints prevent a clean implementation, document the blocker before editing.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-010
+Status: Done
+Priority: Medium
+Title: Fix avatar dropdown interaction and alignment
+Human verification required: Yes
+Description:
+The avatar dropdown created in T-009 closes immediately when the user clicks on one of the actions inside it. This prevents the theme toggle and close-session controls from being used reliably. The menu also shows an alignment mismatch between the two buttons, so the dropdown requires a quick interaction and UI polish fix.
+
+Scope:
+- Keep the avatar dropdown open while the user clicks actions inside the menu
+- Preserve the theme toggle and close session actions without introducing unintended close behavior
+- Recheck the dropdown layout so the two buttons align correctly visually
+- Validate the fix at desktop and mobile widths without changing the intended account menu behavior
+
+Do not touch:
+- Authentication logic or session invalidation beyond the UI-triggered sign-out action
+- Theme implementation details outside the dropdown interaction itself
+- Unrelated layout or app-shell changes outside the account menu
+- Scope beyond the avatar dropdown behavior and alignment fix
+
+Dependencies:
+- T-009: avatar dropdown implementation
+- Existing auth UI and theme toggle behavior
+
+Acceptance criteria:
+- Clicking inside the dropdown does not close the menu when the user interacts with the theme toggle or close-session action
+- The Close session and theme toggle buttons are visually aligned as expected
+- The menu still opens and closes properly via the avatar trigger
+- The fix remains usable on both desktop and small mobile screens
+
+Verification:
+- Review the avatar dropdown in the browser at desktop and mobile widths
+- Verify that action clicks inside the dropdown keep it open
+- Check the alignment of the two buttons visually
+- npm run check
+- Human verification
+
+Notes:
+- If the dropdown is controlled by a parent menu or click-outside logic, adjust the event handling so action clicks do not trigger the close behavior.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.

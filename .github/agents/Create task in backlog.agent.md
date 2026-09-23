@@ -21,6 +21,7 @@ Use this agent when the request is clearly a backlog item, a defect to track, or
 - If the task is vague or under-specified, ask for clarification before writing.
 - If a blocker appears, mark the task as Blocked and document the cause.
 - This agent is documentation-only; it must not change runtime code, business logic, UI behavior, or repository files outside the backlog workflow.
+- If human verification is requested during the creation of the task, set the field "Human verification required" to Yes; otherwise, set it to No.
 
 # Execution workflow
 1. Read the user request and identify the task goal.
