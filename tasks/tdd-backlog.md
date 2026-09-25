@@ -1,52 +1,56 @@
-# T-012 execution plan
+# T-013 execution plan
 
 ## Objective
-Update the recipe cards in the "Asignar Recetas" view so they display the recipe tags when available instead of the ingredient count beneath the title, while preserving the rest of the assignment flow and card layout.
+Add tag-based filtering to the "Asignar recetas" panel so users can narrow the visible recipe list by one or more existing recipe tags while keeping the current recipe-name search and assignment workflow intact.
 
 ## Scope
-- Limit the change to the metadata displayed in the assignment-card list
-- Keep recipe selection, assignment logic, and persistence behavior untouched
-- Preserve the current card layout and ensure empty or missing tag data does not break rendering
-- Validate the change using project checks and a targeted UI smoke check
+- Add an existing-tag selector beneath the recipe-name search field in the assignment panel
+- Support toggling tag chips on and off with multi-select behavior
+- Combine tag filtering with the current text search without changing assignment actions or saved results
+- Keep empty, missing, and duplicate tag data safe for rendering and filtering
+- Validate the change with a focused UI smoke test and the repository check
 
 ## Can this task be split into subtasks?
-Yes. This task is small enough to stay focused, but it still benefits from a 3-step division:
-1. Trace the card rendering and confirm the tag data shape
-2. Replace the ingredient-count line with a tag-based metadata display and handle empty-state cases
-3. Verify the UI and run repository validation
+Yes. This task fits a 3-step plan:
+1. Trace the current assignment-panel search and list filtering flow
+2. Add tag chips and combine them with the text filter logic
+3. Validate the UI behavior and project checks
 
 ## Files to inspect
 - src/components/assignment-dialog.tsx
 - src/components/recipe-library.tsx
 - src/domain/nutrition/types.ts
-- any card or list item helper used by the assignment view
-- any related tests for recipe card rendering if present
+- any helper or state logic used to filter the assignment recipe list
+- any existing tag UI or tag-related model code introduced in the recipe-tag work
 
 ## Ordered implementation steps
-### 1) Locate the exact render path for the assignment-card metadata
-- Find the recipe list item component used in the "Asignar Recetas" workflow.
-- Confirm where the ingredient count is currently rendered under each card title.
-- Verify the shape and availability of the recipe tag field so the UI can render tags safely when present.
-- Check whether the assignment view already receives tag data from the recipe model or needs no additional pass-through.
+### 1) Locate the current assignment-panel filtering behavior
+- Identify the search input and the code that derives the visible recipe list in the "Asignar recetas" panel.
+- Confirm how recipe tags are represented in the current data model and whether they are already available in the assignment view.
+- Trace the current name-search logic to understand the right place to add a second filter without replacing the search behavior.
+- Check whether the list is already memoized or filtered in a helper so the tag logic can be introduced cleanly.
 
-### 2) Update the metadata display logic
-- Replace the ingredient-count text with a tag display for each recipe card when one or more tags exist.
-- Preserve the existing layout and spacing so the card still feels consistent.
-- Ensure cards without tags render cleanly without an empty or broken meta line.
-- Keep the user-visible behavior contained to the display text only; do not affect assignment behavior or data persistence.
+### 2) Add the tag chip UI and merge it with the search filter
+- Render all available existing tags directly under the recipe-name search field in the panel.
+- Make each tag clickable so it toggles selected vs. unselected state and supports multiple active tags at the same time.
+- Filter the panel list to show only recipes matching all active tags, while still applying the active name search.
+- Ensure the filter can be cleared by toggling the selected tag off without breaking the list state or layout.
+- Keep the filter UI compact and accessible within the current panel layout.
 
-### 3) Validate the UI and project checks
-- Review the assignment view in the browser to confirm the list shows tags instead of ingredient count.
-- Verify cards with no tags remain visually acceptable and the overall selection experience is unchanged.
+### 3) Validate the behavior and repository checks
+- Review the assignment panel in a browser to confirm the tag chips appear under the search box and behave correctly.
+- Test one-tag and multi-tag filtering flows, then clear the selection and confirm the list restores correctly.
+- Confirm the existing name search continues to work alongside the tag filter.
 - Run the repository validation command: npm run check.
 
 ## Validation checklist
-- Browser smoke test in the "Asignar Recetas" view
-- Confirm tags appear where expected and ingredient counts are no longer shown
-- Confirm cards without tags do not break layout
+- Tag chips appear beneath the recipe-name search field in the assignment panel
+- Clicking a tag toggles it on and off, with multiple tags allowed at once
+- Matching recipes update based on the active tag selection and text search together
+- Clearing all selected tags restores the original recipe list behavior
 - npm run check passes
 
 ## Risk notes
-- The task is UI-only, so the biggest risk is accidentally changing the card structure or the assignment selection flow while adjusting metadata.
-- Some recipe objects may have undefined, empty, or missing tag arrays; handling that gracefully is required to avoid broken rendering.
-- If the naming or rendering pattern for tags differs from the rest of the app, keep the change minimal and consistent with existing recipe metadata styling.
+- The main risk is replacing the current name-search logic instead of combining it with the tag filter, which would change the assignment flow unexpectedly.
+- Some recipes may have missing, empty, or duplicate tag values; the filter should handle those cases gracefully without breaking the UI.
+- The panel layout is narrow, so the tag selector should remain compact and not disturb the recipe list or selection area.

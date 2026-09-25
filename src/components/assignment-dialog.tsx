@@ -12,6 +12,38 @@ export function getAssignmentTagItems(tags: string[]): string[] {
   return tags.slice(0, 3);
 }
 
+export function getAssignmentTagOptions(tags: string[]): string[] {
+  const normalizedTags = new Map<string, string>();
+
+  for (const tag of tags) {
+    const normalizedValue = tag.trim();
+
+    if (normalizedValue.length === 0) {
+      continue;
+    }
+
+    const key = normalizedValue.toLocaleLowerCase("es");
+
+    if (!normalizedTags.has(key)) {
+      normalizedTags.set(key, normalizedValue);
+    }
+  }
+
+  return [...normalizedTags.values()].sort((left, right) => left.localeCompare(right, "es", { sensitivity: "base" }));
+}
+
+export function matchesAssignmentRecipeTags(recipeTags: string[] | undefined, selectedTags: string[]): boolean {
+  const activeTags = getAssignmentTagOptions(selectedTags);
+
+  if (activeTags.length === 0) {
+    return true;
+  }
+
+  const normalizedRecipeTags = getAssignmentTagOptions(recipeTags ?? []);
+
+  return activeTags.every((selectedTag) => normalizedRecipeTags.includes(selectedTag));
+}
+
 interface AssignmentDialogProps {
   slot: MealSlotView | null;
   recipes: RecipeListItem[];
@@ -28,20 +60,27 @@ export function AssignmentDialog({
   onSave,
 }: AssignmentDialogProps) {
   const [query, setQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState(
     () => new Set(slot?.recipes.map((recipe) => recipe.id) ?? []),
   );
 
+  const availableTags = useMemo(
+    () => getAssignmentTagOptions(recipes.flatMap((recipe) => recipe.tags ?? [])),
+    [recipes],
+  );
+
   const visibleRecipes = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("es");
-    if (!normalizedQuery) {
-      return recipes;
-    }
 
-    return recipes.filter((recipe) =>
-      `${recipe.name} ${recipe.description}`.toLocaleLowerCase("es").includes(normalizedQuery),
-    );
-  }, [query, recipes]);
+    return recipes.filter((recipe) => {
+      const matchesQuery =
+        normalizedQuery.length === 0 || `${recipe.name} ${recipe.description}`.toLocaleLowerCase("es").includes(normalizedQuery);
+      const matchesTags = matchesAssignmentRecipeTags(recipe.tags ?? [], selectedTags);
+
+      return matchesQuery && matchesTags;
+    });
+  }, [query, recipes, selectedTags]);
 
   if (!slot) {
     return null;
@@ -61,6 +100,12 @@ export function AssignmentDialog({
 
       return nextIds;
     });
+  }
+
+  function toggleTag(tag: string) {
+    setSelectedTags((currentTags) =>
+      currentTags.includes(tag) ? currentTags.filter((currentTag) => currentTag !== tag) : [...currentTags, tag],
+    );
   }
 
   function clearSelection() {
@@ -125,6 +170,30 @@ export function AssignmentDialog({
             disabled={isSaving}
           />
         </label>
+
+        {availableTags.length > 0 ? (
+          <div className="assignment-tag-filter" aria-label="Filtrar recetas por etiquetas">
+            <span className="assignment-tag-filter__label">Etiquetas</span>
+            <div className="assignment-tag-filter__list">
+              {availableTags.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={`assignment-tag-option ${isSelected ? "assignment-tag-option--selected" : ""}`}
+                    onClick={() => toggleTag(tag)}
+                    aria-pressed={isSelected}
+                    disabled={isSaving}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div className="recipe-picker" aria-live="polite">
           <button

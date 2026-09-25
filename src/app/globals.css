@@ -1810,6 +1810,54 @@ html[data-theme="dark"] .recipe-art--tone-4 {
   margin-top: 21px;
 }
 
+.assignment-tag-filter {
+  display: grid;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.assignment-tag-filter__label {
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.assignment-tag-filter__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.assignment-tag-option {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.assignment-tag-option:hover:not(:disabled) {
+  border-color: var(--primary-muted);
+  background: var(--surface-soft);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.assignment-tag-option--selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.assignment-tag-option:disabled {
+  opacity: 1;
+}
+
 .recipe-picker {
   display: grid;
   gap: 8px;

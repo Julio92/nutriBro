@@ -426,3 +426,51 @@ Result:
 Notes:
 - If the recipe card component or recipe tags are unavailable for a given recipe, keep the item hidden or gracefully omitted without breaking the card layout.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-013
+Status: Done
+Priority: Medium
+Title: Add tag-based filtering to the "Asignar recetas" panel
+Human verification required: Yes
+Description:
+Add a second recipe-filtering mechanism to the "Asignar recetas" panel so users can browse existing tags created for recipes and narrow the visible list by one or more selected tags. The current name search remains available, and the tag filter should work alongside it without changing the recipe-assignment flow.
+
+Scope:
+- Display all existing user-created tags under the recipe-name search box in the "Asignar recetas" panel
+- Allow selecting and deselecting tags by clicking on them
+- Keep multiple selected tags active simultaneously
+- Filter the recipe list to show only recipes matching the selected tags while preserving the text search
+- Keep the tag filter UI clear and accessible in the current panel layout
+
+Do not touch:
+- Recipe assignment logic or saved assignment behavior
+- Recipe creation/editing flow outside the filter UI
+- Persistence or schema changes unrelated to tag filtering
+- Unrelated dashboard or recipe-library behavior outside "Asignar recetas"
+
+Dependencies:
+- Existing recipe tag data model and tag values already created in the app
+- Current search/filter logic for recipe names in the "Asignar recetas" panel
+
+Acceptance criteria:
+- A list of existing tags appears directly below the recipe-name search field in the "Asignar recetas" panel
+- Clicking a tag toggles it on and off, and multiple tags can remain selected
+- Only recipes matching the selected tags are shown once the filter is active
+- The current recipe-name search continues to work alongside the tag filter
+- The filter can be cleared by clicking a selected tag again without breaking the UI
+
+Verification:
+- Review the "Asignar recetas" panel in the browser
+- Confirm the tag chips appear under the name search box and toggle correctly
+- Smoke-test filtering with one tag and multiple tags selected
+- npm run check
+- Human verification of the tag-toggle UX
+
+Result:
+- Added a tag-chip selector beneath the search field and merged it with the existing text search in the assignment flow.
+- Filter logic normalizes and deduplicates tags so blank or duplicated values do not disrupt the UI.
+- Verified the fix with the repository’s required `npm run check` command, which passed successfully.
+
+Notes:
+- If the tag data source or the panel’s filtering logic needs a blocker discussion, document it before implementation.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.
