@@ -8,6 +8,10 @@ import type { MealSlotView, RecipeListItem } from "@/domain/nutrition/types";
 
 import { RecipeArt } from "./recipe-art";
 
+export function getAssignmentTagItems(tags: string[]): string[] {
+  return tags.slice(0, 3);
+}
+
 interface AssignmentDialogProps {
   slot: MealSlotView | null;
   recipes: RecipeListItem[];
@@ -140,6 +144,8 @@ export function AssignmentDialog({
 
           {visibleRecipes.map((recipe) => {
             const selected = selectedRecipeIds.has(recipe.id);
+            const assignmentTags = getAssignmentTagItems(recipe.tags ?? []);
+            const hasMoreTags = (recipe.tags ?? []).length > assignmentTags.length;
 
             return (
               <button
@@ -153,7 +159,16 @@ export function AssignmentDialog({
                 <RecipeArt name={recipe.name} imageUrl={recipe.imageUrl} />
                 <span>
                   <strong>{recipe.name}</strong>
-                  <small>{recipe.ingredientCount} ingredientes</small>
+                  {assignmentTags.length > 0 ? (
+                    <span className="recipe-card__tags" aria-label={`Etiquetas de ${recipe.name}`}>
+                      {assignmentTags.map((tag) => (
+                        <span className="recipe-card__tag" key={`${recipe.id}-${tag}`}>
+                          {tag}
+                        </span>
+                      ))}
+                      {hasMoreTags ? <span className="recipe-card__tag">+{(recipe.tags ?? []).length - assignmentTags.length}</span> : null}
+                    </span>
+                  ) : null}
                 </span>
                 {selected ? <Check size={17} aria-label="Receta seleccionada" /> : null}
               </button>

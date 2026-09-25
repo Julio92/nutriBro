@@ -18,6 +18,19 @@ Instructions:
 The new task I want to create is this:
 [DESCRIBE YOUR IDEA HERE IN NATURAL LANGUAGE]
 
+### Plan a task before implementation
+
+Read the active task in tasks/backlog.md and break it into a smaller execution plan when the scope is large or likely to exceed context limits.
+
+Create or update tasks/tdd-backlog.md with a short plan that includes:
+- objective
+- files to inspect
+- implementation units
+- validation steps
+- risks or blockers
+
+Then implement only what is described in the execution plan.
+
 ### Implement task from backlog
 
 Read the repository and the active task in backlog.md.
@@ -27,6 +40,7 @@ Follow the rules in AGENTS.md and copilot-instructions.md.
 If there are multiple tasks, choose the one with the “In Progress” status or, if none has that status, the one with status "New" and the highest available priority and a clearly defined scope.
 Do not start a new task if the current task has not been closed.
 Before touching any code, explain your implementation plan, which files you’ll review, and which validations you’ll run.
+If the task is multi-step, read tasks/tdd-backlog.md and work from that execution plan instead of trying to complete the whole task in one pass.
 Then implement only what’s necessary to complete that task.
 Stick strictly to the scope and don’t expand it without documenting the change.
 When finished, run `npm run check` and update the task’s status in backlog.txt to “Done,” “Review,” or “Blocked” depending on the result.

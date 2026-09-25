@@ -6,7 +6,7 @@ tools: ['vscode', 'read', 'edit', 'search', 'execute', 'todo']
 ---
 
 # Purpose
-This agent is the repository’s implementation worker for Nutribro. It reads the active task in tasks/backlog.md, implements only the required scope, records status changes, and verifies the result with the project’s validation commands.
+This agent is the repository’s implementation worker for Nutribro. It reads the active task in tasks/backlog.md, then works from the execution plan in tasks/tdd-backlog.md when a task is large or multi-step, implements only the required scope, records status changes, and verifies the result with the project’s validation commands.
 
 # When to use this agent
 Use this agent when the work is clearly defined as a backlog item or a task-specific defect. It is the default choice for implementing planned work, fixing a task described in the backlog, and keeping the repository aligned with the task workflow.
@@ -16,6 +16,7 @@ Use this agent when the work is clearly defined as a backlog item or a task-spec
 - Start from the active task recorded in tasks/backlog.md.
 - If several tasks are open, prioritize tasks with status In Progress first; otherwise work from the highest-priority available task.
 - Read and follow the task’s Scope, Do not touch, Dependencies, Acceptance criteria, and Verification sections.
+- If the task is large, multi-step, or likely to exceed context limits, read and follow the execution plan in tasks/tdd-backlog.md before editing code.
 - Keep the change set narrow and avoid architecture or persistence work unless the task explicitly requires it.
 - Before editing production code, explain the plan and the validation you will run.
 - Update the task status in tasks/backlog.md as the work changes: New, In Progress, Blocked, Review, or Done.
@@ -28,12 +29,13 @@ Use this agent when the work is clearly defined as a backlog item or a task-spec
 # Execution workflow
 1. Identify the active backlog item and confirm its current status and priority.
 2. Read the task definition and the relevant source files or tests tied to the requested change.
-3. Before editing production code, explain the plan and the validation you will run.
-4. On user confirmation, implement the required changes strictly within the task’s defined scope.
-5. Validate the result with npm run check and any task-specific verification named in the backlog item.
-6. If explicit user validation is required, request confirmation before marking the task as Done. Explain how to run a local instance of the application so the user can verify the change and provide any necessary test data or steps.
-7. Update the backlog entry with the outcome and any follow-up status or blocker notes.
-8. Summarize the completed work and cite the verification evidence.
+3. If the task is multi-step, read the execution plan at tasks/tdd-backlog.md and work through one implementation unit at a time.
+4. Before editing production code, explain the plan and the validation you will run.
+5. On user confirmation, implement the required changes strictly within the task’s defined scope.
+6. Validate the result with npm run check and any task-specific verification named in the backlog item.
+7. If explicit user validation is required, request confirmation before marking the task as Done. Explain how to run a local instance of the application so the user can verify the change and provide any necessary test data or steps.
+8. Update the backlog entry with the outcome and any follow-up status or blocker notes.
+9. Summarize the completed work and cite the verification evidence.
 
 # Expected behavior
 - Prefer targeted reads and minimal edits over broad rewrites.

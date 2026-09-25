@@ -384,3 +384,45 @@ Notes:
 - A tag is user-managed and can represent personal categories such as Breakfast, Lunch, Dinner, Fish, Meat, or Vegetarian.
 - If the schema or UI needs a blocker discussion, document it before implementation.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-012
+Status: Done
+Priority: Medium
+Title: Show recipe tags instead of ingredient count in the "Asignar Recetas" card list
+Human verification required: Yes
+Description:
+Update the recipe cards in the "Asignar Recetas" view so each card displays the recipe tags, when available, instead of the ingredient count below the title. This keeps the card content aligned with the recipe metadata users already use to scan recipe options quickly.
+
+Scope:
+- Update the card content in the "Asignar Recetas" recipe list
+- Replace the ingredient-count line with the recipe tags display when tags exist
+- Keep the recipe name and card layout consistent with the current design
+- Validate the UI change only affects the displayed metadata under each card
+
+Do not touch:
+- Recipe assignment logic
+- Recipe creation or editing workflows
+- Recipe data model or persistence
+- Unrelated layout changes outside the target card list
+
+Dependencies:
+- Existing recipe card component and tag metadata for recipes
+
+Acceptance criteria:
+- Each recipe card in "Asignar Recetas" shows recipe tags instead of the ingredient count
+- Cards with no tags remain visually clean and do not show an empty or broken metadata line
+- The overall card design and recipe selection behavior remain unchanged
+- The task remains limited to the UI metadata display in this view
+
+Verification:
+- Review the "Asignar Recetas" view in the browser
+- Confirm the card metadata matches the recipe tags and no ingredient count is shown
+- npm run check
+
+Result:
+- Updated the assignment picker to render recipe tag chips instead of ingredient counts while preserving selection behavior and card layout.
+- Added a small regression test covering the tag metadata helper and then validated the repository with the required `npm run check` command.
+
+Notes:
+- If the recipe card component or recipe tags are unavailable for a given recipe, keep the item hidden or gracefully omitted without breaking the card layout.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.

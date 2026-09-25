@@ -8,6 +8,7 @@
 - [x] Use `npm run dev` for local development. Do not start persistent servers during a task unless needed for a focused verification.
 - [x] Keep the README and docs in `docs/` updated when architecture, model, endpoints, or scope change.
 - [x] Use the active task defined in `tasks/backlog.md` as the source of work for agents. Each task must include status, scope, and acceptance criteria.
+- [x] For complex or multi-step work, create or update `tasks/tdd-backlog.md` as the execution plan before implementation begins.
 - [x] Before editing code, the agent must explain the implementation plan and the validation it will run.
 
 ## Conventions

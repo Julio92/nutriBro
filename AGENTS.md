@@ -12,6 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Work from the active task recorded in `tasks/backlog.md`.
 - Each task must have a status: `New`, `In Progress`, `Blocked`, `Review`, or `Done`.
+- For complex or multi-step work, create or update `tasks/tdd-backlog.md` as the execution plan before implementation begins.
 - Before editing production code, explain the plan and the validation you will run.
 - Do not broaden scope beyond the task unless the task explicitly requires it.
 - Validate with `npm run check` before integration.

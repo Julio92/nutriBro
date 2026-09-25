@@ -17,6 +17,7 @@ Use this agent when the request is clearly a backlog item, a defect to track, or
 - Set the task status to New by default, then choose the correct priority: High, Medium, or Low.
 - Keep the task in English and follow the template exactly.
 - Keep the scope specific; do not broaden the project or add unrelated work.
+- If the task is large, multi-step, or likely to exceed the implementation context window, flag it for decomposing to tasks/tdd-backlog.md before execution.
 - Append the new task to the end of tasks/backlog.md without reordering existing entries.
 - If the task is vague or under-specified, ask for clarification before writing.
 - If a blocker appears, mark the task as Blocked and document the cause.
