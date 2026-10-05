@@ -4,6 +4,7 @@ import { ChefHat, Clock3, Pencil, Trash2, X } from "lucide-react";
 
 import { formatSlotName } from "@/lib/format";
 import type { RecipeDetail } from "@/domain/nutrition/types";
+import { Badge } from "@/components/ui/badge";
 
 import { RecipeArt } from "./recipe-art";
 
@@ -66,9 +67,9 @@ export function RecipeDetailDrawer({
             {recipe.tags.length > 0 ? (
               <div className="tag-list tag-list--detail" aria-label="Etiquetas de la receta">
                 {recipe.tags.map((tag) => (
-                  <span className="tag-pill" key={tag}>
+                  <Badge key={tag}>
                     {tag}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             ) : null}

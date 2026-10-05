@@ -77,3 +77,56 @@ Use the Fluid Functionalism Combobox in both the assignment dialog and the recip
 - Added shared recipe-tag helper tests for existing option normalization, valid query creation, case-insensitive duplicates, empty queries, and the 32-character boundary. Focused tests passed (9); `npm run check` passed (9 test files, 34 tests, build).
 - Removed generic form input border styling from the Combobox's nested input, leaving its outer field border visible.
 - User confirmed the Combobox experience and marked T-017 complete.
+
+## T-018 — Use Fluid Functionalism Badge for recipe detail tags
+
+### Objective
+Replace the existing tag pills below the recipe description in the recipe detail drawer with the Fluid Functionalism Badge, preserving all labels and the wrapping-row layout.
+
+### Ordered implementation units
+1. Run the requested `npx shadcn@latest add https://www.fluidfunctionalism.com/r/badge.json --overwrite` command and inspect all changed/generated files, dependencies, and any overwritten files.
+2. Check the generated Badge API against the established project context, aliases, Tailwind v4, and current theme setup; keep built-in color, shape, and size behavior intact.
+3. Update only the tag row in `src/components/recipe-detail-drawer.tsx` to render each recipe tag as a Badge, retaining the existing accessible label and spacing/wrapping behavior.
+4. Remove obsolete tag-row or tag-pill CSS only if no other UI uses it.
+5. Run focused checks if present, then `npm run check`; review diagnostics and diff for scope.
+
+### Validation
+- Inspect the generated component and every registry-modified file.
+- Run focused recipe-detail tests if available.
+- Run `npm run check` (lint, tests, production build) and review the final diff.
+
+### Risks
+- The registry may overwrite shared UI files because `--overwrite` is required; preserve unrelated project behavior and inspect resulting diffs.
+- Badge depends on shared shape/size behavior. Prefer generated component defaults and documented props rather than custom radius, sizing, or palette logic.
+
+### Implementation result
+- Installed the registry component with `NODE_OPTIONS=--use-system-ca` after the first fetch attempt encountered the environment's self-signed certificate chain. The CLI added only `src/components/ui/badge.tsx`; shared utils and shape/size contexts were skipped as identical.
+- Updated the recipe detail drawer to use the default solid gray Badge for each existing tag. Preserved the accessible tag-row label and wrapping/margin styles, and removed only obsolete tag-pill rules.
+- `npm run check` passed (lint, 9 test files / 34 tests, production build); `git diff --check` passed.
+
+## T-019 — Add theme preference Select
+
+### Objective
+Add the Fluid Functionalism Select to Preferences for System, Light, and Dark themes, with the System choice following the OS preference and existing theme changes persisted in local storage.
+
+### Ordered implementation units
+1. Install the requested Base UI Select registry component with `--overwrite`; inspect generated files, overwritten files, and package changes.
+2. Read the relevant Next.js App Router/client component guide and inspect existing theme initialization, provider, preferences styling, and Select APIs.
+3. Extend theme state to distinguish the persisted preference (`system | light | dark`) from the effective theme (`light | dark`); handle OS preference changes and remove the redundant avatar-menu theme toggle.
+4. Add a clearly labeled theme section to Preferences with the requested icon-bearing Select options; leave meal visibility UI intact.
+5. Run diagnostics and `npm run check`, review generated/unrelated diffs, and perform a browser smoke test if available.
+
+### Validation
+- Confirm System applies `prefers-color-scheme`, updates when the OS value changes, and survives reload.
+- Confirm explicit Light/Dark choices persist and the account menu contains no theme action while retaining the Preferences link.
+- Run `npm run check` and inspect final diff for overwritten shared files.
+- Human verification of the resulting preference UX.
+
+### Implementation result
+- Installed `https://www.fluidfunctionalism.com/r/base/select.json`; it created `src/components/ui/select.tsx` and reused the project's existing shared files/dependencies. The registry also inserted its Tailwind dark variant; no Select-specific npm dependency was added.
+- Added a persisted theme preference API (`system | light | dark`) while retaining the existing effective `light | dark` theme API.
+- Updated the pre-hydration theme initialization and provider to resolve System from `prefers-color-scheme` and react to OS preference changes.
+- Added a Spanish Preferences section using the requested icon-bearing Select options; meal visibility controls remain unchanged.
+- Removed the duplicate theme action from the account dropdown, along with its unused icons, provider toggle API, and menu-only styles.
+- Removed the unused generated Switch component, unreferenced `font-weight.ts`, and the Switch-only `@radix-ui/react-switch` dependency (including its unused transitive packages). This removed the unrelated TypeScript build error.
+- `npm run check` passed: lint, 9 test files / 34 tests, production build, and standalone preparation. Browser interaction and human verification remain outstanding.

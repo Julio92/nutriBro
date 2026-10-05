@@ -7,12 +7,10 @@ import {
   LayoutGrid,
   Leaf,
   LogOut,
-  Moon,
   Plus,
   Settings2,
   ShoppingBasket,
   Sparkles,
-  Sun,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -30,7 +28,6 @@ import { AssignmentDialog } from "./assignment-dialog";
 import { RecipeDetailDrawer } from "./recipe-detail-drawer";
 import { RecipeFormDialog } from "./recipe-form-dialog";
 import { RecipeLibrary } from "./recipe-library";
-import { useTheme } from "./theme-provider";
 import { TodayMeals } from "./today-meals";
 import { WeeklyBoard } from "./weekly-board";
 
@@ -47,7 +44,6 @@ interface AppShellProps {
 }
 
 export function AppShell({ initialData, identity }: AppShellProps) {
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [dashboard, setDashboard] = useState(initialData);
   const [activeView, setActiveView] = useState<AppView>("plan");
@@ -280,18 +276,6 @@ export function AppShell({ initialData, identity }: AppShellProps) {
                   >
                     <Settings2 size={16} aria-hidden="true" />
                     <span>Preferencias</span>
-                  </button>
-                  <button
-                    className="account-menu__item theme-toggle theme-toggle--menu"
-                    type="button"
-                    onClick={() => {
-                      toggleTheme();
-                    }}
-                    aria-label={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
-                    title={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
-                  >
-                    {theme === "light" ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
-                    <span>{theme === "light" ? "Modo oscuro" : "Modo claro"}</span>
                   </button>
                   <button
                     className="account-menu__item sign-out-action sign-out-action--menu"

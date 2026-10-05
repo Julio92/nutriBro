@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Check, Save } from "lucide-react";
+import { ArrowLeft, Check, Monitor, Moon, Save, Sun } from "lucide-react";
 import { useState } from "react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { useTheme } from "@/components/theme-provider";
 
 const initialMealPreferences = {
   desayuno: true,
@@ -22,6 +30,9 @@ const mealOptions = [
 
 export default function PreferencesPage() {
   const [preferences, setPreferences] = useState(initialMealPreferences);
+  const { themePreference, setThemePreference } = useTheme();
+  const themeIcons = { light: Sun, dark: Moon, system: Monitor } as const;
+  const ThemeIcon = themeIcons[themePreference] ?? Monitor;
 
   function toggleMealPreference(key: keyof typeof initialMealPreferences) {
     setPreferences((currentPreferences) => ({
@@ -74,6 +85,39 @@ export default function PreferencesPage() {
             );
           })}
         </div>
+
+        <section className="preferences-theme" aria-labelledby="preferences-theme-title">
+          <div className="preferences-theme__copy">
+            <h2 id="preferences-theme-title">Tema de la aplicación</h2>
+            <p>Elige el tema del dispositivo o selecciona uno manualmente.</p>
+          </div>
+          <Select
+            value={themePreference}
+            onValueChange={(value) => {
+              if (value === "system" || value === "light" || value === "dark") {
+                setThemePreference(value);
+              }
+            }}
+          >
+            <SelectTrigger
+              className="preferences-theme__select"
+              icon={ThemeIcon}
+              placeholder="Tema"
+              aria-label="Tema de la aplicación"
+            />
+            <SelectContent>
+              <SelectItem index={0} value="system" icon={Monitor}>
+                Sistema
+              </SelectItem>
+              <SelectItem index={1} value="light" icon={Sun}>
+                Claro
+              </SelectItem>
+              <SelectItem index={2} value="dark" icon={Moon}>
+                Oscuro
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </section>
       </section>
     </div>
   );

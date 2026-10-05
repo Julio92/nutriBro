@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: "Organiza tu menú semanal y tus recetas en un solo lugar.",
 };
 
-const themeScript = `try { const theme = localStorage.getItem("nutribro-theme") ?? localStorage.getItem("nutria-theme"); if (theme === "dark" || theme === "light") { localStorage.setItem("nutribro-theme", theme); document.documentElement.dataset.theme = theme; } } catch {}`;
+const themeScript = `try { const storedTheme = localStorage.getItem("nutribro-theme") ?? localStorage.getItem("nutria-theme"); const preference = storedTheme === "dark" || storedTheme === "light" || storedTheme === "system" ? storedTheme : "system"; const useDarkTheme = preference === "dark" || (preference === "system" && window.matchMedia?.("(prefers-color-scheme: dark)").matches); document.documentElement.dataset.theme = useDarkTheme ? "dark" : "light"; if (storedTheme === "dark" || storedTheme === "light") localStorage.setItem("nutribro-theme", storedTheme); } catch {}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

@@ -667,3 +667,92 @@ Notes:
 - The user explicitly requested the registry command with `--overwrite`; inspect every generated/overwritten file and keep changes in scope.
 - The user confirmed the assignment Combobox works and requested extending the same UI to the recipe create/edit form.
 - Before editing code, explain the implementation plan and validation.
+
+ID: T-018
+Status: Done
+Priority: Medium
+Title: Use Fluid Functionalism Badge for recipe detail tags
+Human verification required: No
+Description:
+Replace the current recipe tag pills shown below the description in the recipe detail drawer with the Fluid Functionalism Badge component, using the provided shadcn registry command and preserving the existing tag labels and layout.
+
+Scope:
+- Install the Fluid Functionalism Badge registry component using the provided shadcn command with `--overwrite`
+- Inspect generated and overwritten files, dependencies, and required theme/context assumptions
+- Replace only the tag presentation in the recipe detail drawer with Badge components
+- Remove styling made obsolete by the replacement only if it is no longer used
+
+Do not touch:
+- Recipe data, tag persistence, or tag behavior
+- Other recipe UI, dialogs, or tag selectors
+- Unrelated UI components, shared theme behavior, or broad redesign
+
+Dependencies:
+- Existing recipe-detail drawer and Fluid Functionalism shared component setup
+- Tailwind v4, the `@/` import alias, npm, and existing shape/size contexts
+
+Acceptance criteria:
+- Recipe tags in the detail drawer render with the Fluid Functionalism Badge component
+- Each existing tag label remains visible and unchanged
+- The tags retain a wrapping row below the description and use the app's theme-aware shape/size behavior
+- No recipe logic or other tag presentation is changed
+
+Verification:
+- Review generated Badge and shared files for unintended overwrites
+- Run the focused checks available for the recipe detail UI
+- Run `npm run check`
+- Review the final diff for scope and accessibility
+
+Notes:
+- Use Badge props and `className` to compose behavior; do not reimplement or override its built-in color, size, or shape behavior.
+- Before editing code, explain the implementation plan and validation.
+- Installed successfully with `NODE_OPTIONS=--use-system-ca` after the initial registry fetch failed certificate verification; the generated Badge file was the only source file added by the CLI, while the shared utility/context files were unchanged.
+- Replaced the detail drawer's old tag pills with default solid gray Badges and retained the accessible label and wrapping spacing. Removed obsolete tag-pill CSS.
+- `npm run check` passed: lint, all 34 tests, and production build. `git diff --check` passed.
+
+ID: T-019
+Status: Review
+Priority: Medium
+Title: Add system/light/dark theme preference with Fluid Functionalism Select
+Human verification required: Yes
+Description:
+Add a theme-selection section to the preferences page so users can choose System, Light, or Dark using the Fluid Functionalism Select. Persist the preference using the existing local-storage theme mechanism and resolve System from the operating system's current color scheme.
+
+Scope:
+- Install the Fluid Functionalism Base UI Select from the requested shadcn registry URL and inspect generated changes
+- Add a theme selection section to the existing preferences page with System, Light, and Dark options and matching icons
+- Extend the existing theme provider and initialization script to support a persisted system preference while retaining the resolved light/dark theme for current UI behavior
+- Remove the redundant theme switch from the avatar dropdown; keep the Preferences link as the theme-settings entry point
+
+Do not touch:
+- Meal visibility preference persistence or database work
+- Authentication, recipe, dashboard, or nutrition behavior
+- Unrelated shared UI components or broad redesign
+
+Dependencies:
+- Existing Fluid Functionalism shared UI setup, theme provider, and preferences page
+- Tailwind v4, the `@/` import alias, and existing local-storage theme setting
+
+Acceptance criteria:
+- Preferences exposes a labeled theme section and an accessible Select with System, Light, and Dark values and Monitor, Sun, and Moon icons
+- Selecting Light or Dark applies and persists that theme; System follows and persists the OS color scheme
+- The avatar dropdown no longer contains a theme switch
+- Theme selection remains available from the Preferences page
+- Existing meal visibility controls and their behavior remain unchanged
+- Generated files and overwritten files are reviewed and changes remain in scope
+
+Verification:
+- Inspect registry-generated files and package changes
+- Exercise each theme option, reload persistence, and OS-theme change handling; confirm the avatar dropdown has no theme switch and retains its Preferences link
+- Run `npm run check` and review the final diff
+- Human verification of the theme selection UX
+
+Result:
+- Installed the Select registry component and reused the existing Base UI, Framer Motion, shared context, and utility dependencies; no new Select-specific npm dependency was needed.
+- Added persisted System/Light/Dark preference state, OS color-scheme tracking, early theme initialization, and the icon-bearing Select section in Preferences.
+- Removed the duplicate theme switch from the account dropdown and its now-unused styles and state; the Preferences link remains available.
+- Removed the unused generated Switch and its unreferenced `font-weight.ts` helper; uninstalled the Switch-only `@radix-ui/react-switch` dependency and its transitive packages.
+- `npm run check` passes: lint, 9 test files / 34 tests, production build, and standalone preparation.
+
+Notes:
+- Before editing code, explain the implementation plan and validation.
