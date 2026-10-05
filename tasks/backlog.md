@@ -756,3 +756,53 @@ Result:
 
 Notes:
 - Before editing code, explain the implementation plan and validation.
+
+ID: T-020
+Status: Done
+Priority: Medium
+Title: Replace preferences page with sidebar Dialog
+Human verification required: No
+Description:
+Replace the standalone preferences page with a Fluid Functionalism Dialog containing Appearance and General sections in Spanish. Open it from the existing Preferences action in the avatar menu.
+
+Scope:
+- Install the Fluid Functionalism Base UI Dialog from the provided shadcn registry URL with `--overwrite` and inspect all generated or overwritten files and package changes
+- Compose an xl Dialog with a sidebar containing Apariencia and General sections, following the documented dialog-sidebar pattern
+- Move the existing theme selector under Apariencia and existing meal visibility checkboxes under General without changing their behavior
+- Open the preferences dialog from the existing avatar-menu action
+- Remove the obsolete standalone preferences page and its now-unused styles
+- Add or update focused tests when practical
+
+Do not touch:
+- Theme persistence/resolution, meal preference persistence, or database behavior
+- Authentication, recipe, dashboard, or nutrition behavior
+- Unrelated shared UI components or broad redesign
+
+Dependencies:
+- Existing Fluid Functionalism Select, shared UI utilities, contexts, and theme provider
+- Tailwind v4, the `@/` import alias, npm, and existing app-shell account menu
+
+Acceptance criteria:
+- The avatar menu's Preferencias action opens a modal Dialog without navigating to `/preferences`
+- The Dialog has a sidebar with Apariencia and General sections and allows switching between them
+- Apariencia contains the existing Sistema/Claro/Oscuro theme selector and General contains the existing meal visibility controls
+- Existing control behavior, Spanish labels, and accessibility are preserved
+- The Dialog adapts for compact/mobile widths without losing access to either section
+- The obsolete preferences route is removed, and generated changes are reviewed for unintended overwrites
+
+Verification:
+- Inspect registry-generated files and package changes
+- Run `npm run check` and review the final diff
+- Smoke-test opening, closing, section switching, theme selection, and meal checkboxes at desktop and mobile widths
+- Human verification of the resulting preferences UX
+
+Notes:
+- T-019 remains in Review pending its separately requested human verification; this new scoped task was explicitly requested by the user.
+- Follow Fluid Functionalism's documented `dialog-sidebar` composition and compose via props/className rather than modifying generated component internals.
+- Before editing code, explain the implementation plan and validation.
+- Installed the Dialog and dialog-sidebar registries. The generated block supplied the documented responsive sidebar/Select navigation; unused example-only Switch and InputGroup files were removed. Existing npm dependencies were sufficient; no package manifest changes were required.
+- Adapted the block to Apariencia and General, kept theme preference connected to the existing ThemeProvider, and retained in-session meal visibility state across section changes and dialog closes.
+- The avatar menu opens the dialog without navigation; removed the old `/preferences` route and its obsolete page styles. Added visible keyboard focus styling to the custom meal checkboxes.
+- Added the generated Sidebar sources to the existing ESLint exception for Fluid Functionalism's ref-driven animation patterns.
+- `npm run check` passed (lint has registry-source warnings only, 9 test files / 34 tests, production build and standalone preparation); `git diff --check` passed. Next dev served `/` with HTTP 200 after route regeneration.
+- User confirmed the task is completed, including the requested human review.

@@ -130,3 +130,35 @@ Add the Fluid Functionalism Select to Preferences for System, Light, and Dark th
 - Removed the duplicate theme action from the account dropdown, along with its unused icons, provider toggle API, and menu-only styles.
 - Removed the unused generated Switch component, unreferenced `font-weight.ts`, and the Switch-only `@radix-ui/react-switch` dependency (including its unused transitive packages). This removed the unrelated TypeScript build error.
 - `npm run check` passed: lint, 9 test files / 34 tests, production build, and standalone preparation. Browser interaction and human verification remain outstanding.
+
+## T-020 — Replace preferences page with sidebar Dialog
+
+### Objective
+Replace the standalone `/preferences` page with the Fluid Functionalism Dialog's sidebar layout. The existing avatar-menu Preferences action should open a modal with Apariencia (theme selector) and General (meal visibility options), retaining current state and behavior.
+
+### Ordered implementation units
+1. Install `https://www.fluidfunctionalism.com/r/base/dialog.json` using the requested shadcn command with `--overwrite`; inspect generated/overwritten files, shared dependency changes, and compatibility with existing providers and UI conventions.
+2. Read the relevant Next.js App Router client-component guide and inspect the existing account menu, preference controls/styles, Dialog and Select APIs, theme provider, and app-wide layout constraints.
+3. Extract the preference controls into a focused client-side Dialog component: responsive section navigation, theme control under Apariencia, and meal visibility controls under General; retain existing Spanish labels, local component state behavior, and accessible names.
+4. Open/close the Dialog from the avatar menu without route navigation, remove the obsolete `/preferences` page, and delete only styles made unused by the page-to-dialog transition.
+5. Run targeted tests if available, `npm run check`, and `git diff --check`; inspect all generated/overwritten changes and report browser smoke-test coverage or remaining human verification.
+
+### Validation
+- Confirm account-menu Preferences opens the modal and does not navigate.
+- Confirm both sections are switchable on desktop and compact/mobile layouts; closing and reopening does not lose in-session meal checkbox state.
+- Confirm existing theme choices still call the existing persisted theme-preference API and meal controls retain their current selection behavior.
+- Run `npm run check`, `git diff --check`, and inspect the final diff.
+- Request human review of the resulting preferences UX.
+
+### Risks
+- The CLI's `--overwrite` option may replace shared shadcn files; inspect every changed file and preserve established shared component behavior.
+- The dialog-sidebar pattern needs an accessible narrow-screen section switcher; follow the docs' Select-based behavior below `sm` rather than hiding navigation.
+- T-019 remains in Review awaiting independent human verification; this user-authorized task is scoped separately and does not alter T-019's status.
+
+### Implementation result
+- Installed the Fluid Functionalism Dialog and `dialog-sidebar` block. The block includes the requested xl dialog, bounded Sidebar layout, and compact Select-based section navigation. No npm package changes were necessary.
+- Replaced sample sections with Apariencia (existing System/Light/Dark Select wired to `useTheme`) and General (existing meal visibility choices). Kept the meal checkbox state above the conditional section panel and retained visible keyboard focus.
+- Connected the avatar Preferences action to the controlled dialog, removed the standalone `/preferences` route and obsolete page styles, and removed unused sample-only Switch/InputGroup generated files.
+- Added the generated Sidebar core/menu files to the existing ESLint exception for the library's ref-driven animations.
+- `npm run check` passed (34 tests, production build and standalone preparation); `git diff --check` passed. A brief `next dev` launch regenerated stale route type output and served `/` with HTTP 200; the server was stopped after verification.
+- User confirmed the dialog task is completed; T-020 is closed as Done.

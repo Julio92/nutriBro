@@ -28,6 +28,7 @@ import { AssignmentDialog } from "./assignment-dialog";
 import { RecipeDetailDrawer } from "./recipe-detail-drawer";
 import { RecipeFormDialog } from "./recipe-form-dialog";
 import { RecipeLibrary } from "./recipe-library";
+import { SettingsDialog } from "./dialog-sidebar/settings-dialog";
 import { TodayMeals } from "./today-meals";
 import { WeeklyBoard } from "./weekly-board";
 
@@ -54,6 +55,7 @@ export function AppShell({ initialData, identity }: AppShellProps) {
   const [isRecipeFormOpen, setIsRecipeFormOpen] = useState(false);
   const [recipeBeingEdited, setRecipeBeingEdited] = useState<RecipeDetail | null>(null);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const detailRequestId = useRef(0);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
@@ -269,7 +271,7 @@ export function AppShell({ initialData, identity }: AppShellProps) {
                     type="button"
                     onClick={() => {
                       setIsAccountMenuOpen(false);
-                      router.push("/preferences");
+                      setIsPreferencesOpen(true);
                     }}
                     aria-label="Abrir preferencias"
                     title="Preferencias"
@@ -358,6 +360,8 @@ export function AppShell({ initialData, identity }: AppShellProps) {
           onSave={saveRecipe}
         />
       ) : null}
+
+      <SettingsDialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen} />
 
       {toast ? (
         <div className={`toast toast--${toast.tone}`} role="status" aria-live="polite">

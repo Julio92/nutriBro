@@ -586,77 +586,6 @@ textarea:focus-visible {
   color: var(--text);
 }
 
-.preferences-page {
-  display: grid;
-  min-height: 100svh;
-  place-items: start center;
-  padding: 24px 20px 36px;
-  background: var(--canvas);
-}
-
-.preferences-panel {
-  width: min(100%, 760px);
-  padding-top: 12px;
-}
-
-.preferences-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0;
-}
-
-.preferences-header__left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.preferences-header__meta {
-  display: flex;
-  align-items: center;
-  min-height: 38px;
-}
-
-.preferences-header__actions {
-  display: flex;
-  align-items: center;
-}
-.preferences-header__label {
-  margin: 0;
-  color: var(--text);
-  font-size: 23px;
-  font-weight: 760;
-  letter-spacing: -0.055em;
-  line-height: 1.08;
-}
-
-.preferences-back {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text-soft);
-}
-
-.preferences-back:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-muted);
-  color: var(--text);
-}
-
-.preferences-description {
-  margin: 18px 0 22px;
-  color: var(--text-soft);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
 .preferences-list {
   display: grid;
   gap: 0;
@@ -692,6 +621,12 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
+.preferences-item:focus-within {
+  z-index: 1;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .preferences-item input {
   position: absolute;
   inset: 0;
@@ -722,41 +657,20 @@ textarea:focus-visible {
   letter-spacing: -0.02em;
 }
 
-.preferences-theme {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 24px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-}
-
-.preferences-theme__copy h2 {
-  margin: 0;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.preferences-theme__copy p {
-  margin: 5px 0 0;
-  color: var(--text-soft);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
 .preferences-theme__select {
   width: 208px;
   flex-shrink: 0;
 }
 
 @media (max-width: 520px) {
-  .preferences-theme {
+  .preferences-theme-row {
     align-items: stretch;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .preferences-theme-row > div:last-child {
+    width: 100%;
   }
 
   .preferences-theme__select {
@@ -2778,6 +2692,19 @@ html[data-theme="dark"] .recipe-art--tone-4 {
     opacity: 0;
     }
   }
+  @keyframes spinner-move {
+  to {
+    stroke-dashoffset: -100;
+    }
+  }
+  @keyframes spinner-dash {
+  0%, 100% {
+    stroke-dasharray: 15 85;
+    }
+  50% {
+    stroke-dasharray: 40 60;
+    }
+  }
 }
 
 html[data-theme="dark"] {
@@ -3016,6 +2943,16 @@ html[data-theme="dark"] {
   --shadow-6: inset 0 1px 0 0 var(--dm-hi-high), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.18), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop);
   --shadow-7: inset 0 1px 0 0 var(--dm-hi-peak), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.20), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop), 0 48px 48px -24px var(--dm-drop);
   --shadow-8: inset 0 1px 0 0 var(--dm-hi-peak), inset 0 0 0 1px var(--dm-ring-high), 0 0 0 1px rgba(0,0,0,0.22), 0 1px 1px -0.5px var(--dm-drop), 0 3px 3px -1.5px var(--dm-drop), 0 6px 6px -3px var(--dm-drop), 0 12px 12px -6px var(--dm-drop), 0 24px 24px -12px var(--dm-drop), 0 48px 48px -24px var(--dm-drop), 0 96px 96px -48px var(--dm-drop);
+}
+  @property --sf-start {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+  @property --sf-end {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
 }
   @property --sf-start {
     syntax: "<number>";

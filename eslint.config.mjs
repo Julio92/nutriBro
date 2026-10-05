@@ -8,6 +8,8 @@ const eslintConfig = defineConfig([
   {
     files: [
       "src/components/ui/combobox.tsx",
+      "src/components/ui/sidebar-core.tsx",
+      "src/components/ui/sidebar-menu.tsx",
       "src/hooks/use-fluid-hover.ts",
       "src/hooks/use-merge-split.tsx",
     ],
