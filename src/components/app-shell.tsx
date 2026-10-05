@@ -269,6 +269,19 @@ export function AppShell({ initialData, identity }: AppShellProps) {
                   onMouseDown={(event) => event.stopPropagation()}
                 >
                   <button
+                    className="account-menu__item preferences-action preferences-action--menu"
+                    type="button"
+                    onClick={() => {
+                      setIsAccountMenuOpen(false);
+                      router.push("/preferences");
+                    }}
+                    aria-label="Abrir preferencias"
+                    title="Preferencias"
+                  >
+                    <Settings2 size={16} aria-hidden="true" />
+                    <span>Preferencias</span>
+                  </button>
+                  <button
                     className="account-menu__item theme-toggle theme-toggle--menu"
                     type="button"
                     onClick={() => {

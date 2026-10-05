@@ -27,11 +27,7 @@ export default async function SignInPage() {
           <span>nutriBro</span>
         </div>
         <p className="eyebrow">Tu espacio personal</p>
-        <h1 id="sign-in-title">Organiza tu semana a tu ritmo.</h1>
-        <p className="sign-in-card__description">
-          Accede a tus recetas y a tu menú recurrente en un espacio privado.
-        </p>
-
+        <h1 id="sign-in-title">Organizate a tu ritmo</h1>
         {isConfigured ? (
           <CredentialsSignInForm />
         ) : (

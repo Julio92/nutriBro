@@ -474,3 +474,136 @@ Result:
 Notes:
 - If the tag data source or the panel’s filtering logic needs a blocker discussion, document it before implementation.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-014
+Status: Done
+Priority: Medium
+Title: Add user preferences page accessible from the avatar dropdown
+Description:
+Create a user preferences/settings page for the weekly nutrition app. The page should be reached from the avatar dropdown in the top-right corner of the UI and should allow the user to toggle the visibility of meal slots for Desayuno, media mañana, comida, merienda, and cena. This is a UI-only task focused on navigation and page layout; no persistence or backend integration is required in this iteration.
+
+Scope:
+- Add a new button inside the user avatar dropdown that routes to a preferences/settings page
+- Create the new preferences page with a simple checkbox-based settings form for meal visibility
+- Keep the meal names in Spanish as: Desayuno, media mañana, comida, merienda, cena
+- Show the existing user avatar dropdown as the only entry point to the page
+- Keep the implementation limited to UI navigation and presentation
+
+Do not touch:
+- Persistence, database, or migration work
+- Any backend API or service integration
+- Nutrition logic or weekly plan calculations
+- Unrelated app-shell or dashboard behavior
+- Any scope beyond the avatar menu and the settings page UI
+
+Dependencies:
+- Existing user avatar dropdown in the app shell
+- Current route structure and navigation patterns used by the app
+
+Acceptance criteria:
+- The user avatar dropdown contains a new button/link to the preferences/settings page
+- Clicking the new button navigates to the new page
+- The page displays one checkbox per meal slot: Desayuno, media mañana, comida, merienda, and cena
+- The checkbox states are purely UI controls for this task and do not affect persistence or app data
+- The page remains accessible only through the avatar dropdown, not as a standalone main navigation entry
+
+Verification:
+- Review the avatar dropdown and the new settings page in the browser
+- Confirm the new button appears only in the dropdown and routes correctly
+- Confirm the page renders the five meal visibility checkboxes with the expected labels
+- npm run check
+
+Notes:
+- This is intentionally a UI-only first iteration, so no database, API, or persistence work is included.
+- If the route or dropdown behavior needs a blocker discussion, document it before implementation.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-015
+Status: New
+Priority: Medium
+Title: Add general user preferences table
+Human verification required: No
+Description:
+Create a database table to store general user preferences. This table should be designed to support future settings beyond the current meal-visibility feature, while for now only the meal visibility settings are implemented. The initial requirement is to manage the visibility of the standard meal slots in the weekly plan: breakfast, mid morning, lunch, snack, and dinner. Column names must be in English, and the table should be added in a way that leaves room for additional future settings without making the schema meal-specific.
+
+Scope:
+- Create a new database table for general user preferences
+- Keep the structure extensible for future settings beyond meal visibility
+- Store the current meal visibility state using English column names
+- Include at least: breakfast, mid_morning, lunch, snack, and dinner
+- Limit the initial implementation to meal visibility while keeping the schema generic
+- Align the schema with the existing repository and migration patterns
+
+Do not touch:
+- Unrelated user profile settings or app-wide configuration
+- Nutrition calculation logic or weekly-plan generation
+- UI behavior outside the user-preferences and meal-visibility flow
+- Non-database persistence or unrelated services
+
+Dependencies:
+- Existing database migration and local repository patterns
+- Current user preferences UI work or route if already introduced
+
+Acceptance criteria:
+- A new database table exists for general user preferences
+- The table is not limited to meal visibility as a concept and is ready for future settings
+- The table includes English-named columns for breakfast, mid_morning, lunch, snack, and dinner
+- The first implementation only covers meal visibility, without adding unrelated preference types
+- The schema remains consistent with the repository and migration design
+
+Verification:
+- Review the migration/schema file for the new table
+- Confirm the table is generic while including the current meal-visibility columns in English
+- Run npm run check
+- Review the repository and migration output for consistency with the existing design
+
+Notes:
+- The table should be generic enough to support future user preferences, even though the current implementation only manages meal visibility.
+- The meal labels in the product UI may be Spanish, but the database column names must be in English.
+- If a schema or repository blocker appears, document it before moving forward.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-016
+Status: New
+Priority: Medium
+Title: Evaluate EasyUI and replace the auth forms with its login/signup components
+Human verification required: Yes
+Description:
+Evaluate the EasyUI component library at https://www.easyui.site/ and learn how to install it, configure it in the project, and use the documented component patterns. The goal is to understand the library’s API, styling model, and layout conventions by implementing the sign-up and login examples from the official site, then replacing the current local sign-in and sign-up forms with the resulting EasyUI versions.
+
+Scope:
+- Review the EasyUI documentation at https://www.easyui.site/docs/introduction and https://www.easyui.site/docs/quick-start
+- Install the library and any required dependencies into the NutriBro app in a minimal, project-compatible way
+- Discover how the login and sign-up components are structured and styled in the EasyUI examples
+- Implement at least the two referenced components: https://www.easyui.site/components/login and https://www.easyui.site/components/sign-up
+- Adapt the components to the current app styling and routing patterns without changing the auth flow beyond the UI replacement
+- Replace the existing custom login and sign-up forms with the EasyUI-powered versions and keep the same user actions and validation behavior
+
+Do not touch:
+- Nutrition logic, dashboard calculations, or recipe domain behavior
+- Database schema, persistence contracts, or unrelated backend services
+- Unrelated app pages or shared UI beyond the auth screens
+- Any broad redesign outside the login and sign-up screens
+
+Dependencies:
+- Existing auth pages and forms already present in the app
+- The project’s current Next.js and styling setup
+- Access to the EasyUI docs and component examples referenced in the task
+
+Acceptance criteria:
+- The EasyUI library is successfully installed and usable in the project
+- The implementation demonstrates proper use of the documented EasyUI login and sign-up components in the app
+- The app’s login and sign-up pages render the EasyUI-based forms without breaking the existing auth workflow
+- The final UI matches the EasyUI design and integrates with the project’s current layout conventions
+- The change remains limited to the auth experience and documentation-based component adoption
+
+Verification:
+- Review the EasyUI installation and usage steps against the official docs
+- Run npm run check after the integration
+- Smoke-test the auth screens in the browser to confirm the new login and sign-up forms render and function correctly
+- Human verification of the final auth UI and form behavior
+
+Notes:
+- This task is multi-step and should be decomposed into a focused implementation plan before code changes begin, ideally in tasks/tdd-backlog.md.
+- If EasyUI does not integrate cleanly with the current project structure or styling constraints, document the blocker before proceeding.
+- Before editing code, the agent must explain the implementation plan and the validation it will run.
