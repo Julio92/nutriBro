@@ -369,6 +369,7 @@ export function AppShell({ initialData, identity }: AppShellProps) {
         <RecipeFormDialog
           key={recipeBeingEdited?.id ?? "new-recipe"}
           recipe={recipeBeingEdited}
+          existingTags={dashboard.recipes.flatMap((item) => item.tags)}
           onClose={() => setIsRecipeFormOpen(false)}
           onSave={saveRecipe}
         />

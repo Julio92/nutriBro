@@ -3,8 +3,17 @@
 import { Check, Save, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { getMealLabel, getWeekdayLabel } from "@/domain/nutrition/constants";
 import type { MealSlotView, RecipeListItem } from "@/domain/nutrition/types";
+import { getRecipeTagOptions } from "@/lib/recipe-tags";
 
 import { RecipeArt } from "./recipe-art";
 
@@ -13,35 +22,31 @@ export function getAssignmentTagItems(tags: string[]): string[] {
 }
 
 export function getAssignmentTagOptions(tags: string[]): string[] {
-  const normalizedTags = new Map<string, string>();
-
-  for (const tag of tags) {
-    const normalizedValue = tag.trim();
-
-    if (normalizedValue.length === 0) {
-      continue;
-    }
-
-    const key = normalizedValue.toLocaleLowerCase("es");
-
-    if (!normalizedTags.has(key)) {
-      normalizedTags.set(key, normalizedValue);
-    }
-  }
-
-  return [...normalizedTags.values()].sort((left, right) => left.localeCompare(right, "es", { sensitivity: "base" }));
+  return getRecipeTagOptions(tags);
 }
 
 export function matchesAssignmentRecipeTags(recipeTags: string[] | undefined, selectedTags: string[]): boolean {
-  const activeTags = getAssignmentTagOptions(selectedTags);
+  const activeTags = getAssignmentTagOptions(selectedTags).map((tag) => tag.toLocaleLowerCase("es"));
 
   if (activeTags.length === 0) {
     return true;
   }
 
-  const normalizedRecipeTags = getAssignmentTagOptions(recipeTags ?? []);
+  const normalizedRecipeTags = getAssignmentTagOptions(recipeTags ?? []).map((tag) => tag.toLocaleLowerCase("es"));
 
   return activeTags.every((selectedTag) => normalizedRecipeTags.includes(selectedTag));
+}
+
+export function matchesAssignmentRecipe(
+  recipe: Pick<RecipeListItem, "name" | "description" | "tags">,
+  query: string,
+  selectedTags: string[],
+): boolean {
+  const normalizedQuery = query.trim().toLocaleLowerCase("es");
+  const matchesQuery =
+    normalizedQuery.length === 0 || `${recipe.name} ${recipe.description}`.toLocaleLowerCase("es").includes(normalizedQuery);
+
+  return matchesQuery && matchesAssignmentRecipeTags(recipe.tags ?? [], selectedTags);
 }
 
 interface AssignmentDialogProps {
@@ -71,15 +76,7 @@ export function AssignmentDialog({
   );
 
   const visibleRecipes = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("es");
-
-    return recipes.filter((recipe) => {
-      const matchesQuery =
-        normalizedQuery.length === 0 || `${recipe.name} ${recipe.description}`.toLocaleLowerCase("es").includes(normalizedQuery);
-      const matchesTags = matchesAssignmentRecipeTags(recipe.tags ?? [], selectedTags);
-
-      return matchesQuery && matchesTags;
-    });
+    return recipes.filter((recipe) => matchesAssignmentRecipe(recipe, query, selectedTags));
   }, [query, recipes, selectedTags]);
 
   if (!slot) {
@@ -100,12 +97,6 @@ export function AssignmentDialog({
 
       return nextIds;
     });
-  }
-
-  function toggleTag(tag: string) {
-    setSelectedTags((currentTags) =>
-      currentTags.includes(tag) ? currentTags.filter((currentTag) => currentTag !== tag) : [...currentTags, tag],
-    );
   }
 
   function clearSelection() {
@@ -172,26 +163,38 @@ export function AssignmentDialog({
         </label>
 
         {availableTags.length > 0 ? (
-          <div className="assignment-tag-filter" aria-label="Filtrar recetas por etiquetas">
-            <span className="assignment-tag-filter__label">Etiquetas</span>
-            <div className="assignment-tag-filter__list">
-              {availableTags.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={`assignment-tag-option ${isSelected ? "assignment-tag-option--selected" : ""}`}
-                    onClick={() => toggleTag(tag)}
-                    aria-pressed={isSelected}
-                    disabled={isSaving}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="assignment-tag-filter">
+            <span id="assignment-tag-filter-label" className="assignment-tag-filter__label">
+              Etiquetas
+            </span>
+            <Combobox
+              items={availableTags}
+              multiple
+              value={selectedTags}
+              onValueChange={(value) => setSelectedTags(value as string[])}
+              disabled={isSaving}
+              size="compact"
+            >
+              <ComboboxChips
+                className="w-full"
+                aria-labelledby="assignment-tag-filter-label"
+                aria-label="Filtrar recetas por etiquetas"
+                placeholder="Buscar etiquetas"
+                clearable
+              />
+              <ComboboxContent className="z-[60]">
+                <ComboboxEmpty>No se encontraron etiquetas.</ComboboxEmpty>
+                <ComboboxList>
+                  {(tag) =>
+                    typeof tag === "string" ? (
+                      <ComboboxItem key={tag} value={tag}>
+                        {tag}
+                      </ComboboxItem>
+                    ) : null
+                  }
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
         ) : null}
 

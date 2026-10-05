@@ -4,6 +4,10 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
+import { Inter } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "nutriBro · Planificador semanal",
@@ -14,7 +18,7 @@ const themeScript = `try { const theme = localStorage.getItem("nutribro-theme") 
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className="h-full" suppressHydrationWarning>
+    <html lang="es" className={cn("h-full", "font-sans", inter.variable)} suppressHydrationWarning>
       <body className="min-h-full">
         <Script
           id="nutribro-theme-init"

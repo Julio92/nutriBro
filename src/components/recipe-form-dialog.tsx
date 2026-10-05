@@ -3,8 +3,17 @@
 import { ImageIcon, Minus, Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import type { RecipeDetail, RecipeInput } from "@/domain/nutrition/types";
 import { ApiClientError } from "@/lib/api-client";
+import { getCreatedRecipeTag, getRecipeTagOptions } from "@/lib/recipe-tags";
 
 interface DraftIngredient {
   key: string;
@@ -14,6 +23,7 @@ interface DraftIngredient {
 
 interface RecipeFormDialogProps {
   recipe: RecipeDetail | null;
+  existingTags: string[];
   onClose: () => void;
   onSave: (input: RecipeInput, recipeId?: string) => Promise<void>;
 }
@@ -38,13 +48,13 @@ function recipeToDraft(recipe: RecipeDetail | null) {
   };
 }
 
-export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogProps) {
+export function RecipeFormDialog({ recipe, existingTags, onClose, onSave }: RecipeFormDialogProps) {
   const [draft, setDraft] = useState(() => recipeToDraft(recipe));
-  const [tagInput, setTagInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isEditing = Boolean(recipe);
+  const tagOptions = getRecipeTagOptions([...existingTags, ...(recipe?.tags ?? []), ...draft.tags], "en-US");
 
   function updateIngredient(index: number, field: "name" | "quantity", value: string) {
     setDraft((currentDraft) => ({
@@ -65,33 +75,19 @@ export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogPr
     }));
   }
 
-  function addTag() {
-    const normalizedTag = tagInput.trim();
-    if (!normalizedTag) {
+  function createTag(query: string) {
+    const newTag = getCreatedRecipeTag(tagOptions, query);
+
+    if (!newTag) {
       return;
     }
 
-    setDraft((currentDraft) => {
-      const existingValues = currentDraft.tags ?? [];
-      const key = normalizedTag.toLocaleLowerCase("en-US");
-
-      if (existingValues.some((value) => value.toLocaleLowerCase("en-US") === key)) {
-        return currentDraft;
-      }
-
-      return {
-        ...currentDraft,
-        tags: [...existingValues, normalizedTag],
-      };
-    });
-    setTagInput("");
-  }
-
-  function removeTag(tagToRemove: string) {
     setDraft((currentDraft) => ({
       ...currentDraft,
-      tags: (currentDraft.tags ?? []).filter((tag) => tag !== tagToRemove),
+      tags: getRecipeTagOptions([...currentDraft.tags, newTag], "en-US"),
     }));
+
+    return newTag;
   }
 
   function removeIngredient(index: number) {
@@ -197,36 +193,41 @@ export function RecipeFormDialog({ recipe, onClose, onSave }: RecipeFormDialogPr
           </label>
 
           <div className="tag-editor form-field form-field--wide">
-            <label className="tag-editor__label" htmlFor="recipe-tag-input">
+            <span id="recipe-tag-label" className="tag-editor__label">
               Etiquetas
-            </label>
-            <div className="tag-input-row">
-              <input
-                id="recipe-tag-input"
-                value={tagInput}
-                onChange={(event) => setTagInput(event.target.value)}
-                placeholder="Ej. Desayuno"
+            </span>
+            <Combobox
+              items={tagOptions}
+              multiple
+              value={draft.tags}
+              onValueChange={(tags) => setDraft((currentDraft) => ({ ...currentDraft, tags: tags as string[] }))}
+              onCreate={createTag}
+              createLabel={(query) => `Crear etiqueta “${query}”`}
+              disabled={isSaving}
+              size="compact"
+            >
+              <ComboboxChips
+                className="w-full"
+                aria-labelledby="recipe-tag-label"
+                aria-label="Etiquetas de la receta"
+                placeholder="Buscar o crear una etiqueta"
                 maxLength={32}
-                disabled={isSaving}
+                clearable
               />
-              <button type="button" className="button button--secondary" onClick={addTag} disabled={isSaving || !tagInput.trim()}>
-                Añadir
-              </button>
-            </div>
-            {draft.tags.length > 0 ? (
-              <div className="tag-list" aria-label="Etiquetas de la receta">
-                {draft.tags.map((tag) => (
-                  <span className="tag-pill" key={tag}>
-                    <span>{tag}</span>
-                    <button type="button" className="tag-pill__remove" onClick={() => removeTag(tag)} aria-label={`Quitar etiqueta ${tag}`}>
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="muted-copy">Añade categorías para organizar la receta.</p>
-            )}
+              <ComboboxContent className="z-[60]">
+                <ComboboxEmpty>No hay etiquetas que coincidan.</ComboboxEmpty>
+                <ComboboxList>
+                  {(tag) =>
+                    typeof tag === "string" ? (
+                      <ComboboxItem key={tag} value={tag}>
+                        {tag}
+                      </ComboboxItem>
+                    ) : null
+                  }
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+            <p className="muted-copy">Añade categorías para organizar la receta.</p>
           </div>
 
           <label className="form-field form-field--wide">

@@ -607,3 +607,63 @@ Notes:
 - This task is multi-step and should be decomposed into a focused implementation plan before code changes begin, ideally in tasks/tdd-backlog.md.
 - If EasyUI does not integrate cleanly with the current project structure or styling constraints, document the blocker before proceeding.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+ID: T-017
+Status: Done
+Priority: Medium
+Title: Use Fluid Functionalism Combobox for recipe tag selection
+Human verification required: Yes
+Description:
+Replace tag selection in the "Asignar Recetas" panel and the "Crear receta / Editar receta" form with the Fluid Functionalism searchable, multi-select Combobox. In the recipe form, users can create tags from their query while seeing tags already used on their recipes. Keep recipe-name search, assignment, save, and persistence behavior intact.
+
+Scope:
+- Install the Combobox registry component and its required shared files/dependencies using the provided shadcn command
+- Use the multiple-selection/chips mode to search, select, and deselect recipe tags
+- Preserve multi-tag filtering and the existing recipe-name search
+- Replace the recipe form's manual tag input and add button with the same Combobox
+- Show existing user recipe tags in the recipe form dropdown and allow creating a new tag from the query
+- Preserve the current recipe tag length limit, deduplication, and save contract
+- Keep the field accessible, responsive, and compatible with NutriBro's theme
+- Add focused regression coverage for tag normalization and combined filter behavior
+
+Do not touch:
+- Recipe assignment/save behavior
+- Recipe tags persistence or API behavior
+- Unrelated recipe-form fields or validation behavior
+- Unrelated UI components or app architecture
+- Unrequested registry components or broad redesign
+
+Dependencies:
+- Existing recipe tags and assignment-dialog filtering
+- Tailwind v4, the `@/` import alias, and npm
+
+Acceptance criteria:
+- The "Etiquetas" section uses a searchable multi-select Combobox instead of displaying every tag as a button
+- Users can select multiple tags, remove selections, and see matching recipes filtered alongside the existing recipe-name query
+- Create/edit recipe uses searchable, multiple-selection tags with existing recipe tags available as options
+- A new tag can be created from a non-empty query and is selected immediately without duplicating case-insensitive matches
+- Recipe tags continue to satisfy the existing 32-character per-tag validation limit
+- Empty tag data and no-match states remain clear and usable
+- The assignment/save workflow is unchanged
+- The required component dependencies and any font/configuration changes are identified
+
+Verification:
+- Run focused assignment-dialog tests
+- Run focused recipe-form tag tests
+- Run `npm run check`
+- Smoke-test keyboard, filtering, multi-selection, and create-from-query behavior in the browser
+- Human verification of the tag selectors in both dialogs
+
+Result:
+- Installed the Fluid Functionalism Combobox and its Base UI, Framer Motion, class-variance-authority, and shared support files. `lucide-react` was already present; `cn`, `tw-animate-css`, and the shadcn CLI were also added (CLI in devDependencies).
+- Replaced the tag chips with a searchable, multi-select chips field; recipe-name search and AND tag filtering remain combined, with case-insensitive tag matching.
+- Replaced the recipe form's manual tag entry with the same searchable multi-select field. Existing tags are included as dropdown options, and create-from-query adds a trimmed new tag to the draft and selects it immediately; duplicate values are ignored case-insensitively and tags over 32 characters are rejected.
+- Added focused coverage for case-insensitive and combined filtering; `npm run check` passed (lint, all 31 tests, and production build).
+- Added tag-option/create-query tests. The focused tests passed (9), and `npm run check` passed (lint, all 34 tests, and production build).
+- User confirmed the Combobox experience is working and marked the task complete.
+- Removed the nested input border/background from the recipe-form Combobox so its wrapper is the only visible field border; editor diagnostics report no errors.
+
+Notes:
+- The user explicitly requested the registry command with `--overwrite`; inspect every generated/overwritten file and keep changes in scope.
+- The user confirmed the assignment Combobox works and requested extending the same UI to the recipe create/edit form.
+- Before editing code, explain the implementation plan and validation.

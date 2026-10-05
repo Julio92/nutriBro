@@ -35,3 +35,45 @@ Learn EasyUI’s documented installation, styling, and usage patterns by integra
 - The referenced EasyUI content may provide copy-paste components rather than an installable package; follow the actual official setup and avoid inventing package APIs.
 - EasyUI’s styling or framework assumptions may conflict with this project’s Next.js/Tailwind setup. Prefer the smallest documented compatible integration; if no clean path exists, stop and document the blocker rather than broadening scope.
 - UI replacement must not bypass existing server actions, Zod validation, auth feedback, or accessibility requirements.
+
+## T-017 — Use Fluid Functionalism Combobox for recipe tag selection
+
+### Objective
+Use the Fluid Functionalism Combobox in both the assignment dialog and the recipe create/edit form. In the recipe form, surface existing user tags in the options and enable creation of a new tag from the search query.
+
+### Scope and files
+- Run the user-provided `npx shadcn@latest add https://www.fluidfunctionalism.com/r/base/combobox.json --overwrite` command and inspect all generated files and package changes.
+- Update `src/components/assignment-dialog.tsx` to use the registry's multiple-selection field and existing tag selection state.
+- Pass existing recipe tags from `src/components/app-shell.tsx` into `src/components/recipe-form-dialog.tsx`.
+- Replace the recipe form's manual tag input with the multi-select Combobox, adding custom queries to the recipe draft and returning the new option so it is selected.
+- Add focused tests for option normalization, new-tag creation, deduplication, and the existing 32-character constraint.
+- Update `src/app/globals.css` only as needed to remove obsolete tag-pill styles or align spacing/theme.
+- Keep tests adjacent to the existing assignment and recipe-form tag behavior.
+- Update `tasks/backlog.md` and this execution plan to record completion and validation.
+
+### Ordered implementation units
+1. Inspect the generated Combobox and helper dependencies; identify their direct/transitive npm dependencies and verify font and styling assumptions against the project.
+2. Integrate the recipe-form Combobox as a controlled multi-select, passing deduplicated existing tags and implementing `onCreate` to append/select a valid new draft tag.
+3. Remove only obsolete manual tag-entry styles and add focused tests for tag normalization, create-from-query, duplicate handling, and combined assignment filtering.
+4. Run focused tests and `npm run check`; inspect the final diff for unrelated overwrite or scaffolding changes. Report any browser-only UX verification still needed.
+
+### Validation
+- Run the assignment-dialog test file through the existing Vitest script.
+- Run focused recipe-tag helper tests.
+- Run `npm run check` (lint, tests, and production build).
+- Review generated package dependencies and changed files; perform a browser smoke test of both assignment and create/edit forms if practical.
+
+### Risks
+- Registry dependencies may include additional shared component files and theme conventions beyond the component itself; preserve the app's existing design tokens and avoid unrelated generated replacements.
+- The component expects Inter for variable-weight animation. Verify what the installer configures and add only an in-scope font setup if needed.
+- Keep the 32-character limit aligned with the existing recipe tag schema; the create row must never bypass tag normalization or persistence validation.
+
+### Implementation result
+- Installed the Base UI registry variant. Direct Combobox requirements: `@base-ui/react`, `framer-motion`, `class-variance-authority`, `cn`; `lucide-react` was already installed. Registry shared files also use Base UI Scroll Area. The CLI added `tw-animate-css` for its generated Tailwind setup and `shadcn` as a dev dependency.
+- Changed the generated font setup to Inter and mapped registry surface/color tokens to NutriBro's existing light/dark theme tokens.
+- Replaced the visible tag button list with a searchable multiple-selection chips field. Existing selected-tag state now comes directly from Combobox values; filtering remains AND-based and combines with recipe text search.
+- Replaced the recipe form's separate input/add button and tag pills with the same Combobox, seeded options from all dashboard recipe tags (including the current recipe's tags), and configured the create row in Spanish. Successful creation appends the trimmed tag to draft state and returns it so Combobox selects it; case-insensitive duplicates and values above the existing 32-character schema maximum are not created.
+- Added normalized case-insensitive and combined-query tests. Focused tests passed (6); `npm run check` passed (8 test files, 31 tests, build). `git diff --check` passed.
+- Added shared recipe-tag helper tests for existing option normalization, valid query creation, case-insensitive duplicates, empty queries, and the 32-character boundary. Focused tests passed (9); `npm run check` passed (9 test files, 34 tests, build).
+- Removed generic form input border styling from the Combobox's nested input, leaving its outer field border visible.
+- User confirmed the Combobox experience and marked T-017 complete.

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getAssignmentTagItems, getAssignmentTagOptions, matchesAssignmentRecipeTags } from "./assignment-dialog";
+import {
+  getAssignmentTagItems,
+  getAssignmentTagOptions,
+  matchesAssignmentRecipe,
+  matchesAssignmentRecipeTags,
+} from "./assignment-dialog";
 
 describe("assignment dialog recipe metadata", () => {
   it("returns the first three tags for a recipe when tag data is available", () => {
@@ -25,5 +30,17 @@ describe("assignment dialog recipe metadata", () => {
     expect(matchesAssignmentRecipeTags(["Cena", "Vegetariano"], ["Cena", "Vegetariano", ""])).toBe(true);
 
     expect(matchesAssignmentRecipeTags(["Cena"], ["Cena", "Vegetariano"])).toBe(false);
+  });
+
+  it("matches selected tags without depending on their letter case", () => {
+    expect(matchesAssignmentRecipeTags(["Desayuno"], ["desayuno"])).toBe(true);
+  });
+
+  it("combines the recipe-name query with the selected tag filters", () => {
+    const recipe = { name: "Salmón al horno", description: "Cena ligera", tags: ["Cena", "Pescado"] };
+
+    expect(matchesAssignmentRecipe(recipe, "salmón", ["Pescado"])).toBe(true);
+    expect(matchesAssignmentRecipe(recipe, "salmón", ["Vegetariano"])).toBe(false);
+    expect(matchesAssignmentRecipe(recipe, "pollo", ["Pescado"])).toBe(false);
   });
 });
