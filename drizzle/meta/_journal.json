@@ -50,6 +50,13 @@
       "when": 1790177826136,
       "tag": "0006_sparkling_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791284030603,
+      "tag": "0007_add_user_preferences",
+      "breakpoints": true
     }
   ]
 }

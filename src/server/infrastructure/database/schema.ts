@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import {
+  boolean,
   foreignKey,
   index,
   integer,
@@ -101,6 +102,18 @@ export const userCredentials = pgTable("user_credentials", {
     .defaultNow()
     .notNull(),
   createdAt: createdAtColumn(),
+});
+
+/** Preferencias generales de cada cuenta; inicialmente controlan la visibilidad de comidas. */
+export const userPreferences = pgTable("user_preferences", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  breakfast: boolean("breakfast").default(true).notNull(),
+  midMorning: boolean("mid_morning").default(true).notNull(),
+  lunch: boolean("lunch").default(true).notNull(),
+  snack: boolean("snack").default(true).notNull(),
+  dinner: boolean("dinner").default(true).notNull(),
 });
 
 /** Registra qué versión de la biblioteca inicial recibió cada cuenta. */
@@ -245,6 +258,7 @@ export const databaseSchema = {
   authSessions,
   authVerificationTokens,
   userCredentials,
+  userPreferences,
   userDefaultRecipeLibraries,
   recipes,
   recipeIngredients,

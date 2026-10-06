@@ -519,7 +519,7 @@ Notes:
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
 
 ID: T-015
-Status: New
+Status: Done
 Priority: Medium
 Title: Add general user preferences table
 Human verification required: No
@@ -562,6 +562,13 @@ Notes:
 - The meal labels in the product UI may be Spanish, but the database column names must be in English.
 - If a schema or repository blocker appears, document it before moving forward.
 - Before editing code, the agent must explain the implementation plan and the validation it will run.
+
+Implementation result:
+- Added `user_preferences` with a cascading one-to-one user key and five non-null, default-true meal visibility booleans.
+- Added migration `0007_add_user_preferences`, including a backfill row for each existing user. Future accounts have no row until preferences are explicitly saved; a missing row means all meals are visible.
+- Applied the migration to the database configured in `.env.local`; PostgreSQL verification found 5 users, 5 preference rows, and 0 users without a row at verification time. All five boolean columns are non-null/default-true and the user foreign key cascades on delete.
+- Updated the relational diagram and data-model documentation. No UI, API, service, or account-registration behavior was changed.
+- `npm run db:generate -- --name=verify_user_preferences` reported no schema changes. `npm run check` passed (10 test files / 38 tests and production build); `git diff --check` passed. ESLint reported 28 existing warnings and no errors.
 
 ID: T-016
 Status: New
@@ -1049,3 +1056,52 @@ Result:
 - Added four focused mapping tests. `npm run check` passed: lint (0 errors; 28 existing warnings in generated UI components), 10 test files / 38 tests, production build, and standalone preparation. `git diff --check` passed.
 - The user confirmed that the three-view navigation and the final heading alignment are perfect.
 - Aligned Hoy, Plan, and Recetas primary heading levels and typography; removed the weekly calendar's leftover outer top gap. `npm run check` passed (38 tests, production build; 28 existing lint warnings and no errors), and `git diff --check` passed.
+
+ID: T-026
+Status: Done
+Priority: High
+Title: Persist meal visibility preferences and apply them to the dashboard
+Human verification required: Yes
+Description:
+Load each user's saved meal visibility from `user_preferences`, allow changes to be saved from Preferencias > General, and apply committed settings to the Hoy and Plan views.
+
+Scope:
+- Load preferences with the authenticated dashboard on initial page load; a missing row means all five meals are visible.
+- Add strict domain validation, a dedicated preferences repository/service, and an authenticated `PATCH /api/preferences` endpoint.
+- Use an explicit Save action that persists all five booleans together; retain the draft and show retryable feedback on failure.
+- Share committed preference state across General, Hoy, and Plan; filter hidden meals from both views.
+- Add focused domain/service/repository/route/filter tests and update architecture/API documentation.
+
+Do not touch:
+- Database schema or migration (T-015 and migration 0007 already exist and are applied to the configured database).
+- Account registration (new users intentionally get a preference row only when they save preferences).
+- Recipe, weekly-plan, nutrition, or authentication behavior outside preference authorization.
+- Autosave, loading preferences on every dialog reopen, or unrelated visual redesign.
+
+Acceptance criteria:
+- Initial authenticated page data contains the user's saved preferences, or all-true defaults when the row is absent.
+- Only the authenticated user's row can be read or updated; client payloads cannot select a user ID.
+- General displays database values and saves the complete five-boolean selection only when Save is activated.
+- Save success commits the shared UI state; failures retain the draft, report an error, and allow retry.
+- Hoy and Plan omit hidden meal slots, including when all meals are hidden; visible slot behavior remains unchanged.
+- Missing-row reads are read-only and saving creates the row with all current choices.
+- Focused tests cover validation, defaults, persistence, route protection, and meal filtering.
+- Architecture and HTTP contract documentation describe the new flow.
+
+Verification:
+- Run focused tests, `npm run check`, and `git diff --check`.
+- Smoke-test initial values, checkbox draft/save/reopen, failed-save retry, and hidden/visible meals in Hoy and Plan.
+- Human verification of the saved preferences and dashboard filtering before marking Done.
+
+Notes:
+- Domain/API keys use `breakfast`, `midMorning`, `lunch`, `snack`, and `dinner`; the SQL name `mid_morning` is mapped at the persistence boundary. Spanish labels remain unchanged.
+- Load once alongside the server-rendered dashboard to ensure the first Hoy/Plan render respects saved visibility; do not refetch on dialog reopen.
+- Before editing code, explain the implementation plan and validation.
+
+Result:
+- Added strict `MealVisibilityPreferences` validation and a pure slot-visibility filter with focused tests.
+- Added a dedicated preferences repository/service and an authenticated `PATCH /api/preferences` route. Missing rows read as all-visible without insertion; saving upserts by the session user ID.
+- Loaded preferences alongside the initial dashboard, shared committed values through AppShell, added an explicit General save action with pending/success/error feedback, and filtered meals in Hoy and Plan with an all-hidden empty state.
+- Updated the architecture and HTTP contract documentation. No database schema/migration or account-registration changes were made.
+- `npm run check` passed (15 test files / 52 tests and production build); `git diff --check` passed. ESLint reports 28 existing warnings and no errors.
+- The user verified the preferences integration and confirmed the task can be closed; T-026 is Done.

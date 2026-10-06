@@ -23,7 +23,8 @@ import type {
   RecipeDetail,
   RecipeInput,
 } from "@/domain/nutrition/types";
-import { ApiClientError, nutritionApi } from "@/lib/api-client";
+import type { MealVisibilityPreferences } from "@/domain/preferences/types";
+import { ApiClientError, nutritionApi, preferencesApi } from "@/lib/api-client";
 import {
   getAppViewForTabIndex,
   getAppViewTabIndex,
@@ -46,15 +47,17 @@ type Toast = { message: string; tone: ToastTone } | null;
 
 interface AppShellProps {
   initialData: DashboardData;
+  initialMealVisibility: MealVisibilityPreferences;
   identity: {
     displayName: string;
     email: string | null;
   };
 }
 
-export function AppShell({ initialData, identity }: AppShellProps) {
+export function AppShell({ initialData, initialMealVisibility, identity }: AppShellProps) {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(initialData);
+  const [mealVisibility, setMealVisibility] = useState(initialMealVisibility);
   const [activeView, setActiveView] = useState<AppView>("today");
   const selectedTabIndex = getAppViewTabIndex(activeView);
   const [assignmentSlot, setAssignmentSlot] = useState<MealSlotView | null>(null);
@@ -183,6 +186,11 @@ export function AppShell({ initialData, identity }: AppShellProps) {
     }
   }
 
+  async function saveMealVisibility(preferences: MealVisibilityPreferences) {
+    const savedPreferences = await preferencesApi.save(preferences);
+    setMealVisibility(savedPreferences);
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Navegación principal">
@@ -254,12 +262,17 @@ export function AppShell({ initialData, identity }: AppShellProps) {
           <TabsSubtlePanel index={0} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
             <TodayMeals
               plan={dashboard.plan}
+              mealVisibility={mealVisibility}
               onOpenRecipe={(recipeId) => void openRecipe(recipeId)}
               onSelectSlot={setAssignmentSlot}
             />
           </TabsSubtlePanel>
           <TabsSubtlePanel index={1} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
-            <WeeklyBoard plan={dashboard.plan} onSelectSlot={setAssignmentSlot} />
+            <WeeklyBoard
+              plan={dashboard.plan}
+              mealVisibility={mealVisibility}
+              onSelectSlot={setAssignmentSlot}
+            />
           </TabsSubtlePanel>
           <TabsSubtlePanel index={2} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
             <RecipeLibrary
@@ -336,7 +349,12 @@ export function AppShell({ initialData, identity }: AppShellProps) {
         />
       ) : null}
 
-      <SettingsDialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen} />
+      <SettingsDialog
+        open={isPreferencesOpen}
+        onOpenChange={setIsPreferencesOpen}
+        mealVisibility={mealVisibility}
+        onSaveMealVisibility={saveMealVisibility}
+      />
 
       {toast ? (
         <div className={`toast toast--${toast.tone}`} role="status" aria-live="polite">

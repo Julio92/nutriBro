@@ -5,6 +5,7 @@ import type {
   RecipeDetail,
   RecipeInput,
 } from "@/domain/nutrition/types";
+import type { MealVisibilityPreferences } from "@/domain/preferences/types";
 
 export class ApiClientError extends Error {
   constructor(
@@ -71,4 +72,12 @@ export const nutritionApi = {
         body: JSON.stringify({ recipeIds }),
       },
     ),
+};
+
+export const preferencesApi = {
+  save: (preferences: MealVisibilityPreferences) =>
+    request<MealVisibilityPreferences>("/api/preferences", {
+      method: "PATCH",
+      body: JSON.stringify(preferences),
+    }),
 };

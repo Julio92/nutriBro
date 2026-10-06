@@ -1,9 +1,11 @@
 "use client";
 
-import { ArrowUpRight, CalendarDays, Pencil, Plus } from "lucide-react";
+import { ArrowUpRight, CalendarDays, EyeOff, Pencil, Plus } from "lucide-react";
 
 import { MEAL_TYPES, WEEKDAYS } from "@/domain/nutrition/constants";
 import type { MealSlotView, WeekdayId, WeeklyPlanView } from "@/domain/nutrition/types";
+import type { MealVisibilityPreferences } from "@/domain/preferences/types";
+import { filterVisibleMealSlots } from "@/domain/preferences/visibility";
 
 const NATIVE_DAY_TO_WEEKDAY: readonly WeekdayId[] = [
   "sunday",
@@ -17,6 +19,7 @@ const NATIVE_DAY_TO_WEEKDAY: readonly WeekdayId[] = [
 
 interface TodayMealsProps {
   plan: WeeklyPlanView;
+  mealVisibility: MealVisibilityPreferences;
   onOpenRecipe: (recipeId: string) => void;
   onSelectSlot: (slot: MealSlotView) => void;
 }
@@ -37,14 +40,15 @@ function formatTodayDate() {
 
 export function TodayMeals({
   plan,
+  mealVisibility,
   onOpenRecipe,
   onSelectSlot,
 }: TodayMealsProps) {
   const day = getTodayWeekdayId();
   const dayLabel = WEEKDAYS.find((item) => item.id === day)?.label ?? "Hoy";
-  const slots = MEAL_TYPES.map((meal) =>
+  const slots = filterVisibleMealSlots(MEAL_TYPES.map((meal) =>
     plan.slots.find((slot) => slot.day === day && slot.meal === meal.id),
-  ).filter((slot): slot is MealSlotView => Boolean(slot));
+  ).filter((slot): slot is MealSlotView => Boolean(slot)), mealVisibility);
 
   return (
     <section className="today-section" aria-labelledby="today-heading">
@@ -58,16 +62,24 @@ export function TodayMeals({
         </div>
       </div>
 
-      <div className="today-meals-grid">
-        {slots.map((slot) => (
-          <TodayMealCard
-            key={slot.id}
-            slot={slot}
-            onOpenRecipe={onOpenRecipe}
-            onSelectSlot={onSelectSlot}
-          />
-        ))}
-      </div>
+      {slots.length > 0 ? (
+        <div className="today-meals-grid">
+          {slots.map((slot) => (
+            <TodayMealCard
+              key={slot.id}
+              slot={slot}
+              onOpenRecipe={onOpenRecipe}
+              onSelectSlot={onSelectSlot}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state" role="status">
+          <span className="empty-state__icon"><EyeOff size={20} aria-hidden="true" /></span>
+          <h3>No hay comidas visibles</h3>
+          <p>Activa las comidas que quieras ver en Preferencias, en la sección General.</p>
+        </div>
+      )}
     </section>
   );
 }

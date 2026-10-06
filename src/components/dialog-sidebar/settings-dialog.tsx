@@ -30,6 +30,8 @@ import { useIcons, type IconName } from "@/lib/icon-context";
 import { cn } from "@/lib/utils";
 import { fontWeights } from "@/lib/font-weight";
 import { useTheme, type ThemePreference } from "@/components/theme-provider";
+import type { MealVisibilityPreferences } from "@/domain/preferences/types";
+import type { MealTypeId } from "@/domain/nutrition/types";
 
 // ---------------------------------------------------------------------------
 // A settings dialog: the `xl` Dialog as a canvas, a non-collapsing Sidebar
@@ -51,14 +53,14 @@ interface SettingsSection {
 }
 
 type PreferencesSection = "general" | "appearance";
-type MealPreferenceKey = "desayuno" | "mediaManana" | "comida" | "merienda" | "cena";
+type MealPreferenceKey = MealTypeId;
 
 const MEAL_OPTIONS: { key: MealPreferenceKey; label: string }[] = [
-  { key: "desayuno", label: "Desayuno" },
-  { key: "mediaManana", label: "Media Mañana" },
-  { key: "comida", label: "Comida" },
-  { key: "merienda", label: "Merienda" },
-  { key: "cena", label: "Cena" },
+  { key: "breakfast", label: "Desayuno" },
+  { key: "midMorning", label: "Media Mañana" },
+  { key: "lunch", label: "Comida" },
+  { key: "snack", label: "Merienda" },
+  { key: "dinner", label: "Cena" },
 ];
 
 const SECTIONS: SettingsSection[] = [
@@ -70,7 +72,9 @@ export interface SettingsDialogProps {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** The section shown first. @default "appearance" */
+  mealVisibility: MealVisibilityPreferences;
+  onSaveMealVisibility: (preferences: MealVisibilityPreferences) => Promise<void>;
+  /** The section shown first. @default "general" */
   defaultSection?: PreferencesSection;
 }
 
@@ -78,18 +82,41 @@ export function SettingsDialog({
   open,
   defaultOpen,
   onOpenChange,
-  defaultSection = "appearance",
+  mealVisibility,
+  onSaveMealVisibility,
+  defaultSection = "general",
 }: SettingsDialogProps) {
   const icons = useIcons();
   const [section, setSection] = useState<PreferencesSection>(defaultSection);
-  const [mealPreferences, setMealPreferences] = useState({
-    desayuno: true,
-    mediaManana: true,
-    comida: true,
-    merienda: true,
-    cena: true,
-  });
+  const [draftMealVisibility, setDraftMealVisibility] = useState(mealVisibility);
+  const [isSavingMealVisibility, setIsSavingMealVisibility] = useState(false);
+  const [mealVisibilitySaveStatus, setMealVisibilitySaveStatus] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
   const current = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0];
+
+  async function saveMealVisibility() {
+    setIsSavingMealVisibility(true);
+    setMealVisibilitySaveStatus(null);
+    try {
+      await onSaveMealVisibility(draftMealVisibility);
+      setMealVisibilitySaveStatus({
+        tone: "success",
+        message: "Preferencias guardadas.",
+      });
+    } catch (error) {
+      setMealVisibilitySaveStatus({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "No se han podido guardar las preferencias. Inténtalo de nuevo.",
+      });
+    } finally {
+      setIsSavingMealVisibility(false);
+    }
+  }
 
   return (
     <Dialog open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
@@ -182,13 +209,19 @@ export function SettingsDialog({
               <div className="flex flex-col gap-6 px-6 pb-6">
                 <SelectionPanel
                   id={current.id}
-                  mealPreferences={mealPreferences}
-                  onToggleMealPreference={(key) =>
-                    setMealPreferences((currentPreferences) => ({
+                  mealPreferences={draftMealVisibility}
+                  savedMealPreferences={mealVisibility}
+                  isSaving={isSavingMealVisibility}
+                  saveStatus={mealVisibilitySaveStatus}
+                  onSaveMealPreferences={saveMealVisibility}
+                  onToggleMealPreference={(key) => {
+                    if (isSavingMealVisibility) return;
+                    setMealVisibilitySaveStatus(null);
+                    setDraftMealVisibility((currentPreferences) => ({
                       ...currentPreferences,
                       [key]: !currentPreferences[key],
-                    }))
-                  }
+                    }));
+                  }}
                 />
               </div>
             </ScrollArea>
@@ -235,10 +268,18 @@ function SettingRow({
 function SelectionPanel({
   id,
   mealPreferences,
+  savedMealPreferences,
+  isSaving,
+  saveStatus,
+  onSaveMealPreferences,
   onToggleMealPreference,
 }: {
   id: PreferencesSection;
-  mealPreferences: Record<MealPreferenceKey, boolean>;
+  mealPreferences: MealVisibilityPreferences;
+  savedMealPreferences: MealVisibilityPreferences;
+  isSaving: boolean;
+  saveStatus: { tone: "success" | "error"; message: string } | null;
+  onSaveMealPreferences: () => void;
   onToggleMealPreference: (key: MealPreferenceKey) => void;
 }) {
   if (id === "appearance") {
@@ -248,6 +289,10 @@ function SelectionPanel({
   return (
     <SettingsPanel
       mealPreferences={mealPreferences}
+      savedMealPreferences={savedMealPreferences}
+      isSaving={isSaving}
+      saveStatus={saveStatus}
+      onSaveMealPreferences={onSaveMealPreferences}
       onToggleMealPreference={onToggleMealPreference}
     />
   );
@@ -255,15 +300,26 @@ function SelectionPanel({
 
 function SettingsPanel({
   mealPreferences,
+  savedMealPreferences,
+  isSaving,
+  saveStatus,
+  onSaveMealPreferences,
   onToggleMealPreference,
 }: {
-  mealPreferences: Record<MealPreferenceKey, boolean>;
+  mealPreferences: MealVisibilityPreferences;
+  savedMealPreferences: MealVisibilityPreferences;
+  isSaving: boolean;
+  saveStatus: { tone: "success" | "error"; message: string } | null;
+  onSaveMealPreferences: () => void;
   onToggleMealPreference: (key: MealPreferenceKey) => void;
 }) {
   const checkedIndices = new Set(
     MEAL_OPTIONS.flatMap(({ key }, index) =>
       mealPreferences[key] ? [index] : []
     )
+  );
+  const hasChanges = MEAL_OPTIONS.some(
+    ({ key }) => mealPreferences[key] !== savedMealPreferences[key],
   );
 
   return (
@@ -278,6 +334,7 @@ function SettingsPanel({
         checkedIndices={checkedIndices}
         aria-label="Configuración de visibilidad de comidas"
         aria-describedby="meal-preference-description"
+        aria-disabled={isSaving}
         className="w-full"
       >
         {MEAL_OPTIONS.map(({ key, label }, index) => (
@@ -286,10 +343,30 @@ function SettingsPanel({
             index={index}
             label={label}
             checked={mealPreferences[key]}
+            aria-disabled={isSaving}
             onToggle={() => onToggleMealPreference(key)}
           />
         ))}
       </CheckboxGroup>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          className="button button--primary"
+          type="button"
+          disabled={!hasChanges || isSaving}
+          onClick={onSaveMealPreferences}
+        >
+          {isSaving ? "Guardando…" : "Guardar cambios"}
+        </button>
+        {saveStatus ? (
+          <p
+            className={saveStatus.tone === "error" ? "text-destructive" : "text-muted-foreground"}
+            role={saveStatus.tone === "error" ? "alert" : "status"}
+            aria-live={saveStatus.tone === "error" ? "assertive" : "polite"}
+          >
+            {saveStatus.message}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

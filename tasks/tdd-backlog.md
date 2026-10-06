@@ -392,3 +392,70 @@ Provide the same three views on mobile and desktop: Hoy (today's meals), Plan / 
 - Removed WeeklyBoard's 42px desktop / 28px mobile top margin left over from its former position beneath Hoy. All headings now begin at the same content inset.
 - `npm run check` passed (10 test files / 38 tests, production build and standalone preparation); lint reports 28 existing warnings and no errors. `git diff --check` passed.
 - T-025 is in Review. Navigation was confirmed by the user; final visual confirmation of the heading alignment remains requested.
+
+## T-015 — Add general user preferences table
+
+### Objective
+Create a generic user preferences table with explicit meal-visibility booleans, preserving the all-visible default and existing user ownership conventions.
+
+### Ordered implementation units
+1. Add the `userPreferences` Drizzle table with `user_id` as a cascading primary-key foreign key to `users.id`, plus non-null `breakfast`, `mid_morning`, `lunch`, `snack`, and `dinner` booleans defaulting to true; register it in `databaseSchema`.
+2. Generate the next PostgreSQL migration after `0006_sparkling_green_goblin`; retain the generated schema changes and add an idempotence-appropriate backfill for all users existing at migration time. Do not add preference rows for users created after the migration unless they explicitly save preferences.
+3. Update `docs/data-model.md` with the one-to-one relationship, columns/defaults, existing-user backfill, and the rule that a missing row for a later account means all meals are visible.
+4. Review generated schema and migration metadata, inspect the final diff, and ensure no UI, API, service, or registration behavior changed.
+
+### Validation
+- Review the generated SQL for primary/foreign keys, cascade deletion, `NOT NULL` and `DEFAULT true` on all five fields, and backfill from `users`.
+- Run `npm run check` and `git diff --check`.
+- Confirm T-015 acceptance criteria and changed-file scope before recording the implementation result.
+
+### Scope decisions
+- Database table: `user_preferences`; meal columns: `breakfast`, `mid_morning`, `lunch`, `snack`, `dinner`.
+- Backfill existing users with all five values true. For accounts registered after this migration, leave the row absent until preferences are explicitly saved; future preference reads must treat absence as all true.
+- Do not wire settings UI, APIs/services, or registration inserts in this task.
+
+### Implementation result
+- Added and registered `userPreferences` in the Drizzle schema with `user_id` as the cascading primary-key foreign key and five non-null booleans defaulting to true.
+- Generated migration `0007_add_user_preferences` and added an insert-select backfill from `users`; Drizzle generated snapshot and journal metadata are synchronized.
+- Applied the migration to the `.env.local` database and verified the PostgreSQL schema: five default-true, non-null boolean columns, cascading user FK, 5 users, 5 preference rows, and 0 users missing a preference row at verification time.
+- Documented the relationship, column meanings/defaults, backfill, and missing-row semantics in `docs/data-model.md`.
+- No UI/API/service/account-registration changes were made. `npm run db:generate -- --name=verify_user_preferences` reported no schema changes; `npm run check` passed (10 test files / 38 tests and production build); `git diff --check` passed. ESLint reported 28 pre-existing warnings and no errors.
+
+## T-026 — Persist meal visibility preferences and apply them to the dashboard
+
+### Objective
+Load the existing per-user meal-visibility record with the authenticated dashboard, save General changes atomically through an authenticated API, and filter meal rows in Hoy and Plan using committed values.
+
+### Ordered implementation units
+1. Add a domain preferences DTO and strict Zod parser using the five `MealTypeId`-aligned keys. Add and test a pure helper for filtering meal slots by the visibility record.
+2. Add a dedicated `UserPreferencesRepository` port, PostgreSQL implementation, service, and production composition. Reads of an absent row return all-true defaults without insertion; saves upsert all five fields for the supplied authenticated user.
+3. Add `PATCH /api/preferences` using the existing same-origin, JSON body, identity, service, and response-envelope patterns. Reject malformed/incomplete/extra input; derive identity only from the authenticated session.
+4. Load dashboard and preferences together in the authenticated server page. Pass initial preferences into AppShell and own the committed preference state there so the initial dashboard and settings dialog use the same values.
+5. Add a typed preferences update method to `api-client.ts`. Make SettingsDialog edit a draft and expose a Spanish Save action with pending, success, and retryable error states. Commit draft state to AppShell only after PATCH succeeds; retain the draft on failure.
+6. Filter TodayMeals and WeeklyBoard by MealTypeId; add a clear empty state if all meals are hidden. Test individual hidden values, all-visible/all-hidden, and missing slots.
+7. Update `docs/data-model.md` with PATCH contract and `docs/architecture.md` with initial load, service/repository, and save flow. Review scope and run focused tests, `npm run check`, and `git diff --check`.
+8. Smoke-test authenticated initial rendering, edit/save/reopen, failed-save retry, and visibility in Hoy/Plan at desktop and mobile sizes. Keep T-026 in Review until the user confirms the UI behavior.
+
+### Validation
+- Domain/schema tests: accept the exact five booleans; reject missing, wrong-type, null, or unknown fields.
+- Service/repository tests: missing row returns all-true without insert; persisted values round-trip; writes are scoped to the authenticated user; upsert creates absent row.
+- Route tests: authenticated PATCH success, unauthenticated rejection, same-origin checks, malformed/invalid payloads, and no client identity override.
+- Filtering tests: each meal independently, all visible, all hidden, and absent plan slots.
+- UI smoke test: server-provided values populate General and both views; only successful save changes committed dashboard visibility; failure leaves draft retryable.
+- Run `npm run check` and `git diff --check`; preserve unrelated existing worktree modifications.
+
+### Scope decisions and risks
+- The existing `user_preferences` schema/migration is already present and applied; do not generate a migration.
+- Missing rows are interpreted as all visible until Save; GET/read must not create a row. New account creation remains unchanged.
+- Keep preferences independent of the nutrition aggregate and never accept user identity from client JSON.
+- Initial preferences load happens alongside the dashboard (once per server page load) so there is no flash of hidden meals; reopening the dialog does not refetch.
+- The existing Vitest setup is Node-oriented; focus unit/service/repository/API tests, and perform dialog interaction as a browser/manual smoke test rather than adding a component-test stack without need.
+
+### Implementation result
+- Added `MealVisibilityPreferences`, strict Zod parsing, and a pure visible-slot filter, with focused domain tests.
+- Added a dedicated `UserPreferencesRepository`, PostgreSQL implementation (read defaults without inserting; upsert on save), service, and production composition.
+- Added authenticated `PATCH /api/preferences` with same-origin and body validation; the user ID comes only from the session identity.
+- Loaded preferences in parallel with the initial dashboard and shared committed state across General, Hoy, and Plan. General edits a draft and exposes an explicit save action with pending, success, and retryable error messaging; only success updates the displayed meal visibility.
+- Filtered Hoy and Plan using saved values and added all-hidden empty states. Updated architecture and API contract docs. No schema, migration, or account registration changes.
+- Focused preference tests passed (14); `npm run check` passed (15 test files / 52 tests, production build); `git diff --check` passed. ESLint reports 28 existing warnings and no errors.
+- The user confirmed the preferences interaction and visible-meal behavior; T-026 is closed as Done.

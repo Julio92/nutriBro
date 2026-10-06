@@ -9,6 +9,7 @@ erDiagram
   USERS ||--o{ AUTH_ACCOUNTS : has
   USERS ||--o{ AUTH_SESSIONS : has
   USERS ||--|| USER_CREDENTIALS : has
+  USERS ||--o| USER_PREFERENCES : configures
   USERS ||--|| USER_DEFAULT_RECIPE_LIBRARIES : receives
   USERS ||--o{ RECIPES : owns
   USERS ||--o{ USER_RECIPE_TAGS : defines
@@ -43,6 +44,14 @@ erDiagram
     text password_hash
     timestamp password_updated_at
     timestamp created_at
+  }
+  USER_PREFERENCES {
+    uuid user_id PK, FK
+    boolean breakfast
+    boolean mid_morning
+    boolean lunch
+    boolean snack
+    boolean dinner
   }
   USER_DEFAULT_RECIPE_LIBRARIES {
     uuid user_id PK, FK
@@ -118,6 +127,15 @@ The local phase uses Auth.js Credentials and these tables:
 Hashes, passwords, and tokens are not included in DTOs, client components, or product API responses.
 
 ## Product tables
+
+### `user_preferences`
+
+| Field | Rule |
+| --- | --- |
+| `user_id` | Primary key and cascading FK to `users.id`; each user can have at most one preferences row. |
+| `breakfast`, `mid_morning`, `lunch`, `snack`, `dinner` | Non-null booleans defaulting to `true` (visible). The database names remain English; `mid_morning` corresponds to the domain's `midMorning` meal ID. |
+
+Migration `0007_add_user_preferences` creates an all-visible row for each user that exists when the migration runs. Accounts created later do not get a row until preferences are explicitly saved; consumers must interpret a missing row as all meals visible. Deleting a user cascades to the preferences row. Future preference fields can be added through normal schema migrations.
 
 ### `recipes`
 
@@ -208,6 +226,7 @@ The migration `0004_gigantic_joystick` creates this table, copies each non-null 
 6. `NutritionService` filters and verifies all recipes and plans using the `userId` from the JWT session; the foreign key alone does not replace that authorization.
 7. Before any mutation, the repository hydrates only the authenticated user's aggregate and revalidates domain invariants.
 8. Starter library templates are copied with new UUIDs and ownership for each account. The source document provides 21 recipes with instructions; portions without a recipe are not included as recipes.
+9. Meal visibility is read and written only for the authenticated user. A missing `user_preferences` row reads as all meals visible; saving creates or updates the row.
 
 ## HTTP contracts
 
@@ -230,6 +249,7 @@ Every route below requires an Auth.js session. Without a session they respond wi
 | `GET` | `/api/recipes/:recipeId` | Path UUID | Recipe details and the slots where it is used. |
 | `PATCH` | `/api/recipes/:recipeId` | `RecipeInput` | Updated recipe details. |
 | `DELETE` | `/api/recipes/:recipeId` | Path UUID | Deleted ID and number of cleaned assignments. |
+| `PATCH` | `/api/preferences` | Complete `MealVisibilityPreferences` object with boolean `breakfast`, `midMorning`, `lunch`, `snack`, and `dinner` fields | The saved `MealVisibilityPreferences` object. User ownership comes from the session, not the request body. |
 | `PATCH` | `/api/weekly-plan/slots/:slotId` | `{ recipeIds: UUID[] }` with zero to 50 elements | Updated dashboard. Replaces the entire selection and preserves order. |
 | `GET`, `POST` | `/api/auth/[...nextauth]` | Auth.js protocol | Sign-in, session, and sign-out flows. |
 

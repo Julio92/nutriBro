@@ -1,0 +1,13 @@
+CREATE TABLE "user_preferences" (
+	"user_id" uuid PRIMARY KEY NOT NULL,
+	"breakfast" boolean DEFAULT true NOT NULL,
+	"mid_morning" boolean DEFAULT true NOT NULL,
+	"lunch" boolean DEFAULT true NOT NULL,
+	"snack" boolean DEFAULT true NOT NULL,
+	"dinner" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD CONSTRAINT "user_preferences_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+--> statement-breakpoint
+INSERT INTO "user_preferences" ("user_id")
+SELECT "id" FROM "users";

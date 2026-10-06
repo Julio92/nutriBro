@@ -21,8 +21,12 @@ flowchart LR
   LA --> D[Drizzle ORM]
   P --> S[NutritionService]
   A --> S
+  P --> PS[UserPreferencesService]
+  A --> PS
   S --> R[NutritionRepository]
   R --> D[Drizzle ORM]
+  PS --> PR[UserPreferencesRepository]
+  PR --> D
   D --> N[(Neon PostgreSQL)]
 ```
 
@@ -36,9 +40,9 @@ flowchart LR
 | Layer | Location | Responsibility |
 | --- | --- | --- |
 | Presentation | `src/app`, `src/components`, `src/lib` | UI, interaction, and DTO consumption. It does not access sessions or the database directly. |
-| Domain | `src/domain/nutrition` | Types, calendar logic, historical factories, and Zod validation. It has no dependency on Next.js. |
+| Domain | `src/domain/nutrition`, `src/domain/preferences` | Nutrition/calendar types and user preference DTOs, pure filtering, and Zod validation. These modules have no dependency on Next.js. |
 | Application | `src/server/services` | Use cases, ownership rules, DTOs, and input validation. |
-| Persistence | `src/server/infrastructure/database`, `postgres-nutrition-repository.ts` | Drizzle schema, Neon client, and aggregation hydration/synchronization per user. |
+| Persistence | `src/server/infrastructure/database`, `postgres-*repository.ts` | Drizzle schema, Neon client, and per-user reads/writes for nutrition data and preferences. |
 | HTTP delivery | `src/app/api`, `src/server/http` | Origin checks, body limits, and error-to-JSON response mapping. |
 | Identity | `src/auth.ts`, `src/server/auth`, `src/server/services/local-account-service.ts` | Local credentials, Argon2id hashing, JWT session, and secure identity data for the UI. |
 
@@ -50,6 +54,15 @@ flowchart LR
 4. `PostgresNutritionRepository` ensures the user has a 35-slot plan, hydrates only their aggregate, and applies the service mutator on a copy.
 5. Domain invariants are validated and Drizzle synchronizes recipes, ingredients, plan, slots, and ordered assignments through a Neon transactional HTTP batch.
 6. The endpoint returns a minimal DTO or a structured error; it never leaks password hashes or data from another account.
+
+## Meal visibility preferences flow
+
+1. The authenticated server page resolves the session identity and loads the dashboard and meal visibility preferences together. If that user has no `user_preferences` row yet, the preferences service returns all-visible defaults without inserting a row.
+2. `AppShell` owns the committed preference snapshot and passes it to General, Hoy, and Plan. The first dashboard render therefore already reflects saved visibility.
+3. General edits a local draft. Its explicit Save action sends the complete five-boolean snapshot to `PATCH /api/preferences`; the route checks same-origin, validates the JSON through `UserPreferencesService`, and takes ownership only from the authenticated session.
+4. `PostgresUserPreferencesRepository` upserts the row keyed by that session user ID. Only after the request succeeds does `AppShell` replace its committed snapshot, which filters hidden meals from Hoy and Plan. A failed save leaves both the draft available for retry and the dashboard on the last saved visibility.
+
+Preferences remain a separate aggregate and do not extend `NutritionRepository` or `NutritionService`.
 
 ## Architectural decisions (ADRs)
 

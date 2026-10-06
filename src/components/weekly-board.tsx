@@ -1,14 +1,20 @@
-import { CalendarDays, ChevronRight, Clock3, Plus } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock3, EyeOff, Plus } from "lucide-react";
 
 import { MEAL_TYPES, WEEKDAYS } from "@/domain/nutrition/constants";
 import type { MealSlotView, WeeklyPlanView } from "@/domain/nutrition/types";
+import type { MealVisibilityPreferences } from "@/domain/preferences/types";
+import { MEAL_TYPE_IDS } from "@/domain/nutrition/types";
+import { filterVisibleMealSlots } from "@/domain/preferences/visibility";
 
 interface WeeklyBoardProps {
   plan: WeeklyPlanView;
+  mealVisibility: MealVisibilityPreferences;
   onSelectSlot: (slot: MealSlotView) => void;
 }
 
-export function WeeklyBoard({ plan, onSelectSlot }: WeeklyBoardProps) {
+export function WeeklyBoard({ plan, mealVisibility, onSelectSlot }: WeeklyBoardProps) {
+  const hasVisibleMeals = MEAL_TYPE_IDS.some((meal) => mealVisibility[meal]);
+
   return (
     <section className="weekly-section" aria-labelledby="weekly-plan-heading">
       <div className="section-heading section-heading--board">
@@ -21,36 +27,47 @@ export function WeeklyBoard({ plan, onSelectSlot }: WeeklyBoardProps) {
         </div>
       </div>
 
-      <div className="week-scroll" role="region" aria-label="Plan semanal completo" tabIndex={0}>
-        <div className="weekly-board">
-          {WEEKDAYS.map((day) => {
-            const daySlots = MEAL_TYPES.map((meal) =>
-              plan.slots.find((slot) => slot.day === day.id && slot.meal === meal.id),
-            ).filter((slot): slot is MealSlotView => Boolean(slot));
+      {hasVisibleMeals ? (
+        <div className="week-scroll" role="region" aria-label="Plan semanal completo" tabIndex={0}>
+          <div className="weekly-board">
+            {WEEKDAYS.map((day) => {
+              const daySlots = filterVisibleMealSlots(
+                MEAL_TYPES.map((meal) =>
+                  plan.slots.find((slot) => slot.day === day.id && slot.meal === meal.id),
+                ).filter((slot): slot is MealSlotView => Boolean(slot)),
+                mealVisibility,
+              );
 
-            return (
-              <article className="day-column" key={day.id}>
-                <header className="day-column__header">
-                  <span className="day-column__letter" aria-hidden="true">
-                    {day.shortLabel}
-                  </span>
-                  <h3>{day.label}</h3>
-                </header>
+              return (
+                <article className="day-column" key={day.id}>
+                  <header className="day-column__header">
+                    <span className="day-column__letter" aria-hidden="true">
+                      {day.shortLabel}
+                    </span>
+                    <h3>{day.label}</h3>
+                  </header>
 
-                <div className="day-column__slots">
-                  {daySlots.map((slot) => (
-                    <MealSlotCard
-                      key={slot.id}
-                      slot={slot}
-                      onSelect={() => onSelectSlot(slot)}
-                    />
-                  ))}
-                </div>
-              </article>
-            );
-          })}
+                  <div className="day-column__slots">
+                    {daySlots.map((slot) => (
+                      <MealSlotCard
+                        key={slot.id}
+                        slot={slot}
+                        onSelect={() => onSelectSlot(slot)}
+                      />
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="empty-state" role="status">
+          <span className="empty-state__icon"><EyeOff size={20} aria-hidden="true" /></span>
+          <h3>No hay comidas visibles</h3>
+          <p>Activa las comidas que quieras ver en Preferencias, en la sección General.</p>
+        </div>
+      )}
     </section>
   );
 }
