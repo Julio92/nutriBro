@@ -2197,7 +2197,7 @@ html[data-theme="dark"] .recipe-art--tone-4 {
 
   .app-main {
     margin-left: 0;
-    padding-bottom: 68px;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
   }
 
   .topbar {
@@ -2211,11 +2211,13 @@ html[data-theme="dark"] .recipe-art--tone-4 {
     bottom: 0;
     left: 0;
     display: grid;
-    height: 66px;
+    height: calc(86px + env(safe-area-inset-bottom));
     grid-template-columns: 48px minmax(0, 1fr) 48px;
     column-gap: 4px;
     align-items: center;
-    padding: 6px max(18px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    /* The extra 20px lifts controls clear of the gesture zone; matching the
+       height increase preserves the existing 53px grid area. */
+    padding: 6px max(18px, env(safe-area-inset-right)) calc(26px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
     border-top: 1px solid var(--border);
     background: color-mix(in srgb, var(--surface) 93%, transparent);
     backdrop-filter: blur(14px);

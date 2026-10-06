@@ -957,3 +957,42 @@ Notes:
 - `npm run check` passed: 9 test files / 34 tests and the production build/standalone preparation succeeded. Lint reports 28 existing generated-UI warnings and no errors. `git diff --check` passed.
 - Generated Dropdown sources remain unchanged; their paths were added to the existing file-scoped React Hooks lint exception. Registry-added duplicate `@property` declarations were removed while retaining the scrollbar utility used by registry components.
 - Removed the custom account popup width/surface rules, 44px mobile menu-row override, and explicit side offset; the menu now uses Fluid's popup/item typography and sizing defaults, retaining only required responsive placement/alignment.
+
+ID: T-024
+Status: Done
+Priority: High
+Title: Raise mobile bottom navigation above the iPhone gesture area
+Human verification required: Yes
+Description:
+Increase the bottom clearance for the mobile navigation in iPhone Safari/web-app mode so tapping Plan, Recetas, Create, and the account avatar does not invoke the system home/Siri gesture area.
+
+Scope:
+- Correct the mobile bottom-navigation geometry to account for `safe-area-inset-bottom` without compressing its tab/action controls
+- Add 20px of additional breathing room below the controls while keeping the navigation surface anchored to the viewport bottom
+- Reserve the corresponding bottom space in the mobile app content so the fixed navigation does not obscure the final content
+- Keep desktop layout and all navigation/action behavior unchanged
+
+Do not touch:
+- Tab labels, order, selection behavior, or account-menu actions
+- Desktop navigation/header layout
+- Unrelated responsive breakpoints or product behavior
+
+Dependencies:
+- Existing mobile navigation and 44px/tab and avatar control sizing from T-022
+
+Acceptance criteria:
+- Mobile nav controls sit above both the device safe-area inset and the additional bottom breathing space
+- Safe-area padding does not cause controls to overflow/compress inside the expanded nav
+- The bottom nav background still reaches the viewport edge and the page can scroll clear of the nav
+- Desktop appearance and all tab/action behavior remain unchanged
+
+Verification:
+- Run `npm run check` and `git diff --check`
+- Review the mobile CSS calculations and confirm desktop rules are untouched
+- Human verification on the deployed iPhone Safari web app that tapping each bottom control no longer activates Siri/system navigation
+
+Notes:
+- The user reported the issue from the production deployment and explicitly requested extra bottom space for the mobile navigation.
+- The user explicitly authorized closing T-024 as Done.
+- Expanded the mobile navigation height and bottom padding by 20px plus the safe-area inset, preserving its 53px grid area; raised the mobile content clearance to match. Desktop rules and controls are unchanged.
+- `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed.

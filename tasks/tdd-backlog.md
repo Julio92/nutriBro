@@ -296,3 +296,25 @@ Replace the custom Preferences/sign-out popup with Fluid Functionalism's Base UI
 - Registry installation added no npm dependencies. Generated Dropdown sources were left unchanged; their documented React Hooks behavior is covered by the existing file-scoped lint exception. Removed only duplicate registry-appended `@property` declarations while retaining the shared scrollbar utility.
 - Removed the account-specific popup width/surface rules, mobile 44px row-height override, and explicit side offset. There was no app-specific font-size/weight override; MenuItem already uses Fluid's default type scale.
 - `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed. The user confirmed the responsive Dropdown experience is perfect; T-023 is Done.
+
+## T-024 — Raise mobile bottom navigation above the iPhone gesture area
+
+### Objective
+Provide reliable bottom clearance for the fixed mobile navigation in iPhone Safari/web-app mode without changing tab/action behavior or desktop layout.
+
+### Ordered implementation units
+1. Confirm the current mobile bar's fixed height, safe-area padding, button dimensions, app-content bottom padding, and viewport behavior.
+2. Update only the mobile breakpoint CSS so the bar height grows with `safe-area-inset-bottom` plus 20px, while preserving the existing usable grid height and extending the bar background to the viewport edge.
+3. Increase mobile app-content bottom padding to match the taller fixed nav so the last content remains scrollable and visible.
+4. Verify the calculation leaves tab, create, and avatar controls at their existing sizes/positions relative to the expanded bar; ensure desktop rules remain unchanged.
+5. Run `npm run check` and `git diff --check`; leave T-024 in Review pending the user's iPhone Safari verification after deployment.
+
+### Validation and risks
+- The current nav has a fixed 66px height while bottom padding includes `safe-area-inset-bottom`, which can reduce its available grid content height instead of moving the fixed control row upward.
+- Keep the existing viewport configuration unless the CSS review proves a viewport-fit change is needed; avoid unrelated top safe-area/layout changes.
+- Human verification must confirm all four mobile navigation controls can be tapped without invoking Siri/system navigation and that scrolling content is not covered.
+
+### Implementation result
+- Expanded the mobile nav to `86px + safe-area-inset-bottom` and its bottom padding to `26px + safe-area-inset-bottom`. Together, these preserve the existing 53px grid area and raise the controls 20px plus the device inset while the nav background remains flush to the viewport edge.
+- Increased mobile app-content bottom padding to `88px + safe-area-inset-bottom` so page content can scroll clear of the taller fixed bar. Desktop styles and tab/action behavior are unchanged.
+- `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed. T-024 remains in Review pending deployed iPhone Safari verification.
