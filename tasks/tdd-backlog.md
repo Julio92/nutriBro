@@ -1,3 +1,33 @@
+## T-021 — Use Fluid Functionalism CheckboxGroup for meal preferences
+
+### Objective
+Replace General's individual meal checkboxes with Fluid Functionalism CheckboxGroup and introduce a dedicated SettingsPanel while preserving existing state and Appearance behavior.
+
+### Ordered implementation units
+1. Run `npx shadcn@latest add https://www.fluidfunctionalism.com/r/base/checkbox-group.json --overwrite`; inspect generated/overwritten files, dependencies, and API.
+2. Run `npx skills add mickadesign/fluid-functionalism`; inspect installed guidance/files.
+3. Replace meal checkbox markup with controlled CheckboxGroup/CheckboxItem controls and add concise Spanish explanatory copy.
+4. Extract General into SettingsPanel and return it from the section selector; keep Appearance returned as AppearancePanel.
+5. Read the Next.js font guide, add the Inter optical-size axis required for the CheckboxGroup's weight animation, and validate the existing global font wiring.
+6. Run focused checks, `npm run check`, and `git diff --check`; review all changes.
+
+### Validation
+- Verify checked indices map to all five existing meal preferences and toggling one updates only that key.
+- Verify generated props/imports, labels, keyboard focus, and accessibility.
+- Verify Next.js still self-hosts the same Inter font with the `opsz` axis enabled.
+- Run `npm run check` and `git diff --check`.
+
+### Risks
+- `--overwrite` may replace existing shared UI components; inspect diffs and preserve only justified changes.
+- The skill installer may create repo-level files; inspect before retaining and avoid unrelated changes.
+- Meal visibility stays local and non-persistent, consistent with scope.
+
+### Implementation result
+- Installed the Base UI CheckboxGroup registry and the requested project-level Fluid Functionalism skill. No package dependencies changed. Reviewed the generated component and shared type-scale/font/CSS updates; restored the existing `medium` font weight referenced by Tooltip.
+- General now renders all five meal options with CheckboxGroup/CheckboxItem. `checkedIndices` reflects the existing controlled state, item toggles update their original meal keys, and the group is described by concise Spanish copy.
+- Extracted General into SettingsPanel and renamed the section switch to SelectionPanel; Appearance remains routed to AppearancePanel. Removed the obsolete hand-built checkbox CSS.
+- Enabled Inter's optical-size axis in the existing next/font configuration for the CheckboxGroup's variable-weight labels.
+- Added CheckboxGroup to the existing ESLint exception for its documented ref-driven calculations. `npm run check` passed (9 test files / 34 tests, build and standalone preparation); `git diff --check` passed. Lint retains non-blocking unused-variable warnings in generated Fluid components.
 ## T-016 — Evaluate EasyUI and replace the auth forms
 
 ### Objective

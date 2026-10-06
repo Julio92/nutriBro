@@ -8,6 +8,7 @@ const eslintConfig = defineConfig([
   {
     files: [
       "src/components/ui/combobox.tsx",
+      "src/components/ui/checkbox-group.tsx",
       "src/components/ui/sidebar-core.tsx",
       "src/components/ui/sidebar-menu.tsx",
       "src/hooks/use-fluid-hover.ts",

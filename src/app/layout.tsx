@@ -7,7 +7,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], axes: ["opsz"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "nutriBro · Planificador semanal",

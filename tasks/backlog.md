@@ -806,3 +806,48 @@ Notes:
 - Added the generated Sidebar sources to the existing ESLint exception for Fluid Functionalism's ref-driven animation patterns.
 - `npm run check` passed (lint has registry-source warnings only, 9 test files / 34 tests, production build and standalone preparation); `git diff --check` passed. Next dev served `/` with HTTP 200 after route regeneration.
 - User confirmed the task is completed, including the requested human review.
+ID: T-021
+Status: Done
+Priority: Medium
+Title: Use Fluid Functionalism CheckboxGroup for meal preferences
+Human verification required: No
+Description:
+Replace General preferences meal visibility controls with the Fluid Functionalism CheckboxGroup, add explanatory copy, and separate General settings into a dedicated SettingsPanel.
+
+Scope:
+- Install the Base UI CheckboxGroup registry with the requested shadcn CLI URL and `--overwrite`; inspect generated files and dependencies
+- Replace current meal checkbox UI with CheckboxGroup and CheckboxItem, retaining controlled state and Spanish labels
+- Add a short description explaining that selections control which meals appear in the app
+- Extract General settings into SettingsPanel returned by the section-selection function; keep Appearance routed to AppearancePanel
+- Ensure the existing Inter variable font includes the optical-size axis required by the CheckboxGroup label weight animation
+- Add the Fluid Functionalism skill as requested and inspect its files
+
+Do not touch:
+- Meal preference persistence or database behavior
+- Theme behavior, authentication, recipes, dashboard, nutrition, or unrelated shared components
+
+Dependencies:
+- Existing Base UI setup, Tailwind v4, `@/` alias, and settings dialog meal state
+
+Acceptance criteria:
+- General displays all five meal options through CheckboxGroup and CheckboxItem
+- Checked state remains controlled by existing in-session state, with a concise explanation
+- A dedicated SettingsPanel is returned for General and Appearance behavior is unchanged
+- Inter is loaded with its optical-size axis for stable CheckboxGroup weight animations
+- Generated registry/skill changes are reviewed and no unrelated overwrite remains
+
+Verification:
+- Inspect component API, all generated files, dependencies, and skill installation
+- Run focused tests where available, `npm run check`, and `git diff --check`
+
+Notes:
+- T-019 remains in Review pending separate human verification; this user-authorized task is scoped independently.
+- Compose with generated component props/className; do not modify component internals.
+- Explain plan and validation before production-code edits.
+
+Result:
+- Installed CheckboxGroup and the requested project-level Fluid Functionalism skill. The registry added the group and type-scale files, updated shared size/font/CSS tokens, and did not change package dependencies; restored the existing `medium` font token needed by Tooltip.
+- Replaced the General meal selector with a controlled CheckboxGroup, preserved in-session toggles, added explanatory copy, extracted SettingsPanel, and routed the section selector through SelectionPanel. Appearance remains unchanged.
+- Enabled the optical-size axis in the existing self-hosted Inter variable font configuration as required by CheckboxGroup's weight animation.
+- Removed obsolete meal-selector CSS and added the generated CheckboxGroup to the existing lint exception for Fluid Functionalism ref-driven behavior.
+- `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); `git diff --check` passed. ESLint reports existing/non-blocking unused-variable warnings in generated shared components.

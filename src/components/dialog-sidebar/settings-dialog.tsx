@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CheckboxGroup, CheckboxItem } from "@/components/ui/checkbox-group";
 import {
   Select,
   SelectTrigger,
@@ -50,7 +50,7 @@ interface SettingsSection {
   description: string;
 }
 
-type PreferencesSection = "appearance" | "general";
+type PreferencesSection = "general" | "appearance";
 type MealPreferenceKey = "desayuno" | "mediaManana" | "comida" | "merienda" | "cena";
 
 const MEAL_OPTIONS: { key: MealPreferenceKey; label: string }[] = [
@@ -62,8 +62,8 @@ const MEAL_OPTIONS: { key: MealPreferenceKey; label: string }[] = [
 ];
 
 const SECTIONS: SettingsSection[] = [
-  { id: "appearance", label: "Apariencia", icon: "palette", description: "Elige el tema de la aplicación." },
-  { id: "general", label: "General", icon: "settings", description: "Configura qué comidas quieres mostrar." },
+  { id: "general", label: "General", icon: "settings", description: "Ajustes generales de la aplicación" },
+  { id: "appearance", label: "Apariencia", icon: "palette", description: "Cambia la apariencia de la aplicación." },
 ];
 
 export interface SettingsDialogProps {
@@ -180,7 +180,7 @@ export function SettingsDialog({
             </div>
             <ScrollArea className="min-h-0 flex-1">
               <div className="flex flex-col gap-6 px-6 pb-6">
-                <SectionPanel
+                <SelectionPanel
                   id={current.id}
                   mealPreferences={mealPreferences}
                   onToggleMealPreference={(key) =>
@@ -232,7 +232,7 @@ function SettingRow({
   );
 }
 
-function SectionPanel({
+function SelectionPanel({
   id,
   mealPreferences,
   onToggleMealPreference,
@@ -246,25 +246,50 @@ function SectionPanel({
   }
 
   return (
-    <div className="preferences-list" role="group" aria-label="Configuración de visibilidad de comidas">
-      {MEAL_OPTIONS.map(({ key, label }) => {
-        const isChecked = mealPreferences[key];
+    <SettingsPanel
+      mealPreferences={mealPreferences}
+      onToggleMealPreference={onToggleMealPreference}
+    />
+  );
+}
 
-        return (
-          <label key={key} className="preferences-item">
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={() => onToggleMealPreference(key)}
-              aria-label={`Mostrar ${label}`}
-            />
-            <span className="preferences-item__control" aria-hidden="true">
-              {isChecked ? <Check size={12} aria-hidden="true" /> : null}
-            </span>
-            <span className="preferences-item__label">{label}</span>
-          </label>
-        );
-      })}
+function SettingsPanel({
+  mealPreferences,
+  onToggleMealPreference,
+}: {
+  mealPreferences: Record<MealPreferenceKey, boolean>;
+  onToggleMealPreference: (key: MealPreferenceKey) => void;
+}) {
+  const checkedIndices = new Set(
+    MEAL_OPTIONS.flatMap(({ key }, index) =>
+      mealPreferences[key] ? [index] : []
+    )
+  );
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p
+        id="meal-preference-description"
+        className="text-[12px] text-muted-foreground"
+      >
+        Selecciona qué comidas quieres mostrar en tu planificación.
+      </p>
+      <CheckboxGroup
+        checkedIndices={checkedIndices}
+        aria-label="Configuración de visibilidad de comidas"
+        aria-describedby="meal-preference-description"
+        className="w-full"
+      >
+        {MEAL_OPTIONS.map(({ key, label }, index) => (
+          <CheckboxItem
+            key={key}
+            index={index}
+            label={label}
+            checked={mealPreferences[key]}
+            onToggle={() => onToggleMealPreference(key)}
+          />
+        ))}
+      </CheckboxGroup>
     </div>
   );
 }
