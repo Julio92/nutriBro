@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { Save } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useIcons, type IconName } from "@/lib/icon-context";
 import { cn } from "@/lib/utils";
 import { fontWeights } from "@/lib/font-weight";
@@ -349,14 +351,16 @@ function SettingsPanel({
         ))}
       </CheckboxGroup>
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="button button--primary"
+        <Button
           type="button"
-          disabled={!hasChanges || isSaving}
+          leadingIcon={Save}
+          loading={isSaving}
+          aria-busy={isSaving}
+          disabled={!hasChanges}
           onClick={onSaveMealPreferences}
         >
-          {isSaving ? "Guardando…" : "Guardar cambios"}
-        </button>
+          Guardar cambios
+        </Button>
         {saveStatus ? (
           <p
             className={saveStatus.tone === "error" ? "text-destructive" : "text-muted-foreground"}

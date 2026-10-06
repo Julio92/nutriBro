@@ -159,31 +159,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-button,
-input,
-textarea {
-  font: inherit;
-}
-
-button {
-  color: inherit;
-}
-
-button:not(:disabled) {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary) 42%, transparent);
-  outline-offset: 2px;
-}
-
 ::selection {
   background: var(--primary-muted);
   color: var(--text);
@@ -2670,6 +2645,26 @@ html[data-theme="dark"] {
 }
 
 @layer base {
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+  button {
+    color: inherit;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 42%, transparent);
+    outline-offset: 2px;
+  }
   :focus-visible {
     outline: 1px solid var(--focus-ring, #6B97FF);
     outline-offset: 2px;

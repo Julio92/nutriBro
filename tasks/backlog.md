@@ -1105,3 +1105,44 @@ Result:
 - Updated the architecture and HTTP contract documentation. No database schema/migration or account-registration changes were made.
 - `npm run check` passed (15 test files / 52 tests and production build); `git diff --check` passed. ESLint reports 28 existing warnings and no errors.
 - The user verified the preferences integration and confirmed the task can be closed; T-026 is Done.
+
+ID: T-027
+Status: Done
+Priority: Medium
+Title: Use Fluid Button for saving meal preferences
+Description:
+Replace the existing "Guardar cambios" control in Preferencias > General with the installed Fluid Functionalism Button. Show its loading state while the save request is pending, and use an appropriate leading Save icon.
+
+Scope:
+- Replace only the meal-preferences save control with the existing Button component
+- Preserve current save behavior, disabled conditions, and success/error feedback
+- Show the Button loading state until the preferences request resolves
+- Add the Lucide Save icon as a leading icon
+
+Do not touch:
+- Preference persistence or API behavior
+- Other buttons or settings UI
+- The already-installed Fluid Button source or its dependencies
+
+Dependencies:
+- Existing Fluid Functionalism Base UI Button and Lucide dependencies
+- Current meal-preference save-pending state
+
+Acceptance criteria:
+- The General preferences action uses the shared Fluid Button
+- The action has a leading Save icon
+- Clicking Save shows loading and disables the action until the database request resolves
+- Existing disabled, success, and error behavior remains intact
+
+Verification:
+- Run `npm run check`
+- Run `git diff --check`
+- Inspect the final diff to confirm changes are limited to the preferences save control and task record
+
+Result:
+- Replaced the General preferences save control with the installed Fluid Functionalism Button and Lucide Save leading icon.
+- Connected the Button's loading and accessible busy states to the existing request state; it stays disabled during the request and clears loading in `finally` after success or failure. Existing save feedback remains unchanged.
+- The Button and required dependencies were already installed, so no CLI overwrite or dependency changes were needed.
+- `npm run check` passed (15 test files / 52 tests and production build); lint reports 28 existing warnings and no errors. `git diff --check` passed.
+- Fixed the visual mismatch by moving generic native-button resets into Tailwind's `base` layer, allowing Fluid's utility-layer text and focus styles to take precedence. This also restores the spinner's contrasting `currentColor`; no one-off color override or shared component edit remains.
+- Re-ran `npm run check` after the CSS-layer fix: all 52 tests and production build passed; lint still reports 28 existing warnings and no errors. `git diff --check` passed.
