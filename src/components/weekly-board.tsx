@@ -16,7 +16,7 @@ export function WeeklyBoard({ plan, onSelectSlot }: WeeklyBoardProps) {
           <span className="eyebrow">
             <CalendarDays size={14} aria-hidden="true" /> Plan recurrente
           </span>
-          <h2 id="weekly-plan-heading">{plan.name}</h2>
+          <h1 id="weekly-plan-heading">{plan.name}</h1>
           <p>Tu estructura se repite cada semana.</p>
         </div>
       </div>

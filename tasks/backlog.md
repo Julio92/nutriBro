@@ -996,3 +996,56 @@ Notes:
 - The user explicitly authorized closing T-024 as Done.
 - Expanded the mobile navigation height and bottom padding by 20px plus the safe-area inset, preserving its 53px grid area; raised the mobile content clearance to match. Desktop rules and controls are unchanged.
 - `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed.
+
+ID: T-025
+Status: Done
+Priority: Medium
+Title: Split dashboard into Hoy and Plan navigation tabs
+Human verification required: Yes
+Description:
+Add a dedicated Plan tab to the mobile bottom navigation so the app has three content tabs: Hoy, Plan, and Recetas. Hoy should contain the current today's-meals view, Plan should contain the existing weekly calendar that is currently displayed below today's meals, and Recetas should remain unchanged.
+
+Scope:
+- Add Hoy as a bottom-navigation tab for the current today's-meals view
+- Add Plan as a bottom-navigation tab for the existing weekly calendar
+- Keep Recetas as the existing recipes tab
+- Connect tab selection and accessible tab panels to the corresponding existing content
+- Align the heading alignment and title/subtitle typography across Hoy, Plan, and Recetas without changing their distinct labels or copy
+
+Do not touch:
+- Weekly-plan, meal, or recipe business logic and persistence
+- Recipe-library behavior or content (heading presentation alignment is in scope)
+- Desktop navigation/layout unless a change is required for consistent access to the same views
+- Unrelated account-menu, preferences, or mobile safe-area behavior
+
+Dependencies:
+- Existing mobile bottom-navigation tabs and active-view wiring from T-022
+- Existing today's-meals and weekly-calendar dashboard views
+
+Acceptance criteria:
+- The bottom navigation provides three content tabs labeled Hoy, Plan, and Recetas
+- Hoy shows today's meals without the weekly calendar below them
+- Plan shows the existing weekly calendar
+- Recetas continues to show the existing recipe library without behavior changes
+- Tab selection, active state, and tab panels remain accessible and keyboard-operable
+- Hoy, Plan, and Recetas use consistent main-heading alignment, title scale, eyebrow spacing, and subtitle styling
+- Existing desktop navigation remains usable and unchanged unless needed for access consistency
+
+Verification:
+- Run `npm run check` and `git diff --check`
+- Smoke-test switching between Hoy, Plan, and Recetas at mobile and desktop widths
+- Confirm today's meals, the weekly calendar, and the recipe library each appear in the intended view
+- Human verification of the navigation and view split
+- Compare the three headings at mobile and desktop widths
+
+Notes:
+- The product labels are Spanish; keep task documentation in English.
+- Before editing code, explain the implementation plan and validation.
+
+Result:
+- Added a tested shared view/index mapping for Hoy, Plan, and Recetas and wired the same selected view across mobile tabs and desktop sidebar navigation. The desktop Plan semanal item and mobile Plan item select the same weekly-calendar view.
+- Split the dashboard into three accessible tabpanels: Hoy contains only today's meals, Plan contains the weekly calendar, and Recetas retains the existing recipe library. Create and account actions remain outside the mobile tablist.
+- Added Hoy as the initial view and a matching desktop sidebar item; existing Plan semanal and Recetas desktop controls remain available.
+- Added four focused mapping tests. `npm run check` passed: lint (0 errors; 28 existing warnings in generated UI components), 10 test files / 38 tests, production build, and standalone preparation. `git diff --check` passed.
+- The user confirmed that the three-view navigation and the final heading alignment are perfect.
+- Aligned Hoy, Plan, and Recetas primary heading levels and typography; removed the weekly calendar's leftover outer top gap. `npm run check` passed (38 tests, production build; 28 existing lint warnings and no errors), and `git diff --check` passed.

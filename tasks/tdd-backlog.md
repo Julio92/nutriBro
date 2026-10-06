@@ -318,3 +318,77 @@ Provide reliable bottom clearance for the fixed mobile navigation in iPhone Safa
 - Expanded the mobile nav to `86px + safe-area-inset-bottom` and its bottom padding to `26px + safe-area-inset-bottom`. Together, these preserve the existing 53px grid area and raise the controls 20px plus the device inset while the nav background remains flush to the viewport edge.
 - Increased mobile app-content bottom padding to `88px + safe-area-inset-bottom` so page content can scroll clear of the taller fixed bar. Desktop styles and tab/action behavior are unchanged.
 - `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed. T-024 remains in Review pending deployed iPhone Safari verification.
+
+## T-025 — Split dashboard into Hoy and Plan navigation tabs
+
+### Objective
+Provide the same three views on mobile and desktop: Hoy (today's meals), Plan / Plan semanal (the existing recurring weekly calendar), and Recetas (the existing recipe library). The desktop Plan label may remain longer as “Plan semanal”, but it and mobile “Plan” must select the exact same view. Retain the create-recipe and account actions outside the mobile tablist.
+
+### Current implementation facts
+- `src/components/app-shell.tsx` owns a shared `activeView` state currently typed as `"plan" | "recipes"`, and the mobile TabsSubtle maps index 0 to Plan and index 1 to Recetas.
+- The current Plan tabpanel renders both `TodayMeals` and `WeeklyBoard` in sequence; the Recetas panel renders `RecipeLibrary`.
+- The desktop sidebar's Plan semanal and Recetas buttons drive the same `activeView` as the mobile tabs; both responsive navigation systems must expose all three shared views.
+- The mobile nav uses the existing Base UI-backed Fluid Functionalism TabsSubtle, with active-label mode, accessible linked tabpanels, a separate create action before the tablist, and the account menu after it. The responsive bar and safe-area geometry are implemented in `src/app/globals.css`.
+- Vitest tests pure module behavior, but the repository has no AppShell/component-render tests or React Testing Library dependency. Add a small, directly testable view/index mapping rather than introducing a new UI-test stack for this task.
+
+### Files to inspect and likely modify
+- `src/components/app-shell.tsx` — extend the view model, map three selected indices, split the three tabpanels, add Hoy/Plan/Recetas tabs, and preserve recipe/account/create callbacks. Add a desktop Hoy navigation item so desktop users can return to today's view after selecting the weekly calendar; keep existing Plan semanal and Recetas actions and desktop layout intact.
+- `src/lib/app-navigation.ts` (new) and `src/lib/app-navigation.test.ts` (new) — define the three-view/index mapping independently of React and test its ordering/round-trip behavior before wiring the UI.
+- `src/app/globals.css` — adjust only the mobile tablist sizing/layout if necessary to fit three tabs beside the existing create and avatar actions, preserving the current breakpoint, 44px targets, and safe-area spacing.
+- `src/components/today-meals.tsx`, `src/components/weekly-board.tsx`, and `src/components/recipe-library.tsx` — inspect their props and existing presentation; modify only if separation requires a minimal correction. Their business logic and content are not in scope.
+- `src/components/ui/tabs-subtle.tsx` — inspect and reuse the existing three-index-compatible API; do not modify the generated component internals.
+- `package.json` and `vitest.config.ts` — inspect test conventions/configuration; no new dependency is expected.
+
+### Ordered implementation units
+1. **Lock down view mapping with a focused test.** Create a small pure navigation mapping for `today`, `plan`, and `recipes`; add Vitest coverage that each view maps to its intended tab index and each supported index maps back to the intended view. Keep the mapping exhaustive and avoid adding a component-test dependency.
+2. **Expand shared view state and desktop navigation.** In AppShell, use the new three-view type and mapping, initialize the landing view to Hoy, and connect the desktop Hoy item, existing Plan semanal item, and Recetas item to the shared views. The desktop and mobile controls must be two labels/layouts for one navigation model, not separate or viewport-specific active states.
+3. **Split the tabpanels and wire mobile navigation.** Render TodayMeals alone in the Hoy panel, WeeklyBoard alone in the Plan panel, and RecipeLibrary alone in the Recetas panel. Add three TabsSubtle items with a stable index-to-view mapping and preserve each panel's `idPrefix`, `aria-controls`/`aria-labelledby` relationships, and selected-only mounting behavior. Keep Create and AccountMenu outside the tablist and preserve their callbacks.
+4. **Fit the expanded mobile tabs.** Check the existing active-label behavior at narrow widths; adjust only `.mobile-nav` / `.mobile-nav__tabs` / `.mobile-nav__tab` rules if required so all three controls remain operable alongside the create and avatar actions. Preserve the existing mobile breakpoint, safe-area calculations, nav height, and touch target sizes; do not alter desktop geometry.
+5. **Run checks and verify the complete flow.** Run the focused mapping tests, `npm run check`, and `git diff --check`. Smoke-test Hoy, Plan, and Recetas at narrow mobile, normal mobile, and desktop widths; verify desktop sidebar switching, tab keyboard behavior, and that Create/account actions do not change the selected view. Request the task's required human verification before marking it Done.
+
+### Validation
+- Unit: test all three view/index mappings and round trips; run the focused Vitest test before UI integration and again after wiring.
+- Repository: run `npm run check` and `git diff --check`; review the final diff to ensure no domain, API, repository, recipe, account, preferences, or safe-area behavior changed.
+- Mobile smoke test: at 320px and 375px, verify all three tab names/icons fit without clipping, active state is clear, content is not obscured by the fixed navigation, and create/avatar remain separate actions.
+- Interaction: verify Hoy shows only TodayMeals, Plan shows only WeeklyBoard, Recetas remains the existing RecipeLibrary, and selecting each view preserves its existing assignment/recipe interactions. Verify Base UI arrow/Home/End focus movement and Enter/Space selection.
+- Desktop smoke test: verify the same Hoy, Plan semanal, and Recetas views are reachable via the sidebar; selecting a view shows the same content as its mobile counterpart, with only the Plan label differing (“Plan” on mobile, “Plan semanal” on desktop). Keep the desktop layout otherwise intact.
+- Human verification is required by T-025; do not mark the task Done until the user confirms the view split and navigation.
+
+### Risks and decisions
+- Mobile and desktop must share one view state and one three-view content mapping. Desktop uses the visible label “Plan semanal” for the same weekly-calendar view labeled “Plan” on mobile; add only the missing Hoy sidebar action and do not otherwise redesign desktop navigation.
+- TabsSubtle's `activeLabel` mode shows all icons while expanding only the selected label, which should keep three choices viable in the mobile bar. Validate at 320px; if a CSS adjustment is needed, do not shrink the current 44px tab target or alter safe-area geometry.
+- Keep the existing TabsSubtle implementation unchanged. It already provides Base UI tab semantics, linked controls/panels, roving keyboard focus, and manual activation.
+- TodayMeals and WeeklyBoard use the same existing plan data and slot callbacks. This task changes only which component is rendered per view; do not duplicate or modify their domain/business behavior.
+- The landing-view choice is Hoy, matching the new tab label and making today's meals immediately available. The existing desktop Plan semanal action continues to open the weekly calendar.
+
+### Implementation result
+- Added `src/lib/app-navigation.ts` with an exhaustive `today` / `plan` / `recipes` view type and checked bidirectional tab-index mapping. Added focused tests for all view mappings and unsupported indices; all 4 passed.
+- Updated `src/components/app-shell.tsx` to use one shared three-view state across layouts, default to Hoy, add Hoy to the desktop sidebar, and retain Plan semanal and Recetas. Mobile tabs now show Hoy, Plan, and Recetas, with linked panels rendering TodayMeals, WeeklyBoard, and RecipeLibrary separately. Create and account actions remain outside the tablist.
+- No CSS, safe-area geometry, dashboard business logic, or recipe behavior needed changes; the existing active-label TabsSubtle layout accommodates the additional tab without changing the 44px target rules.
+- `npm run check` passed: lint (0 errors; 28 existing warnings in generated UI components), 10 test files / 38 tests, production build, and standalone preparation. `git diff --check` passed.
+- T-025 is in Review pending the required human review of view switching and responsive layout at mobile and desktop widths.
+
+### Approved follow-up: align the three view headings
+
+#### Verified mismatch
+- `Hoy` uses a primary title at `clamp(28px, 3vw, 38px)`, 14px subtitle text with a 10px top gap, and the default eyebrow bottom margin of 9px.
+- `Plan` and `Recetas` use an overridden 23px title, 13px subtitle text with a 6px top gap, and a 7px eyebrow bottom margin.
+- `WeeklyBoard` also retains a 42px top margin (28px at the mobile breakpoint) from when it appeared below today's meals. Now that it is a standalone view, that extra offset makes Plan's header sit lower than the other views.
+
+#### Ordered implementation units
+1. Promote the standalone Plan and Recetas titles to the same page-heading level as Hoy while retaining their existing text and accessible `aria-labelledby` IDs.
+2. Remove the compact `.section-heading` title/eyebrow/subtitle overrides so Plan and Recetas inherit the same title scale, eyebrow spacing, and subtitle typography already used by Hoy.
+3. Remove WeeklyBoard's legacy top margin at desktop and mobile sizes so all three view headings begin at the same content inset. Preserve unrelated spacing inside each view and keep recipe controls/content unchanged.
+4. Run `npm run check` and `git diff --check`; compare the three headings at mobile and desktop sizes if a browser smoke check is available.
+
+#### Validation and boundary
+- The user confirmed that navigation works perfectly and specifically requested the visual heading alignment refinement.
+- Only heading hierarchy/presentation and Plan's now-obsolete outer offset may change. Keep each view's eyebrow/title/subtitle wording distinct, and do not alter tab behavior, recipe interactions, domain logic, or mobile safe-area layout.
+- After implementation and automated checks, return the task to Review pending the user's visual confirmation.
+
+#### Follow-up implementation result
+- Promoted the standalone Plan and Recetas titles to `h1`, matching Hoy's page-heading hierarchy while preserving their existing labels, descriptions, and accessible heading IDs.
+- Removed the smaller title and subtitle overrides from `.section-heading`, so all three views use the same 28–38px title scale, 14px subtitle with 10px top spacing, and default eyebrow spacing.
+- Removed WeeklyBoard's 42px desktop / 28px mobile top margin left over from its former position beneath Hoy. All headings now begin at the same content inset.
+- `npm run check` passed (10 test files / 38 tests, production build and standalone preparation); lint reports 28 existing warnings and no errors. `git diff --check` passed.
+- T-025 is in Review. Navigation was confirmed by the user; final visual confirmation of the heading alignment remains requested.

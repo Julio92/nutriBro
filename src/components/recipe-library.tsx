@@ -49,12 +49,9 @@ export function RecipeLibrary({
           <span className="eyebrow">
             <BookOpen size={14} aria-hidden="true" /> Biblioteca
           </span>
-          <h2 id="recipe-library-heading">Tus recetas</h2>
+          <h1 id="recipe-library-heading">Tus recetas</h1>
           <p>Guarda tus básicos y reutilízalos en el menú.</p>
         </div>
-        <button className="button button--primary" type="button" onClick={onCreateRecipe}>
-          <Plus size={17} aria-hidden="true" /> Nueva receta
-        </button>
       </div>
 
       <div className="recipe-library__controls">

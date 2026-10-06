@@ -11,6 +11,7 @@ import {
   Settings2,
   ShoppingBasket,
   Sparkles,
+  Sun,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -23,6 +24,11 @@ import type {
   RecipeInput,
 } from "@/domain/nutrition/types";
 import { ApiClientError, nutritionApi } from "@/lib/api-client";
+import {
+  getAppViewForTabIndex,
+  getAppViewTabIndex,
+  type AppView,
+} from "@/lib/app-navigation";
 
 import { AssignmentDialog } from "./assignment-dialog";
 import { RecipeDetailDrawer } from "./recipe-detail-drawer";
@@ -35,7 +41,6 @@ import { MenuItem } from "./ui/menu-item";
 import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from "./ui/tabs-subtle";
 import { WeeklyBoard } from "./weekly-board";
 
-type AppView = "plan" | "recipes";
 type ToastTone = "success" | "error";
 type Toast = { message: string; tone: ToastTone } | null;
 
@@ -50,8 +55,8 @@ interface AppShellProps {
 export function AppShell({ initialData, identity }: AppShellProps) {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(initialData);
-  const [activeView, setActiveView] = useState<AppView>("plan");
-  const selectedTabIndex = activeView === "plan" ? 0 : 1;
+  const [activeView, setActiveView] = useState<AppView>("today");
+  const selectedTabIndex = getAppViewTabIndex(activeView);
   const [assignmentSlot, setAssignmentSlot] = useState<MealSlotView | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(null);
@@ -181,12 +186,18 @@ export function AppShell({ initialData, identity }: AppShellProps) {
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Navegación principal">
-        <button className="brand" type="button" onClick={() => navigate("plan")}>
+        <button className="brand" type="button" onClick={() => navigate("today")}>
           <span className="brand__mark" aria-hidden="true"><Leaf size={19} /></span>
           <span>nutriBro</span>
         </button>
 
         <nav className="sidebar__nav">
+          <NavigationButton
+            active={activeView === "today"}
+            icon={<Sun size={18} aria-hidden="true" />}
+            label="Hoy"
+            onClick={() => navigate("today")}
+          />
           <NavigationButton
             active={activeView === "plan"}
             icon={<LayoutGrid size={18} aria-hidden="true" />}
@@ -246,9 +257,11 @@ export function AppShell({ initialData, identity }: AppShellProps) {
               onOpenRecipe={(recipeId) => void openRecipe(recipeId)}
               onSelectSlot={setAssignmentSlot}
             />
-            <WeeklyBoard plan={dashboard.plan} onSelectSlot={setAssignmentSlot} />
           </TabsSubtlePanel>
           <TabsSubtlePanel index={1} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
+            <WeeklyBoard plan={dashboard.plan} onSelectSlot={setAssignmentSlot} />
+          </TabsSubtlePanel>
+          <TabsSubtlePanel index={2} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
             <RecipeLibrary
               recipes={dashboard.recipes}
               onCreateRecipe={startCreatingRecipe}
@@ -263,7 +276,7 @@ export function AppShell({ initialData, identity }: AppShellProps) {
           </button>
           <TabsSubtle
             selectedIndex={selectedTabIndex}
-            onSelect={(index) => navigate(index === 0 ? "plan" : "recipes")}
+            onSelect={(index) => navigate(getAppViewForTabIndex(index))}
             idPrefix="mobile-navigation"
             activeLabel
             className="mobile-nav__tabs"
@@ -271,12 +284,18 @@ export function AppShell({ initialData, identity }: AppShellProps) {
           >
             <TabsSubtleItem
               index={0}
+              icon={Sun}
+              label="Hoy"
+              className="mobile-nav__tab"
+            />
+            <TabsSubtleItem
+              index={1}
               icon={LayoutGrid}
               label="Plan"
               className="mobile-nav__tab"
             />
             <TabsSubtleItem
-              index={1}
+              index={2}
               icon={BookOpen}
               label="Recetas"
               className="mobile-nav__tab"

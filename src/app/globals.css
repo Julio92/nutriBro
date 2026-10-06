@@ -726,21 +726,6 @@ textarea:focus-visible {
   gap: 20px;
 }
 
-.today-section__heading h1 {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(28px, 3vw, 38px);
-  font-weight: 760;
-  letter-spacing: -0.052em;
-  line-height: 1.08;
-}
-
-.today-section__heading p {
-  margin: 10px 0 0;
-  color: var(--text-soft);
-  font-size: 14px;
-}
-
 .today-meals-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -882,8 +867,8 @@ textarea:focus-visible {
 }
 
 .plan-hero h1,
-.section-heading h2,
-.recipe-library__heading h2 {
+.today-section__heading h1,
+.section-heading h1 {
   margin: 0;
   color: var(--text);
   font-size: clamp(28px, 3vw, 38px);
@@ -893,8 +878,8 @@ textarea:focus-visible {
 }
 
 .plan-hero p,
-.section-heading p,
-.recipe-library__heading p {
+.today-section__heading p,
+.section-heading p {
   margin: 10px 0 0;
   color: var(--text-soft);
   font-size: 14px;
@@ -1011,7 +996,7 @@ textarea:focus-visible {
 }
 
 .weekly-section {
-  margin-top: 42px;
+  margin-top: 0;
 }
 
 .section-heading {
@@ -1019,20 +1004,6 @@ textarea:focus-visible {
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-}
-
-.section-heading h2,
-.recipe-library__heading h2 {
-  font-size: 23px;
-}
-
-.section-heading .eyebrow {
-  margin-bottom: 7px;
-}
-
-.section-heading p {
-  margin-top: 6px;
-  font-size: 13px;
 }
 
 .week-badge {
@@ -2204,6 +2175,10 @@ html[data-theme="dark"] .recipe-art--tone-4 {
     display: none;
   }
 
+  .recipe-library__heading > .button {
+    display: none;
+  }
+
   .mobile-nav {
     position: fixed;
     z-index: 30;
@@ -2297,10 +2272,6 @@ html[data-theme="dark"] .recipe-art--tone-4 {
   .stat-card__icon {
     width: 34px;
     height: 34px;
-  }
-
-  .weekly-section {
-    margin-top: 28px;
   }
 
   .week-scroll {
