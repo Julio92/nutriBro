@@ -141,6 +141,7 @@ Opening this from a meal does not change data. Rows can be selected or deselecte
 ## 6. Recipe detail
 
 ```text
+Desktop — right-side Drawer
 ┌───────────────────────────────┐
 │ Recipe detail            [×]  │
 ├───────────────────────────────┤
@@ -161,13 +162,30 @@ Opening this from a meal does not change data. Rows can be selected or deselecte
 │ ↻ In the menu                4 │
 │ [Monday · Dinner] [Friday · Dinner] │
 └───────────────────────────────┘
+
+Mobile — near-fullscreen bottom Drawer
+┌──────────────────────────────────┐
+│                                  │
+│      (underlying app visible)     │
+│   ┌──────────────────────────┐   │
+│   │            ━             │   │
+│   │ Recipe detail            │   │
+│       [ image / initials ]       │
+│ Baked salmon with vegetables      │
+│ [Edit] [Delete]                  │
+│ Ingredients …                    │
+│ Preparation …                    │
+│ In the menu …                    │
+│   └──────────────────────────┘   │
+└──────────────────────────────────┘
 ```
 
-A side drawer is used on desktop and a full-screen view on mobile. Deletion asks for native confirmation and warns that assignments will be cleaned up.
+Recipe detail uses the shadcn Base UI Drawer composition at both sizes: it enters from the right on desktop and rises from the bottom on mobile. The desktop panel has a small inset on every viewport edge. The mobile panel has a swipe handle, rounded corners, and a small safe-area-aware inset rather than filling the screen; a darker blurred backdrop keeps the underlying app visible. The mobile panel omits the X control and can be dismissed by swiping down, pressing Escape, or tapping the backdrop. Desktop retains its close control and dismisses with a rightward swipe. Deletion asks for native confirmation and warns that assignments will be cleaned up.
 
 ## 7. Recipe editor
 
 ```text
+Desktop — right-side Drawer; editing stacks above detail
 ┌────────────────────────────────────────────────────┐
 │ NEW RECIPE                                      [×]│
 │ Add a recipe                                      │
@@ -185,9 +203,23 @@ A side drawer is used on desktop and a full-screen view on mobile. Deletion asks
 │                                                    │
 │                              [Cancel] [Save]     │
 └────────────────────────────────────────────────────┘
+
+Mobile — near-fullscreen bottom Drawer
+┌──────────────────────────────────┐
+│   ┌──────────────────────────┐   │
+│   │            ━             │   │
+│   │ NEW RECIPE               │   │
+│   │ Add a recipe             │   │
+│   │ Name *                   │   │
+│   │ Description              │   │
+│   │ Ingredients *            │   │
+│   │ Preparation *            │   │
+│   │      [Cancel] [Save]     │   │
+│   └──────────────────────────┘   │
+└──────────────────────────────────┘
 ```
 
-Client-side validation prevents incomplete submissions and the server validates the full payload again. Error messages are communicated through an alert region.
+Create and edit use the same responsive Drawer as recipe detail. When editing from detail, the form opens as a second Drawer above the still-open detail; closing or swiping away the form reveals detail again. Create/edit enter from the right on desktop and rise from the bottom on mobile. The mobile surface has the same small inset and swipe handle, with no X control; Cancel, backdrop, Escape, or a downward swipe dismisses it. On desktop, retain the X control and rightward swipe. Unsaved form state is discarded when the form Drawer closes. Client-side validation prevents incomplete submissions and the server validates the full payload again. Error messages are communicated through an alert region.
 
 ## Theme and accessibility
 

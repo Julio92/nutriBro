@@ -1,10 +1,13 @@
 "use client";
 
 import { ChefHat, Clock3, Pencil, Trash2, X } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { formatSlotName } from "@/lib/format";
 import type { RecipeDetail } from "@/domain/nutrition/types";
 import { Badge } from "@/components/ui/badge";
+import { DrawerClose } from "@/components/ui/drawer";
+import { RecipeDrawerShell } from "@/components/recipe-drawer-shell";
 
 import { RecipeArt } from "./recipe-art";
 
@@ -14,6 +17,7 @@ interface RecipeDetailDrawerProps {
   onClose: () => void;
   onEdit: (recipe: RecipeDetail) => void;
   onDelete: (recipe: RecipeDetail) => void;
+  children?: ReactNode;
 }
 
 export function RecipeDetailDrawer({
@@ -22,30 +26,27 @@ export function RecipeDetailDrawer({
   onClose,
   onEdit,
   onDelete,
+  children,
 }: RecipeDetailDrawerProps) {
-  if (!recipe && !isLoading) {
-    return null;
-  }
-
   return (
-    <div className="overlay" role="presentation">
-      <button
-        type="button"
-        className="overlay__backdrop"
-        aria-label="Cerrar detalle de receta"
-        onClick={onClose}
-      />
-      <aside
-        className="recipe-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="recipe-detail-heading"
-      >
+    <RecipeDrawerShell
+      open={Boolean(recipe) || isLoading}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+      title={recipe?.name ?? "Detalle de receta"}
+      description="Información de la receta, sus ingredientes y su lugar en el menú."
+      variant="detail"
+      nestedContent={children}
+    >
+      <aside className="recipe-drawer">
         <div className="drawer__toolbar">
           <span>Detalle de receta</span>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Cerrar">
+          <DrawerClose className="icon-button recipe-drawer-close" aria-label="Cerrar">
             <X size={19} aria-hidden="true" />
-          </button>
+          </DrawerClose>
         </div>
 
         {isLoading || !recipe ? (
@@ -133,6 +134,6 @@ export function RecipeDetailDrawer({
           </div>
         )}
       </aside>
-    </div>
+    </RecipeDrawerShell>
   );
 }

@@ -1146,3 +1146,50 @@ Result:
 - `npm run check` passed (15 test files / 52 tests and production build); lint reports 28 existing warnings and no errors. `git diff --check` passed.
 - Fixed the visual mismatch by moving generic native-button resets into Tailwind's `base` layer, allowing Fluid's utility-layer text and focus styles to take precedence. This also restores the spinner's contrasting `currentColor`; no one-off color override or shared component edit remains.
 - Re-ran `npm run check` after the CSS-layer fix: all 52 tests and production build passed; lint still reports 28 existing warnings and no errors. `git diff --check` passed.
+
+ID: T-028
+Status: Review
+Priority: Medium
+Title: Implement responsive recipe create, edit, and view overlays with Base UI Drawer
+Human verification required: Yes
+Description:
+Replace the recipe create, edit, and view overlays with one shared, responsive shadcn/Base UI Drawer shell. Use a right-side presentation on desktop and a near-fullscreen bottom presentation on mobile, while preserving the existing recipe workflows and stacked edit-over-detail behavior.
+
+Scope:
+- Use one Base UI Drawer primitive and responsive shell for all recipe create, edit, and view flows; do not substitute a Dialog on desktop or separate primitives by breakpoint
+- Present the Drawer from the right on desktop and as a near-fullscreen bottom sheet on mobile
+- Preserve existing create/edit/view content and transitions, including edit-over-detail stacking
+- Allow swipe-to-dismiss in the direction matching the active responsive presentation; dismissal discards an unsaved draft
+- Add focused coverage for responsive gesture direction and recipe overlay transitions/dismissal
+- Update the recipe overlay wireframe documentation to describe the responsive Drawer behavior
+
+Do not touch:
+- Recipe domain rules, API contracts, persistence, or unrelated recipe behavior
+- Unrelated dialogs, settings, navigation, authentication, or broad UI redesign
+- Radix UI, Vaul, or a desktop Dialog substitution; use the project's shadcn/Base UI flavor only
+- Existing draft-discard behavior or the stacked edit-over-detail workflow
+
+Dependencies:
+- None
+
+Acceptance criteria:
+- Recipe create, edit, and view flows use the same Base UI Drawer primitive and responsive shell
+- The shell is right-side on desktop and near-fullscreen from the bottom on mobile
+- Editing from recipe detail preserves the edit-over-detail stack and its expected close/focus behavior
+- Swipe-to-dismiss follows the active presentation; dismissing an unsaved form discards its draft
+- Existing save, loading, validation, detail, and delete behavior remains intact
+- Drawer gestures work across breakpoint changes without conflicting with popup transforms or other overlay content
+- Focused tests and responsive wireframe documentation cover the implemented behavior
+
+Verification:
+- Run focused recipe overlay tests and `npm run check`
+- Smoke-test create, view, stacked edit, save, and dismissal at desktop and mobile widths, including swipe direction and draft discard
+- Check keyboard dismissal/focus behavior, resizing with an open Drawer, and recipe form popup layering
+
+Notes:
+- Base UI's `Drawer.Root.swipeDirection` needs runtime breakpoint awareness because the responsive direction changes from right to down; ensure it remains correct on initial render and when resizing while open.
+- Drawer gesture handling moves the popup; avoid an independent popup `transform` animation that conflicts with its gestures. Verify transform composition before migrating all recipe flows.
+- If the single responsive Drawer cannot satisfy the requested behavior robustly, document the blocker and pause rather than substituting Dialog, Radix, or Vaul.
+- Before editing code, explain the implementation plan and validation.
+- Implementation is in Review: all recipe overlays now use the shared Base UI Drawer shell; `npm run check` and `git diff --check` pass. Responsive pointer/touch gestures, focus restoration, and breakpoint resizing still need a browser interaction check before closing.
+- The mobile Drawer was refined to use shadcn's generated Base UI composition, including its swipe handle and nested-drawer behavior, with a small safe-area-aware inset, stronger blurred backdrop, and no mobile X controls. The shell uses the generated component's layout and transform handling instead of a parallel custom drawer animation.

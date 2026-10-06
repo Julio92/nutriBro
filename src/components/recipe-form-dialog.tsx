@@ -3,6 +3,7 @@
 import { ImageIcon, Minus, Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 
+import { RecipeDrawerShell } from "@/components/recipe-drawer-shell";
 import {
   Combobox,
   ComboboxChips,
@@ -11,6 +12,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { DrawerClose } from "@/components/ui/drawer";
 import type { RecipeDetail, RecipeInput } from "@/domain/nutrition/types";
 import { ApiClientError } from "@/lib/api-client";
 import { getCreatedRecipeTag, getRecipeTagOptions } from "@/lib/recipe-tags";
@@ -140,29 +142,28 @@ export function RecipeFormDialog({ recipe, existingTags, onClose, onSave }: Reci
   }
 
   return (
-    <div className="overlay" role="presentation">
-      <button
-        type="button"
-        className="overlay__backdrop"
-        aria-label="Cancelar edición de receta"
-        onClick={onClose}
-        disabled={isSaving}
-      />
-      <section
-        className="recipe-form-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="recipe-form-heading"
-      >
+    <RecipeDrawerShell
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+      title={isEditing ? recipe?.name ?? "Editar receta" : "Añade una receta"}
+      description="Completa los campos para guardar la receta."
+      variant="form"
+      preventDismissal={isSaving}
+    >
+      <section className="recipe-form-dialog">
         <header className="dialog-header">
           <div>
             <span className="eyebrow">{isEditing ? "Editar receta" : "Nueva receta"}</span>
             <h2 id="recipe-form-heading">{isEditing ? recipe?.name : "Añade una receta"}</h2>
             <p>Los campos con asterisco son obligatorios.</p>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Cerrar" disabled={isSaving}>
+          <DrawerClose className="icon-button recipe-drawer-close" aria-label="Cerrar" disabled={isSaving}>
             <X size={19} aria-hidden="true" />
-          </button>
+          </DrawerClose>
         </header>
 
         <form className="recipe-form" onSubmit={handleSubmit} noValidate>
@@ -302,9 +303,9 @@ export function RecipeFormDialog({ recipe, existingTags, onClose, onSave }: Reci
           </label>
 
           <footer className="form-footer">
-            <button className="button button--ghost" type="button" onClick={onClose} disabled={isSaving}>
+            <DrawerClose className="button button--ghost" disabled={isSaving}>
               Cancelar
-            </button>
+            </DrawerClose>
             <button className="button button--primary" type="submit" disabled={isSaving}>
               <Save size={16} aria-hidden="true" />
               {isSaving ? "Guardando…" : isEditing ? "Guardar cambios" : "Crear receta"}
@@ -312,6 +313,6 @@ export function RecipeFormDialog({ recipe, existingTags, onClose, onSave }: Reci
           </footer>
         </form>
       </section>
-    </div>
+    </RecipeDrawerShell>
   );
 }

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useRef, useState, type ReactNode } from "react";
+import { useReducer, useRef, useState, type ReactNode } from "react";
 
 import type {
   DashboardData,
@@ -25,6 +25,7 @@ import type {
 } from "@/domain/nutrition/types";
 import type { MealVisibilityPreferences } from "@/domain/preferences/types";
 import { ApiClientError, nutritionApi, preferencesApi } from "@/lib/api-client";
+import { initialRecipeOverlayState, recipeOverlayReducer } from "@/lib/recipe-overlay-state";
 import {
   getAppViewForTabIndex,
   getAppViewTabIndex,
@@ -64,7 +65,10 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(null);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
-  const [isRecipeFormOpen, setIsRecipeFormOpen] = useState(false);
+  const [recipeOverlayState, dispatchRecipeOverlay] = useReducer(
+    recipeOverlayReducer,
+    initialRecipeOverlayState,
+  );
   const [recipeBeingEdited, setRecipeBeingEdited] = useState<RecipeDetail | null>(null);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
@@ -85,6 +89,7 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
   async function openRecipe(recipeId: string) {
     const requestId = detailRequestId.current + 1;
     detailRequestId.current = requestId;
+    dispatchRecipeOverlay({ type: "open-detail" });
     setSelectedRecipe(null);
     setIsLoadingRecipe(true);
 
@@ -95,6 +100,7 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
       }
     } catch (error) {
       if (detailRequestId.current === requestId) {
+        dispatchRecipeOverlay({ type: "close-detail" });
         showToast(getErrorMessage(error, () => router.replace("/sign-in")), "error");
       }
     } finally {
@@ -106,18 +112,19 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
 
   function closeRecipeDetail() {
     detailRequestId.current += 1;
+    dispatchRecipeOverlay({ type: "close-detail" });
     setSelectedRecipe(null);
     setIsLoadingRecipe(false);
   }
 
   function startCreatingRecipe() {
     setRecipeBeingEdited(null);
-    setIsRecipeFormOpen(true);
+    dispatchRecipeOverlay({ type: "open-form" });
   }
 
   function startEditingRecipe(recipe: RecipeDetail) {
     setRecipeBeingEdited(recipe);
-    setIsRecipeFormOpen(true);
+    dispatchRecipeOverlay({ type: "open-form" });
   }
 
   function closeSession() {
@@ -132,6 +139,7 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
 
     setDashboard(refreshedDashboard);
     setSelectedRecipe(recipe);
+    dispatchRecipeOverlay({ type: "open-detail" });
     showToast(recipeId ? "Cambios guardados en la receta." : "Receta creada y disponible en tu menú.");
   }
 
@@ -190,6 +198,19 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
     const savedPreferences = await preferencesApi.save(preferences);
     setMealVisibility(savedPreferences);
   }
+
+  const recipeForm = recipeOverlayState.formOpen ? (
+    <RecipeFormDialog
+      key={recipeBeingEdited?.id ?? "new-recipe"}
+      recipe={recipeBeingEdited}
+      existingTags={dashboard.recipes.flatMap((item) => item.tags)}
+      onClose={() => {
+        dispatchRecipeOverlay({ type: "close-form" });
+        setRecipeBeingEdited(null);
+      }}
+      onSave={saveRecipe}
+    />
+  ) : null;
 
   return (
     <div className="app-shell">
@@ -333,21 +354,16 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
         onSave={saveSlotRecipes}
       />
       <RecipeDetailDrawer
+        key="recipe-detail-drawer"
         recipe={selectedRecipe}
         isLoading={isLoadingRecipe}
         onClose={closeRecipeDetail}
         onEdit={startEditingRecipe}
         onDelete={(recipe) => void deleteRecipe(recipe)}
-      />
-      {isRecipeFormOpen ? (
-        <RecipeFormDialog
-          key={recipeBeingEdited?.id ?? "new-recipe"}
-          recipe={recipeBeingEdited}
-          existingTags={dashboard.recipes.flatMap((item) => item.tags)}
-          onClose={() => setIsRecipeFormOpen(false)}
-          onSave={saveRecipe}
-        />
-      ) : null}
+      >
+        {recipeBeingEdited ? recipeForm : null}
+      </RecipeDetailDrawer>
+      {!recipeBeingEdited ? recipeForm : null}
 
       <SettingsDialog
         open={isPreferencesOpen}
