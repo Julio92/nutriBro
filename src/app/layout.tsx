@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { MotionConfig } from "framer-motion";
 
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -25,7 +26,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
-        <ThemeProvider>{children}</ThemeProvider>
+        <MotionConfig reducedMotion="user">
+          <ThemeProvider>{children}</ThemeProvider>
+        </MotionConfig>
       </body>
     </html>
   );

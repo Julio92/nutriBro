@@ -9,8 +9,12 @@ const eslintConfig = defineConfig([
     files: [
       "src/components/ui/combobox.tsx",
       "src/components/ui/checkbox-group.tsx",
+      "src/components/ui/dropdown-search.tsx",
+      "src/components/ui/dropdown.tsx",
+      "src/components/ui/menu-item.tsx",
       "src/components/ui/sidebar-core.tsx",
       "src/components/ui/sidebar-menu.tsx",
+      "src/components/ui/tabs-subtle.tsx",
       "src/hooks/use-fluid-hover.ts",
       "src/hooks/use-merge-split.tsx",
     ],

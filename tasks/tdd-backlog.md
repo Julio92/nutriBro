@@ -192,3 +192,107 @@ Replace the standalone `/preferences` page with the Fluid Functionalism Dialog's
 - Added the generated Sidebar core/menu files to the existing ESLint exception for the library's ref-driven animations.
 - `npm run check` passed (34 tests, production build and standalone preparation); `git diff --check` passed. A brief `next dev` launch regenerated stale route type output and served `/` with HTTP 200; the server was stopped after verification.
 - User confirmed the dialog task is completed; T-020 is closed as Done.
+
+## T-022 — Remove the mobile top bar and move the avatar beside Recetas
+
+### Objective
+At the existing mobile breakpoint, remove the top bar entirely and place the account avatar immediately to the right of the Recetas control in the fixed bottom navigation. Keep the desktop top bar/avatar layout and all existing account actions unchanged.
+
+### Current implementation facts
+- `src/components/app-shell.tsx` renders the mobile brand, top-bar context, create action, and account menu inside `.topbar`; the mobile brand is currently shown below 900px while the context and create action are hidden.
+- The same file renders `.mobile-nav` with Plan, create-recipe, Recipes, and the account control after Recetas. The account menu open state and outside-click behavior are owned by `AppShell`; the outside-click handler recognizes both responsive account refs.
+- `src/app/globals.css` switches the sidebar/mobile nav at `max-width: 900px`. The mobile nav now has four equal grid tracks; the upward-opening account menu is right-aligned to the avatar wrapper so it stays within the screen.
+- There are no AppShell/UI component tests in the current Vitest suite. Existing tests cover domain, service, API, and assignment-dialog behavior.
+
+### Files to inspect and likely modify
+- `src/components/app-shell.tsx` — preserve the user's current mobile account-control placement immediately after Recetas and its existing preference/sign-out callbacks, open state, and outside-click behavior.
+- `src/app/globals.css` — hide `.topbar` at the existing mobile-nav breakpoint; align the four mobile-nav controls in equal grid tracks; style the mobile avatar and position its account menu above and left of the trigger within viewport/safe-area constraints. Keep desktop rules unchanged.
+- `tasks/backlog.md` — update T-022 status/result only after implementation and the required user verification; do not change its acceptance criteria during implementation.
+
+### Ordered implementation units
+1. **Confirm the responsive/accessibility constraints.** Re-read the current app-shell markup and CSS, the relevant Next.js guide under `node_modules/next/dist/docs/` before editing, and this task's acceptance criteria. Explain the implementation plan and validation before production-code edits.
+2. **Preserve one account behavior across two responsive placements.** Reuse/extract the account-control markup so the desktop top-bar instance and mobile bottom-nav instance call the same open/close, Preferences, and sign-out behavior. If both responsive instances are mounted, give their controlled menus distinct IDs and ensure outside-click handling recognizes both wrapper refs; clicks inside either menu must not dismiss it prematurely.
+3. **Remove the mobile top bar and align the controls.** At the existing `max-width: 900px` breakpoint, hide the complete top bar (including its logo and avatar). Preserve the user's order of Plan, create, Recipes, avatar and give all four controls equal grid tracks. Preserve the current desktop top-bar markup/appearance above the breakpoint.
+4. **Make the bottom account menu usable.** Keep the avatar trigger's accessible name and expanded/control relationship, provide at least a 44px touch target, and open/align the account menu above the avatar with its right edge aligned to the trigger so it expands left and stays within viewport/safe-area bounds. Retain the existing desktop menu direction and alignment.
+5. **Verify behavior and scope.** Run `npm run check` and `git diff --check`. Smoke-test mobile widths below the breakpoint and desktop above it: confirm no top bar/logo/avatar on mobile, avatar immediately to the right of Recetas, menu positioning and both menu actions, and unchanged desktop top bar/account behavior. Request the human verification specified by T-022 before closing it.
+
+### Validation
+- Static: `npm run check` (lint, Vitest suite, production build) and `git diff --check`.
+- Browser: check a narrow phone viewport (for example 375px), a wider mobile/tablet viewport below 900px, and a desktop viewport above 900px.
+- Interaction: open/close the mobile account menu, click Preferences and verify the existing dialog still opens, click Close session and confirm the existing sign-out action is invoked; verify outside click and keyboard focus remain usable.
+- Regression: confirm desktop retains its current brand/sidebar/top-bar/account placement and mobile navigation retains Plan, create-recipe, and Recipes behavior with the avatar directly after Recetas.
+- Human verification is required by T-022; do not mark the task Done before it is confirmed.
+
+### Risks and scope boundaries
+- The account control currently owns a single ref and menu ID. If responsive desktop/mobile instances are rendered together, handle both refs and use unique IDs to avoid invalid ARIA references or a broken outside-click guard.
+- The bottom-nav menu must open upward and remain clear of the system safe-area inset; retain the existing menu actions rather than changing authentication or preferences logic.
+- Use the current 900px responsive breakpoint so the top bar and bottom navigation do not overlap at tablet widths. Do not change desktop layout or the app's breakpoint system.
+- This is a placement/layout task only: do not alter authentication, theme/preferences behavior, navigation destinations, or add animation/dependencies. The Fluid Functionalism stack audit found no MotionConfig, but reduced-motion setup is unrelated and explicitly out of scope.
+
+### Implementation result
+- Extracted the account control into a shared `AccountMenu` and mounted it in both the unchanged desktop top bar and after Recetas in the mobile bottom navigation. The single open state controls the two responsive instances; menu IDs are unique and the outside-click handler recognizes both refs.
+- The top bar is hidden at the existing 900px breakpoint, including removal of obsolete mobile-brand markup. The mobile nav has four equal-width tracks in Plan/create/Recipes/avatar order, a 44px avatar trigger, and an account menu anchored upward and aligned to the trigger's right edge so it opens leftward.
+- `npm run check` passed (lint has 28 warnings in existing generated UI components, 0 errors; 9 test files / 34 tests; production build and standalone preparation). `git diff --check` passed. The local app root returned HTTP 200; visual and interaction confirmation remains for the user.
+- The baseline implementation was awaiting human verification at that stage; the user later confirmed the final navigation after the approved follow-up (see below).
+- The user corrected the requested avatar placement from after Plan to after Recetas; the implementation and task requirements now reflect Recetas.
+
+### Approved follow-up plan: Fluid TabsSubtle for mobile view navigation
+
+#### Scope
+- Use the Base UI TabsSubtle registry variant only in the mobile navigation for the two existing views, Plan and Recetas.
+- Arrange the create-recipe action before the two-tab selector and the account-menu trigger after it, keeping the avatar immediately to the right of Recetas; neither action may change the selected view.
+- Retain the desktop sidebar buttons, their view switching, the view content, avatar position after Recetas, and existing menu actions.
+- Respect OS reduced-motion preferences for the newly animated tabs.
+
+#### Files to modify
+- `src/components/ui/tabs-subtle.tsx` — install from `https://www.fluidfunctionalism.com/r/base/tabs-subtle.json`; inspect generated source and every shared/dependency change. Do not install the Radix flavor.
+- `src/components/app-shell.tsx` — connect controlled TabsSubtle index 0/1 to the existing `activeView`, add the linked panels around current Plan/Recetas content, and leave Create and AccountMenu outside the tablist.
+- `src/app/globals.css` — compose the tablist and action buttons in the mobile bottom bar with usable touch targets at narrow widths; leave desktop navigation styles unchanged.
+- `src/app/layout.tsx` — wrap the app's provider/content tree with `MotionConfig reducedMotion="user"` so Framer Motion observes the OS preference.
+- `eslint.config.mjs` — apply the repository's existing file-scoped exception for the registry's documented ref-driven animation implementation; do not modify generated TabsSubtle internals.
+- `tasks/backlog.md` and this plan — record implementation/check results; keep T-022 in Review until human verification is confirmed.
+
+#### Ordered implementation units
+1. Check the TabsSubtle target is absent and inspect package/CSS prerequisites; install the Base UI registry URL without `--overwrite`, then review every generated, modified, or dependency file.
+2. Use `TabsSubtle` with stable `idPrefix`, `selectedIndex`, and `onSelect`; render `TabsSubtlePanel` indices 0 and 1 with the same `selectedIndex` so the tabs' `aria-controls` and the panels' `aria-labelledby` stay linked. Keep only the selected view's content mounted as before.
+3. Place Create and AccountMenu as sibling action controls, not tab items, in this order: Create, Plan/Recetas tablist, AccountMenu. Map Plan to index 0 and Recetas to index 1; keep the desktop sidebar controls connected to the same `activeView` state.
+4. Add `MotionConfig reducedMotion="user"` around the existing app providers/content. Keep the tabs component source unmodified; compose using its documented props and `className` only.
+5. Run `npm run check` and `git diff --check`; inspect the final diff and smoke-test 320px, 375px, just below 900px, and desktop widths. Test mouse/touch selection, Arrow/Home/End focus movement, Enter/Space selection, preferences menu opening, and the reduced-motion OS setting.
+
+#### Risks / decisions
+- The registry has Radix and Base UI URLs; use `/r/base/tabs-subtle.json` to match the project's existing Base UI flavor.
+- TabsSubtle's tab labels and icon sizing must fit the mobile bar without clipping at 320px; tune the surrounding layout, not generated internals.
+- Panels must remain correctly linked with unique IDs while desktop sidebar buttons continue controlling the same active view.
+- User approved this as an extension to T-022. Human responsive/interaction verification remains required before marking it Done.
+
+#### Follow-up implementation result
+- Installed `src/components/ui/tabs-subtle.tsx` from the Base UI registry URL. The CLI skipped the existing customized shared files and made no package dependency changes; retained its Tailwind scrollbar utility required by the component.
+- Wired Plan (index 0) and Recetas (index 1) to the existing `activeView`, with stable linked tab/panel IDs. Create is before the tablist and AccountMenu after it, so avatar remains immediately to the right of Recetas and neither action changes tabs. Desktop sidebar controls still use the same state.
+- Added root `MotionConfig reducedMotion="user"`; left the generated TabsSubtle implementation unchanged and added its path to the existing file-scoped React Hooks lint exception for registry animation code.
+- `npm run check` passed: 9 test files / 34 tests, production build and standalone preparation. Lint has 28 non-blocking warnings in existing generated UI components; `git diff --check` passed.
+- The automated smoke request without an authenticated session redirected `/` to `/sign-in`, and browser automation is not installed. The user subsequently reviewed the final navigation and confirmed it is perfect, satisfying the human-verification requirement.
+
+## T-023 — Use Fluid Functionalism Dropdown for the account menu
+
+### Objective
+Replace the custom Preferences/sign-out popup with Fluid Functionalism's Base UI Dropdown, retaining the account avatar trigger and both responsive placements.
+
+### Scope and implementation units
+1. Re-read the account-menu JSX/CSS and inspect the Base UI Dropdown registry API and required file targets. Confirm existing component/shared targets and package versions before installation; do not use `--overwrite` on customized files.
+2. Install `https://www.fluidfunctionalism.com/r/base/dropdown.json`. Review every created/skipped/modified file and package change; the app already has Base UI and Framer Motion, so avoid redundant npm dependencies.
+3. Compose each AccountMenu as a Base UI `DropdownMenu` with `DropdownTrigger`, `DropdownContent`, and action `MenuItem`s. Keep separate menu roots/open state per responsive instance because both placements are mounted while the popup uses a portal.
+4. Preserve the avatar button visuals, accessible name, Preferences callback, and sign-out callback. Position the desktop popup below/end-aligned and the mobile popup above/end-aligned; reconcile legacy account-menu CSS with the popup's portalled content.
+5. Remove AppShell's manual account outside-click state/listener and obsolete popup CSS only after confirming Base UI fully owns the matching behavior. Do not change avatar or account action semantics.
+6. Run `npm run check` and `git diff --check`; smoke-test mobile/desktop anchors, narrow viewport collision handling, focus/arrow navigation, Escape/outside dismissal, Preferences, and sign-out. Keep T-023 in Review until human verification.
+
+### Validation and risks
+- Compare target files and dependency lists against the registry before installation; retain all project-local shared code.
+- Verify two responsive triggers never produce duplicate portalled menus. Prefer independent per-instance Dropdown state rather than sharing the old boolean.
+- Test avatar-menu Preferences still opens SettingsDialog and sign-out still calls the existing `closeSession` callback.
+- T-019 remains in Review for separate human verification; this T-023 task is independently authorized by the user and must not modify T-019.
+
+### Implementation result
+- Replaced the custom account popup with per-instance Base UI Dropdown roots and retained the existing Preferences/sign-out callbacks. Removed the custom outside-click state/listener and obsolete popup-row styling; kept responsive popup placements and the 44px mobile avatar trigger.
+- Registry installation added no npm dependencies. Generated Dropdown sources were left unchanged; their documented React Hooks behavior is covered by the existing file-scoped lint exception. Removed only duplicate registry-appended `@property` declarations while retaining the shared scrollbar utility.
+- Removed the account-specific popup width/surface rules, mobile 44px row-height override, and explicit side offset. There was no app-specific font-size/weight override; MenuItem already uses Fluid's default type scale.
+- `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); lint has 28 existing warnings and 0 errors. `git diff --check` passed. The user confirmed the responsive Dropdown experience is perfect; T-023 is Done.

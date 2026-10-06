@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import type {
   DashboardData,
@@ -30,6 +30,9 @@ import { RecipeFormDialog } from "./recipe-form-dialog";
 import { RecipeLibrary } from "./recipe-library";
 import { SettingsDialog } from "./dialog-sidebar/settings-dialog";
 import { TodayMeals } from "./today-meals";
+import { DropdownContent, DropdownMenu, DropdownTrigger } from "./ui/dropdown";
+import { MenuItem } from "./ui/menu-item";
+import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from "./ui/tabs-subtle";
 import { WeeklyBoard } from "./weekly-board";
 
 type AppView = "plan" | "recipes";
@@ -48,28 +51,16 @@ export function AppShell({ initialData, identity }: AppShellProps) {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(initialData);
   const [activeView, setActiveView] = useState<AppView>("plan");
+  const selectedTabIndex = activeView === "plan" ? 0 : 1;
   const [assignmentSlot, setAssignmentSlot] = useState<MealSlotView | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(null);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [isRecipeFormOpen, setIsRecipeFormOpen] = useState(false);
   const [recipeBeingEdited, setRecipeBeingEdited] = useState<RecipeDetail | null>(null);
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const detailRequestId = useRef(0);
-  const accountMenuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
-        setIsAccountMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
 
   function showToast(message: string, tone: ToastTone = "success") {
     setToast({ message, tone });
@@ -230,10 +221,6 @@ export function AppShell({ initialData, identity }: AppShellProps) {
 
       <div className="app-main">
         <header className="topbar">
-          <button className="brand brand--mobile" type="button" onClick={() => navigate("plan")}>
-            <span className="brand__mark" aria-hidden="true"><Leaf size={18} /></span>
-            <span>nutriBro</span>
-          </button>
           <div className="topbar__context">
             <span className="topbar__eyebrow">Planificador personal</span>
             <span className="topbar__title">Tu semana, a tu ritmo</span>
@@ -243,95 +230,64 @@ export function AppShell({ initialData, identity }: AppShellProps) {
               <Plus size={17} aria-hidden="true" />
               <span>Nueva receta</span>
             </button>
-            <div className="topbar__account" ref={accountMenuRef}>
-              <button
-                className="avatar-button"
-                type="button"
-                onClick={() => setIsAccountMenuOpen((current) => !current)}
-                aria-label="Abrir menú de cuenta"
-                aria-expanded={isAccountMenuOpen}
-                aria-controls="account-menu"
-                title={identity.displayName}
-              >
-                <span className="avatar" aria-hidden="true">
-                  {getInitials(identity.displayName)}
-                </span>
-              </button>
-
-              {isAccountMenuOpen ? (
-                <div
-                  id="account-menu"
-                  className="account-menu"
-                  role="menu"
-                  aria-label="Menú de cuenta"
-                  onMouseDown={(event) => event.stopPropagation()}
-                >
-                  <button
-                    className="account-menu__item preferences-action preferences-action--menu"
-                    type="button"
-                    onClick={() => {
-                      setIsAccountMenuOpen(false);
-                      setIsPreferencesOpen(true);
-                    }}
-                    aria-label="Abrir preferencias"
-                    title="Preferencias"
-                  >
-                    <Settings2 size={16} aria-hidden="true" />
-                    <span>Preferencias</span>
-                  </button>
-                  <button
-                    className="account-menu__item sign-out-action sign-out-action--menu"
-                    type="button"
-                    onClick={() => {
-                      closeSession();
-                    }}
-                    aria-label="Cerrar sesión"
-                    title={`Cerrar sesión${identity.email ? ` (${identity.email})` : ""}`}
-                  >
-                    <LogOut size={16} aria-hidden="true" />
-                    <span>Cerrar sesión</span>
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <AccountMenu
+              className="topbar__account"
+              identity={identity}
+              onOpenPreferences={() => setIsPreferencesOpen(true)}
+              onSignOut={closeSession}
+            />
           </div>
         </header>
 
         <main className="content">
-          {activeView === "plan" ? (
-            <>
-              <TodayMeals
-                plan={dashboard.plan}
-                onOpenRecipe={(recipeId) => void openRecipe(recipeId)}
-                onSelectSlot={setAssignmentSlot}
-              />
-
-              <WeeklyBoard plan={dashboard.plan} onSelectSlot={setAssignmentSlot} />
-            </>
-          ) : (
+          <TabsSubtlePanel index={0} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
+            <TodayMeals
+              plan={dashboard.plan}
+              onOpenRecipe={(recipeId) => void openRecipe(recipeId)}
+              onSelectSlot={setAssignmentSlot}
+            />
+            <WeeklyBoard plan={dashboard.plan} onSelectSlot={setAssignmentSlot} />
+          </TabsSubtlePanel>
+          <TabsSubtlePanel index={1} selectedIndex={selectedTabIndex} idPrefix="mobile-navigation">
             <RecipeLibrary
               recipes={dashboard.recipes}
               onCreateRecipe={startCreatingRecipe}
               onOpenRecipe={(recipeId) => void openRecipe(recipeId)}
             />
-          )}
+          </TabsSubtlePanel>
         </main>
 
         <nav className="mobile-nav" aria-label="Navegación móvil">
-          <NavigationButton
-            active={activeView === "plan"}
-            icon={<LayoutGrid size={19} aria-hidden="true" />}
-            label="Plan"
-            onClick={() => navigate("plan")}
-          />
           <button className="mobile-nav__create" type="button" onClick={startCreatingRecipe} aria-label="Crear receta">
             <Plus size={21} aria-hidden="true" />
           </button>
-          <NavigationButton
-            active={activeView === "recipes"}
-            icon={<BookOpen size={19} aria-hidden="true" />}
-            label="Recetas"
-            onClick={() => navigate("recipes")}
+          <TabsSubtle
+            selectedIndex={selectedTabIndex}
+            onSelect={(index) => navigate(index === 0 ? "plan" : "recipes")}
+            idPrefix="mobile-navigation"
+            activeLabel
+            className="mobile-nav__tabs"
+            aria-label="Secciones principales"
+          >
+            <TabsSubtleItem
+              index={0}
+              icon={LayoutGrid}
+              label="Plan"
+              className="mobile-nav__tab"
+            />
+            <TabsSubtleItem
+              index={1}
+              icon={BookOpen}
+              label="Recetas"
+              className="mobile-nav__tab"
+            />
+          </TabsSubtle>
+          <AccountMenu
+            className="mobile-nav__account"
+            identity={identity}
+            mobile
+            onOpenPreferences={() => setIsPreferencesOpen(true)}
+            onSignOut={closeSession}
           />
         </nav>
       </div>
@@ -369,6 +325,62 @@ export function AppShell({ initialData, identity }: AppShellProps) {
           <span>{toast.message}</span>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function AccountMenu({
+  className,
+  identity,
+  mobile = false,
+  onOpenPreferences,
+  onSignOut,
+}: {
+  className: string;
+  identity: AppShellProps["identity"];
+  mobile?: boolean;
+  onOpenPreferences: () => void;
+  onSignOut: () => void;
+}) {
+  return (
+    <div className={className}>
+      <DropdownMenu>
+        <DropdownTrigger
+          render={
+            <button
+              className="avatar-button"
+              type="button"
+              aria-label="Abrir menú de cuenta"
+              title={identity.displayName}
+            >
+              <span className="avatar" aria-hidden="true">
+                {getInitials(identity.displayName)}
+              </span>
+            </button>
+          }
+        />
+        <DropdownContent
+          side={mobile ? "top" : "bottom"}
+          align="end"
+        >
+          <MenuItem
+            index={0}
+            icon={Settings2}
+            label="Preferencias"
+            onSelect={onOpenPreferences}
+            aria-label="Abrir preferencias"
+            title="Preferencias"
+          />
+          <MenuItem
+            index={1}
+            icon={LogOut}
+            label="Cerrar sesión"
+            onSelect={onSignOut}
+            aria-label="Cerrar sesión"
+            title={`Cerrar sesión${identity.email ? ` (${identity.email})` : ""}`}
+          />
+        </DropdownContent>
+      </DropdownMenu>
     </div>
   );
 }

@@ -711,7 +711,7 @@ Notes:
 - `npm run check` passed: lint, all 34 tests, and production build. `git diff --check` passed.
 
 ID: T-019
-Status: Review
+Status: Done
 Priority: Medium
 Title: Add system/light/dark theme preference with Fluid Functionalism Select
 Human verification required: Yes
@@ -851,3 +851,109 @@ Result:
 - Enabled the optical-size axis in the existing self-hosted Inter variable font configuration as required by CheckboxGroup's weight animation.
 - Removed obsolete meal-selector CSS and added the generated CheckboxGroup to the existing lint exception for Fluid Functionalism ref-driven behavior.
 - `npm run check` passed (9 test files / 34 tests, production build and standalone preparation); `git diff --check` passed. ESLint reports existing/non-blocking unused-variable warnings in generated shared components.
+
+ID: T-022
+Status: Done
+Priority: Medium
+Title: Remove the mobile top bar and move the avatar beside Recetas
+Human verification required: Yes
+Description:
+On mobile screens, remove the top bar's logo and avatar to reclaim vertical space. Move the avatar to the bottom navigation area, immediately to the right of the "Recetas" button, while keeping the account menu accessible.
+
+Scope:
+- Hide the mobile top bar, including its logo and avatar
+- Place the existing avatar control at the bottom, to the right of the "Recetas" button
+- Use Fluid Functionalism TabsSubtle for the mobile Plan/Recetas view navigation
+- Keep "Crear receta" and the avatar menu as separate action controls beside the tabs
+- Preserve the existing view content and connect the selected tab to the active view
+- Respect the OS reduced-motion setting for the new animated mobile tabs
+- Preserve avatar-menu actions and ensure the relocated control remains usable on mobile
+- Keep desktop top-bar and avatar placement unchanged
+
+Do not touch:
+- Authentication or account-menu action behavior
+- Desktop navigation or layout
+- Unrelated mobile navigation, dashboard, recipe, or preferences behavior
+- Changes beyond the mobile top-bar and avatar placement
+
+Dependencies:
+- Existing responsive app-shell top bar, bottom navigation, and avatar menu
+
+Acceptance criteria:
+- On mobile screens, the top bar does not display the logo or avatar
+- The avatar is displayed at the bottom immediately to the right of the "Recetas" button
+- Plan and Recetas are presented as accessible TabsSubtle tabs, and selecting either shows its existing content
+- Create-recipes and avatar controls remain actions, not tabs or tab-panel selections
+- TabsSubtle's selected state and tab panels remain linked accessibly, and motion responds to the OS reduced-motion preference
+- The desktop sidebar navigation and its current view-switching behavior remain unchanged
+- The relocated avatar opens the existing account menu and its actions remain functional
+- Desktop top-bar and avatar placement remain unchanged
+- The mobile layout remains usable and accessible at supported small-screen widths
+
+Verification:
+- Review the app in a browser at mobile and desktop widths
+- Confirm the top bar contents are removed only on mobile and the avatar menu works from its new location
+- Confirm Plan/Recetas tab selection, active indicator, and keyboard navigation; verify create and avatar still invoke actions without changing the active tab
+- Run `npm run check`
+- Human verification of the responsive layout and avatar interaction
+
+Notes:
+- Before editing code, explain the implementation plan and validation.
+- If the "Recetas" control or mobile bottom-navigation structure differs from this description, document the blocker before proceeding.
+
+Result:
+- Hid the complete top bar at the existing mobile breakpoint and removed its obsolete mobile-only brand markup and styles.
+- Reused the account-menu component in the desktop top bar and after Recetas in the mobile bottom navigation; retained the existing preference/sign-out handlers and added distinct menu IDs and outside-click refs for both placements.
+- Gave the mobile navigation a Create / TabsSubtle / avatar layout, keeping the avatar's 44px touch target immediately after Recetas and positioning its account menu above and left of the trigger.
+- Installed the Base UI TabsSubtle registry component without overwriting customized shared files or changing package dependencies. The controlled Plan/Recetas tabs map to the existing active view, with linked tab panels; Create and AccountMenu remain separate actions.
+- Added root `MotionConfig reducedMotion="user"` and the repository's existing file-scoped lint exception for the generated component's documented ref-driven animation behavior.
+- `npm run check` passed (9 test files / 34 tests and production build); `git diff --check` passed. ESLint reports 28 existing warnings in generated UI components, with no errors. Local app root returned HTTP 200.
+- The unauthenticated smoke check redirected to `/sign-in`; the user subsequently reviewed the final navigation and confirmed it is perfect, completing the required human verification.
+- The user corrected the requested mobile avatar position from after Plan to after Recetas; the implementation and acceptance criteria now reflect Recetas.
+
+ID: T-023
+Status: Done
+Priority: Medium
+Title: Use Fluid Functionalism Dropdown for the account menu
+Human verification required: Yes
+Description:
+Replace the hand-built account popup with Fluid Functionalism's Base UI Dropdown while preserving the existing avatar trigger, mobile/desktop placement, Preferences action, and sign-out behavior.
+
+Scope:
+- Install the Base UI Dropdown registry component and inspect all generated files, shared dependencies, and package changes
+- Replace the custom account-menu popup with the documented DropdownMenu, DropdownTrigger, DropdownContent, and MenuItem composition
+- Keep desktop and mobile account menus independently controlled so opening one portal does not open a duplicate popup for the hidden responsive placement
+- Preserve the existing avatar presentation, menu labels/actions, desktop/mobile anchors, and preferences/sign-out callbacks
+- Remove only the manual outside-click state/listener and CSS that are no longer needed after the Dropdown migration
+
+Do not touch:
+- Avatar appearance or user identity data
+- Authentication/sign-out logic or Preferences dialog behavior
+- Mobile navigation tabs, desktop sidebar, dashboard, recipe, or preferences controls
+- T-019 or any unrelated backlog task
+
+Dependencies:
+- T-022 mobile/desktop account placements and existing shared Preferences/sign-out callbacks
+- Existing Base UI, Framer Motion, and Fluid Functionalism shared plumbing
+
+Acceptance criteria:
+- Both responsive account-menu placements use Fluid Functionalism's Base UI Dropdown and only the activated, visible instance opens
+- The popup retains the existing account actions and closes appropriately after action selection
+- Keyboard focus/navigation, Escape, outside dismissal, and trigger expanded state are provided by the Base UI primitive
+- Desktop and mobile popup positioning remains usable; the mobile popup opens above and aligns to the avatar without clipping at narrow widths
+- The existing avatar trigger and account actions remain visually and behaviorally consistent
+- Registry changes add no redundant npm dependencies and preserve customized shared files
+- T-019 remains unchanged in Review pending its separate verification
+
+Verification:
+- Inspect the Base UI registry API, generated files, and dependency changes
+- Run `npm run check` and `git diff --check`
+- Smoke-test desktop and mobile menu opening, positioning, dismissal, keyboard navigation, Preferences, and sign-out invocation
+- Human verification of responsive popup behavior and account actions
+
+Notes:
+- The user explicitly authorized this new task after T-022 was closed; keep it scoped independently of T-019, which remains in Review.
+- The user confirmed the responsive Dropdown experience is perfect and requested removal of app-specific sizing overrides to match the Fluid UI defaults.
+- `npm run check` passed: 9 test files / 34 tests and the production build/standalone preparation succeeded. Lint reports 28 existing generated-UI warnings and no errors. `git diff --check` passed.
+- Generated Dropdown sources remain unchanged; their paths were added to the existing file-scoped React Hooks lint exception. Registry-added duplicate `@property` declarations were removed while retaining the scrollbar utility used by registry components.
+- Removed the custom account popup width/surface rules, 44px mobile menu-row override, and explicit side offset; the menu now uses Fluid's popup/item typography and sizing defaults, retaining only required responsive placement/alignment.
