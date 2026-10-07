@@ -12,6 +12,7 @@ import {
   ShoppingBasket,
   Sparkles,
   Sun,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -33,6 +34,16 @@ import {
 } from "@/lib/app-navigation";
 
 import { AssignmentDialog } from "./assignment-dialog";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { RecipeDetailDrawer } from "./recipe-detail-drawer";
 import { RecipeFormDialog } from "./recipe-form-dialog";
 import { RecipeLibrary } from "./recipe-library";
@@ -64,6 +75,8 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
   const [assignmentSlot, setAssignmentSlot] = useState<MealSlotView | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetail | null>(null);
+  const [recipePendingDelete, setRecipePendingDelete] = useState<RecipeDetail | null>(null);
+  const [isDeletingRecipe, setIsDeletingRecipe] = useState(false);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipeOverlayState, dispatchRecipeOverlay] = useReducer(
     recipeOverlayReducer,
@@ -73,6 +86,7 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const detailRequestId = useRef(0);
+  const deleteRequestInFlight = useRef(false);
 
   function showToast(message: string, tone: ToastTone = "success") {
     setToast({ message, tone });
@@ -143,19 +157,20 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
     showToast(recipeId ? "Cambios guardados en la receta." : "Receta creada y disponible en tu menú.");
   }
 
-  async function deleteRecipe(recipe: RecipeDetail) {
-    const shouldDelete = window.confirm(
-      `¿Eliminar “${recipe.name}”? También se quitará de las comidas donde esté asignada.`,
-    );
-
-    if (!shouldDelete) {
+  async function confirmDeleteRecipe() {
+    const recipe = recipePendingDelete;
+    if (!recipe || deleteRequestInFlight.current) {
       return;
     }
+
+    deleteRequestInFlight.current = true;
+    setIsDeletingRecipe(true);
 
     try {
       const result = await nutritionApi.deleteRecipe(recipe.id);
       const refreshedDashboard = await nutritionApi.getDashboard();
       setDashboard(refreshedDashboard);
+      setRecipePendingDelete(null);
       closeRecipeDetail();
       showToast(
         result.clearedAssignments > 0
@@ -164,6 +179,9 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
       );
     } catch (error) {
       showToast(getErrorMessage(error, () => router.replace("/sign-in")), "error");
+    } finally {
+      deleteRequestInFlight.current = false;
+      setIsDeletingRecipe(false);
     }
   }
 
@@ -239,11 +257,6 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
             label="Recetas"
             onClick={() => navigate("recipes")}
           />
-          <button className="sidebar-nav__item sidebar-nav__item--disabled" type="button" disabled>
-            <ShoppingBasket size={18} aria-hidden="true" />
-            <span>Lista de la compra</span>
-            <small>Próximamente</small>
-          </button>
         </nav>
 
         <div className="sidebar__spacer" />
@@ -359,11 +372,43 @@ export function AppShell({ initialData, initialMealVisibility, identity }: AppSh
         isLoading={isLoadingRecipe}
         onClose={closeRecipeDetail}
         onEdit={startEditingRecipe}
-        onDelete={(recipe) => void deleteRecipe(recipe)}
+        onDelete={setRecipePendingDelete}
       >
         {recipeBeingEdited ? recipeForm : null}
       </RecipeDetailDrawer>
       {!recipeBeingEdited ? recipeForm : null}
+
+      <Dialog
+        open={recipePendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleteRequestInFlight.current) {
+            setRecipePendingDelete(null);
+          }
+        }}
+      >
+        <DialogContent showCloseButton={!isDeletingRecipe} aria-busy={isDeletingRecipe}>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar “{recipePendingDelete?.name}”?</DialogTitle>
+            <DialogDescription>
+              También se quitará de las comidas donde esté asignada.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose
+              render={<Button variant="ghost" disabled={isDeletingRecipe}>Cancelar</Button>}
+            />
+            <Button
+              variant="ghost"
+              className="button--danger-quiet"
+              leadingIcon={Trash2}
+              loading={isDeletingRecipe}
+              onClick={() => void confirmDeleteRecipe()}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <SettingsDialog
         open={isPreferencesOpen}

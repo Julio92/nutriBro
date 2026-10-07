@@ -1193,3 +1193,50 @@ Notes:
 - Before editing code, explain the implementation plan and validation.
 - Implementation is in Review: all recipe overlays now use the shared Base UI Drawer shell; `npm run check` and `git diff --check` pass. Responsive pointer/touch gestures, focus restoration, and breakpoint resizing still need a browser interaction check before closing.
 - The mobile Drawer was refined to use shadcn's generated Base UI composition, including its swipe handle and nested-drawer behavior, with a small safe-area-aware inset, stronger blurred backdrop, and no mobile X controls. The shell uses the generated component's layout and transform handling instead of a parallel custom drawer animation.
+- Follow-up: compose the recipe detail directly with shadcn's Drawer, DrawerContent, DrawerTitle, and DrawerDescription so the recipe title/description are visible library primitives. Keep the existing custom recipe body content and responsive behavior.
+- The direct composition and shared swipe-direction hook pass focused overlay tests and `npm run check`; awaiting review of the updated detail presentation along with the remaining responsive browser checks.
+
+ID: T-029
+Status: Done
+Priority: Medium
+Title: Use Fluid Dialog for recipe deletion confirmation
+Description:
+Replace the browser-native confirmation shown when deleting a recipe with the already-installed Fluid Functionalism Base UI Dialog. Preserve the existing Spanish warning, delete request, success feedback, and error handling.
+
+Scope:
+- Replace `window.confirm` in `src/components/app-shell.tsx` with controlled Fluid Dialog state and a clear Cancel/Eliminar choice.
+- Keep delete execution behind explicit confirmation and prevent duplicate submissions while a deletion is pending.
+- Preserve the existing recipe detail view and error feedback when deletion fails.
+- Reuse the installed Dialog and Button components; do not reinstall or overwrite their customized source.
+
+Do not touch:
+- Recipe persistence/API behavior or assignment cleanup semantics.
+- Other confirmation flows, recipe overlays, preferences, or unrelated UI.
+- `src/components/ui/dialog.tsx` or `src/components/ui/button.tsx`.
+
+Dependencies:
+- Existing Fluid Functionalism Base UI Dialog and Button components.
+- Existing recipe deletion flow in `AppShell`.
+
+Acceptance criteria:
+- Selecting Eliminar in recipe detail opens a Fluid Dialog instead of a native browser prompt.
+- The dialog identifies the recipe and warns that assigned meals will also be cleared.
+- Cancel, Escape, and backdrop dismissal do not issue a delete request.
+- The destructive action issues at most one request while pending and reports the same success/error feedback as before.
+- The app continues to pass its required checks.
+
+Verification:
+- Run relevant focused tests if available.
+- Run `npm run check` and `git diff --check`.
+- Smoke-test dialog open, cancel/dismiss, confirm, and failure feedback if browser verification is available.
+
+Notes:
+- T-028 remains in Review pending its explicitly required responsive browser verification; this scoped task does not change its status.
+- Before editing production code, explain the implementation plan and validation.
+
+Result:
+- Replaced the native recipe deletion prompt with the installed Fluid Dialog, including a recipe-specific heading, assignment-cleanup warning, Cancel action, and destructive Eliminar action.
+- Kept deletion behind explicit confirmation, added pending/loading feedback and a synchronous in-flight guard, and preserved the existing dashboard refresh, success toast, authentication redirect, and error feedback.
+- The detail Drawer remains available on deletion failure so the user can retry; dismissing/canceling the Dialog does not call the delete API.
+- Focused nutrition service tests passed (2 tests). `npm run check` passed (16 test files / 57 tests and production build); lint reports 28 existing warnings and no errors. `git diff --check` passed.
+- The user confirmed the final deletion-dialog experience is perfect; T-029 is closed as Done.

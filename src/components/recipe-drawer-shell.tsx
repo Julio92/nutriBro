@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import {
   Drawer,
@@ -8,9 +8,7 @@ import {
   DrawerDescription,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { getRecipeDrawerSwipeDirection } from "@/lib/recipe-overlay-state";
-
-const DESKTOP_QUERY = "(min-width: 681px)";
+import { useRecipeDrawerSwipeDirection } from "@/hooks/use-recipe-drawer-swipe-direction";
 
 interface RecipeDrawerShellProps {
   open: boolean;
@@ -21,30 +19,6 @@ interface RecipeDrawerShellProps {
   preventDismissal?: boolean;
   nestedContent?: ReactNode;
   children: ReactNode;
-}
-
-function subscribeToDesktopQuery(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(DESKTOP_QUERY);
-  mediaQuery.addEventListener("change", onStoreChange);
-  return () => mediaQuery.removeEventListener("change", onStoreChange);
-}
-
-function getDesktopSnapshot() {
-  return window.matchMedia(DESKTOP_QUERY).matches;
-}
-
-function getServerSnapshot() {
-  return false;
-}
-
-function useRecipeDrawerSwipeDirection() {
-  const isDesktop = useSyncExternalStore(
-    subscribeToDesktopQuery,
-    getDesktopSnapshot,
-    getServerSnapshot,
-  );
-
-  return getRecipeDrawerSwipeDirection(isDesktop);
 }
 
 export function RecipeDrawerShell({
@@ -74,7 +48,7 @@ export function RecipeDrawerShell({
         onOpenChange(nextOpen);
       }}
     >
-      <DrawerContent className={`recipe-drawer-popup recipe-drawer-popup--${variant}`}>
+      <DrawerContent data-drawer-variant={variant}>
         <DrawerTitle className="visually-hidden">{title}</DrawerTitle>
         <DrawerDescription className="visually-hidden">{description}</DrawerDescription>
         {children}

@@ -513,9 +513,42 @@ Replace the recipe create, edit, and view overlays with one shared shadcn/Base U
 
 ### Implementation outcome — Review
 - Added shadcn's generated Base UI Drawer composition and a shared recipe shell. The shell uses a server-safe `useSyncExternalStore` media-query snapshot so the same primitive changes from right-side/`right` swipe on desktop to bottom-sheet/`down` swipe on mobile and updates on resize. The generated `showSwipeHandle` adapts its indicator to the active swipe axis, and the nested Drawer implementation handles stack presentation.
-- Migrated recipe detail and create/edit to the shell, preserving the existing stacked edit-over-detail transitions and reducer-driven visibility. Added `Drawer.Content`, the virtual-keyboard provider for the form, Drawer-native close buttons, and a higher overlay layer for the stacked form.
+- Migrated create/edit to the shared shell and recipe detail to direct shadcn Drawer composition, preserving stacked edit-over-detail transitions and reducer-driven visibility. Added DrawerTitle/DrawerDescription for the visible recipe name/description; the form also uses Drawer.Content, the virtual-keyboard provider, and Drawer-native close buttons.
 - Replaced recipe overlay transforms with the generated Base UI Drawer’s swipe-movement and starting/ending behavior; recipe CSS now only customizes sizing, app surface colors, and the stronger blurred backdrop. Mobile uses small safe-area-aware margins, the built-in swipe handle, and no X controls. Updated the recipe wireframe for both orientations and dismissal directions.
 - Added focused reducer/direction tests: 5 passed. Final `npm run check` passed: lint has 28 existing warnings and 0 errors, 16 test files / 57 tests passed, and the production build completed. `git diff --check` passed. Pylance reports no errors in the changed TypeScript files.
 - The local route served successfully in the browser smoke session. Full gesture, visual layout, focus restoration, and resize interaction checks could not be completed: no local Playwright/Chromium runner is available and the browser view does not expose page interaction to this session. Request user validation before marking T-028 Done.
 - Follow-up sizing fix: removed the shared max-height cap that left unused space below desktop side Drawers, kept the cap only for mobile vertical Drawers, and reset the mobile Drawer width to `auto` so its safe-area margins fit within the viewport. The generated Drawer component was inspected and left unchanged.
+
+## T-029 — Use Fluid Dialog for recipe deletion confirmation
+
+### Objective
+Replace the native `window.confirm` in the recipe deletion flow with the already-installed Fluid Functionalism Base UI Dialog while retaining delete semantics and feedback.
+
+### Ordered implementation units
+1. Confirm the existing Fluid Dialog/Button API, current delete flow, styling, and applicable Next.js client-component guidance. Preserve unrelated in-progress T-028 files.
+2. Add controlled delete-confirmation state and a pending flag in `AppShell`; make cancellation and dialog dismissal side-effect free.
+3. Compose the existing Fluid Dialog with Spanish title/description and Cancel/Eliminar actions; send the delete request only after explicit confirmation and guard against duplicate requests.
+4. Preserve existing success refresh/toast and failure toast behavior, then run focused tests if available, `npm run check`, and `git diff --check`.
+
+### Validation
+- Verify controlled dialog opens for the selected recipe and Cancel/Escape/backdrop close without calling delete.
+- Verify confirmation sends at most one delete request, refreshes the dashboard, closes recipe detail, and shows existing success feedback.
+- Verify failed deletion reports the existing error and leaves the recipe available for retry.
+- Run `npm run check` and `git diff --check`; inspect the final scoped diff.
+
+### Constraints
+- Reuse the installed customized Fluid components. Do not run the registry install with `--overwrite` or modify shared component files.
+- T-028 remains in Review pending its required browser verification; do not alter its requirements/status.
+
+### Implementation result — Done
+- Replaced `window.confirm` with a controlled Fluid Dialog composed from the installed customized Base UI Dialog and Button. The confirmation names the recipe and retains the existing warning that assigned meals will be cleared.
+- Cancel, Escape, backdrop, and close-button dismissal only clear confirmation state. The Eliminar action is loading/disabled during the request, and a ref-based guard prevents duplicate API calls.
+- Preserved the delete endpoint call, dashboard refresh, detail close on success, success toast wording, and existing error/authentication feedback on failure. On failure, the detail view remains available for retry.
+- Focused nutrition service tests passed (2 tests). `npm run check` passed (16 test files / 57 tests, production build, and standalone preparation); lint has 28 existing warnings and no errors. `git diff --check` passed.
+- The user confirmed the final deletion-dialog experience is perfect, including the requested interaction behavior; T-029 is closed as Done.
 - Follow-up desktop inset: set the generated Drawer inset variable to 8px so the right-side panel has consistent top, right, and bottom breathing room; mobile continues to use its safe-area-specific margins.
+- Detail composition follow-up: extract the breakpoint-aware swipe direction into `use-recipe-drawer-swipe-direction.ts`, use Drawer directly in the detail component, and render the recipe name and description with visible DrawerTitle/DrawerDescription primitives. Other recipe detail content remains unchanged.
+- Follow-up toolbar title: render the recipe name in a visible DrawerTitle inside the sticky toolbar (with a loading fallback), replacing the static toolbar label. Keep DrawerDescription in the recipe content.
+- Shared popup follow-up: move the drawer inset to `:root`, apply common popup styling through shadcn's `data-slot="drawer-popup"`, and remove `recipe-drawer-popup` classes from DrawerContent call sites. Preserve the form's wider panel through `data-drawer-variant="form"`.
+- Root-token follow-up: centralize app-owned inset, detail/form panel widths, and mobile max-height tokens under `:root`; use shared popup slot rules to consume them. Keep shadcn's swipe/stack variables local because they are runtime state values.
+- Validation after direct composition and shared popup styling: focused recipe overlay tests passed (5); `npm run check` passed (16 test files / 57 tests, production build); lint reports 28 existing warnings and 0 errors; `git diff --check` passed; Pylance reports no errors in changed TypeScript files. Task remains Review for browser interaction verification.
